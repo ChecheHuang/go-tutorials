@@ -81,8 +81,8 @@ func processPaymentHandler(srv any, ctx context.Context, dec func(any) error, _ 
 
 // StartGRPCServer 啟動 gRPC server（可用 net.Listener 或 bufconn）
 func StartGRPCServer(lis net.Listener, svc PaymentServiceServer) *grpc.Server {
-	// 註冊自訂 codec（用 JSON 取代 protobuf，免去 protoc 依賴）
-	s := grpc.NewServer()
+	// 用 JSON codec 取代 protobuf（免去 protoc 依賴）
+	s := grpc.NewServer(grpc.ForceServerCodec(jsonCodec{}))
 	s.RegisterService(&grpcServiceDesc, svc)
 
 	go func() {

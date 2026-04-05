@@ -10,14 +10,13 @@ import (
 	"ticket-system/internal/mq"
 	"ticket-system/pkg/apperror"
 
-	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )
 
 // TicketUsecase 搶票業務邏輯
 type TicketUsecase struct {
-	redis      *redis.Client
+	stock      domain.StockStore
 	eventRepo  domain.EventRepository
 	orderWrite domain.OrderWriteRepository
 	orderRead  domain.OrderReadRepository
@@ -27,7 +26,7 @@ type TicketUsecase struct {
 
 // NewTicketUsecase 建立搶票 Usecase
 func NewTicketUsecase(
-	rdb *redis.Client,
+	stock domain.StockStore,
 	eventRepo domain.EventRepository,
 	orderWrite domain.OrderWriteRepository,
 	orderRead domain.OrderReadRepository,
@@ -35,7 +34,7 @@ func NewTicketUsecase(
 	tracer trace.Tracer,
 ) *TicketUsecase {
 	return &TicketUsecase{
-		redis:      rdb,
+		stock:      stock,
 		eventRepo:  eventRepo,
 		orderWrite: orderWrite,
 		orderRead:  orderRead,
@@ -45,9 +44,6 @@ func NewTicketUsecase(
 }
 
 // GrabTicket 搶票（核心流程）
-// 1. Redis DECRBY 原子扣庫存
-// 2. 建立 pending 訂單
-// 3. 發送到 Message Queue 異步處理支付
 func (u *TicketUsecase) GrabTicket(ctx context.Context, cmd domain.OrderCommand) (*domain.Order, error) {
 	ctx, span := u.tracer.Start(ctx, "usecase.GrabTicket",
 		trace.WithAttributes(
@@ -64,17 +60,17 @@ func (u *TicketUsecase) GrabTicket(ctx context.Context, cmd domain.OrderCommand)
 		return nil, apperror.Wrap(apperror.ErrNotFound, "活動 ID=%d", cmd.EventID)
 	}
 
-	// 2. Redis 原子扣庫存（Goroutine 安全）
+	// 2. 原子扣庫存（Redis DECRBY 或 Memory atomic）
 	stockKey := fmt.Sprintf("stock:event:%d", cmd.EventID)
-	remaining, err := u.redis.DecrBy(ctx, stockKey, int64(cmd.Quantity)).Result()
+	remaining, err := u.stock.DecrBy(ctx, stockKey, int64(cmd.Quantity))
 	if err != nil {
 		span.RecordError(err)
 		return nil, apperror.Wrap(apperror.ErrInternal, "庫存扣減失敗")
 	}
 
-	// 如果庫存不足，回滾
+	// 庫存不足，回滾
 	if remaining < 0 {
-		u.redis.IncrBy(ctx, stockKey, int64(cmd.Quantity))
+		u.stock.IncrBy(ctx, stockKey, int64(cmd.Quantity))
 		slog.Info("庫存不足", "event_id", cmd.EventID, "remaining", remaining+int64(cmd.Quantity))
 		return nil, apperror.Wrap(apperror.ErrSoldOut, "活動 %s 已售罄", event.Name)
 	}
@@ -83,7 +79,7 @@ func (u *TicketUsecase) GrabTicket(ctx context.Context, cmd domain.OrderCommand)
 		attribute.Int64("remaining", remaining),
 	))
 
-	// 3. 建立 pending 訂單（寫入資料庫）
+	// 3. 建立 pending 訂單
 	order := &domain.Order{
 		EventID:  cmd.EventID,
 		UserID:   cmd.UserID,
@@ -93,17 +89,16 @@ func (u *TicketUsecase) GrabTicket(ctx context.Context, cmd domain.OrderCommand)
 	}
 
 	if err := u.orderWrite.Create(order); err != nil {
-		// 訂單建立失敗，回滾庫存
-		u.redis.IncrBy(ctx, stockKey, int64(cmd.Quantity))
+		u.stock.IncrBy(ctx, stockKey, int64(cmd.Quantity))
 		span.RecordError(err)
 		return nil, apperror.Wrap(apperror.ErrInternal, "建立訂單失敗")
 	}
 
-	// 4. 發送到 Message Queue 異步處理支付
+	// 4. 發送到 Message Queue
 	u.broker.Publish("order.created", order)
 	span.AddEvent("訂單已發送到佇列")
 
-	// 5. 廣播剩餘票數（給 WebSocket）
+	// 5. 廣播剩餘票數
 	u.broker.Publish("stock.updated", domain.TicketStock{
 		EventID:   cmd.EventID,
 		Total:     event.TotalTickets,
@@ -128,7 +123,7 @@ func (u *TicketUsecase) GetStock(ctx context.Context, eventID uint) (*domain.Tic
 	}
 
 	stockKey := fmt.Sprintf("stock:event:%d", eventID)
-	remaining, err := u.redis.Get(ctx, stockKey).Int()
+	remaining, err := u.stock.Get(ctx, stockKey)
 	if err != nil {
 		return nil, apperror.Wrap(apperror.ErrInternal, "讀取庫存失敗")
 	}
@@ -140,10 +135,10 @@ func (u *TicketUsecase) GetStock(ctx context.Context, eventID uint) (*domain.Tic
 	}, nil
 }
 
-// InitStock 初始化活動庫存到 Redis
+// InitStock 初始化活動庫存
 func (u *TicketUsecase) InitStock(ctx context.Context, eventID uint, total int) error {
 	stockKey := fmt.Sprintf("stock:event:%d", eventID)
-	return u.redis.Set(ctx, stockKey, total, 0).Err()
+	return u.stock.Set(ctx, stockKey, total)
 }
 
 // GetOrder 查詢訂單（CQRS Read）

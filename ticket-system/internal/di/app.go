@@ -1,20 +1,20 @@
 package di
 
 import (
+	"ticket-system/internal/domain"
 	"ticket-system/internal/handler"
 	"ticket-system/internal/mq"
 	"ticket-system/internal/usecase"
 	"ticket-system/internal/worker"
 	"ticket-system/internal/ws"
 
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
 // App 封裝整個應用程式的所有依賴
 type App struct {
 	DB               *gorm.DB
-	Redis            *redis.Client
+	Stock            domain.StockStore
 	Broker           *mq.Broker
 	Hub              *ws.Hub
 	GRPC             *GRPCComponents

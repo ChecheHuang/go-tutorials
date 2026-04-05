@@ -1,5 +1,4 @@
 // Package di 提供 Wire 依賴注入的 Provider 函式（第 28 課）
-// 每個 Provider 負責建立一個依賴，Wire 自動串接依賴關係
 package di
 
 import (
@@ -18,6 +17,7 @@ import (
 	"ticket-system/internal/ws"
 	"ticket-system/pkg/circuitbreaker"
 	"ticket-system/pkg/config"
+	"ticket-system/pkg/stockstore"
 
 	"github.com/glebarez/sqlite"
 	"github.com/redis/go-redis/v9"
@@ -40,18 +40,25 @@ func ProvideDB(cfg *config.Config) (*gorm.DB, error) {
 	return db, nil
 }
 
-// ProvideRedis 建立 Redis 連線
-func ProvideRedis(cfg *config.Config) (*redis.Client, error) {
+// ProvideStockStore 建立庫存儲存（嘗試 Redis，失敗用 Memory）
+func ProvideStockStore(cfg *config.Config) domain.StockStore {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     cfg.Redis.Addr,
 		Password: cfg.Redis.Password,
 		DB:       cfg.Redis.DB,
 	})
-	if err := rdb.Ping(context.Background()).Err(); err != nil {
-		return nil, err
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	if err := rdb.Ping(ctx).Err(); err != nil {
+		slog.Warn("Redis 連線失敗，使用 in-memory 模式", "error", err)
+		slog.Info("提示：啟動 Redis 可獲得更好的併發效能：docker run -p 6379:6379 redis:7-alpine")
+		return stockstore.NewMemoryStore()
 	}
-	slog.Info("Redis 連線成功")
-	return rdb, nil
+
+	slog.Info("Redis 連線成功，使用 Redis 庫存儲存")
+	return stockstore.NewRedisStore(rdb)
 }
 
 // ProvideBroker 建立 Message Queue Broker
@@ -64,7 +71,7 @@ func ProvideHub() *ws.Hub {
 	return ws.NewHub()
 }
 
-// GRPCComponents gRPC 相關元件（server + client + cleanup）
+// GRPCComponents gRPC 相關元件
 type GRPCComponents struct {
 	Client  payment.PaymentServiceClient
 	Server  *grpc.Server
@@ -121,14 +128,14 @@ func ProvideOrderReadRepo(db *gorm.DB) domain.OrderReadRepository {
 
 // ProvideTicketUsecase 建立搶票 Usecase
 func ProvideTicketUsecase(
-	rdb *redis.Client,
+	stock domain.StockStore,
 	eventRepo domain.EventRepository,
 	orderWrite domain.OrderWriteRepository,
 	orderRead domain.OrderReadRepository,
 	broker *mq.Broker,
 	tracer trace.Tracer,
 ) *usecase.TicketUsecase {
-	return usecase.NewTicketUsecase(rdb, eventRepo, orderWrite, orderRead, broker, tracer)
+	return usecase.NewTicketUsecase(stock, eventRepo, orderWrite, orderRead, broker, tracer)
 }
 
 // ProvideTicketHandler 建立 HTTP Handler
