@@ -16,14 +16,14 @@ type Article struct {
 
 // CreateArticleRequest 定義建立文章的請求結構
 type CreateArticleRequest struct {
-	Title   string `json:"title" binding:"required,min=1,max=200"`   // 文章標題（1-200 字元）
-	Content string `json:"content" binding:"required,min=1"`         // 文章內容（至少 1 字元）
+	Title   string `json:"title" binding:"required,min=1,max=200" example:"我的第一篇文章"`
+	Content string `json:"content" binding:"required,min=1" example:"這是文章的內容，支援很長的文字..."`
 }
 
 // UpdateArticleRequest 定義更新文章的請求結構
 type UpdateArticleRequest struct {
-	Title   string `json:"title" binding:"omitempty,min=1,max=200"`  // 文章標題（可選）
-	Content string `json:"content" binding:"omitempty,min=1"`        // 文章內容（可選）
+	Title   string `json:"title" binding:"omitempty,min=1,max=200" example:"更新後的標題"`
+	Content string `json:"content" binding:"omitempty,min=1" example:"更新後的內容"`
 }
 
 // ArticleQuery 定義文章查詢參數

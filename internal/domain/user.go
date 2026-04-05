@@ -16,15 +16,15 @@ type User struct {
 
 // RegisterRequest 定義使用者註冊的請求結構
 type RegisterRequest struct {
-	Username string `json:"username" binding:"required,min=3,max=50"`  // 使用者名稱（3-50 字元）
-	Email    string `json:"email" binding:"required,email"`            // 電子信箱
-	Password string `json:"password" binding:"required,min=6,max=100"` // 密碼（至少 6 字元）
+	Username string `json:"username" binding:"required,min=3,max=50" example:"newuser"`
+	Email    string `json:"email" binding:"required,email" example:"newuser@example.com"`
+	Password string `json:"password" binding:"required,min=6,max=100" example:"password123"`
 }
 
 // LoginRequest 定義使用者登入的請求結構
 type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email"`            // 電子信箱
-	Password string `json:"password" binding:"required"`               // 密碼
+	Email    string `json:"email" binding:"required,email" example:"alice@example.com"`
+	Password string `json:"password" binding:"required" example:"password123"`
 }
 
 // LoginResponse 定義登入成功的回應結構

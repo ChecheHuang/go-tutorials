@@ -8,20 +8,6 @@
     },
     "host": "localhost:8080",
     "basePath": "/api/v1",
-    "tags": [
-        {
-            "name": "auth",
-            "description": "使用者認證（註冊、登入、個人資料）"
-        },
-        {
-            "name": "articles",
-            "description": "文章管理（CRUD、分頁、搜尋）"
-        },
-        {
-            "name": "comments",
-            "description": "留言管理（CRUD）"
-        }
-    ],
     "paths": {
         "/api/v1/articles": {
             "get": {
@@ -788,15 +774,15 @@
             ],
             "properties": {
                 "content": {
-                    "description": "文章內容（至少 1 字元）",
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "example": "這是文章的內容，支援很長的文字..."
                 },
                 "title": {
-                    "description": "文章標題（1-200 字元）",
                     "type": "string",
                     "maxLength": 200,
-                    "minLength": 1
+                    "minLength": 1,
+                    "example": "我的第一篇文章"
                 }
             }
         },
@@ -807,10 +793,10 @@
             ],
             "properties": {
                 "content": {
-                    "description": "留言內容（1-1000 字元）",
                     "type": "string",
                     "maxLength": 1000,
-                    "minLength": 1
+                    "minLength": 1,
+                    "example": "寫得很好，感謝分享！"
                 }
             }
         },
@@ -822,12 +808,12 @@
             ],
             "properties": {
                 "email": {
-                    "description": "電子信箱",
-                    "type": "string"
+                    "type": "string",
+                    "example": "alice@example.com"
                 },
                 "password": {
-                    "description": "密碼",
-                    "type": "string"
+                    "type": "string",
+                    "example": "password123"
                 }
             }
         },
@@ -857,20 +843,20 @@
             ],
             "properties": {
                 "email": {
-                    "description": "電子信箱",
-                    "type": "string"
+                    "type": "string",
+                    "example": "newuser@example.com"
                 },
                 "password": {
-                    "description": "密碼（至少 6 字元）",
                     "type": "string",
                     "maxLength": 100,
-                    "minLength": 6
+                    "minLength": 6,
+                    "example": "password123"
                 },
                 "username": {
-                    "description": "使用者名稱（3-50 字元）",
                     "type": "string",
                     "maxLength": 50,
-                    "minLength": 3
+                    "minLength": 3,
+                    "example": "newuser"
                 }
             }
         },
@@ -878,15 +864,15 @@
             "type": "object",
             "properties": {
                 "content": {
-                    "description": "文章內容（可選）",
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "example": "更新後的內容"
                 },
                 "title": {
-                    "description": "文章標題（可選）",
                     "type": "string",
                     "maxLength": 200,
-                    "minLength": 1
+                    "minLength": 1,
+                    "example": "更新後的標題"
                 }
             }
         },
@@ -897,10 +883,10 @@
             ],
             "properties": {
                 "content": {
-                    "description": "留言內容",
                     "type": "string",
                     "maxLength": 1000,
-                    "minLength": 1
+                    "minLength": 1,
+                    "example": "更新後的留言內容"
                 }
             }
         },

@@ -15,12 +15,12 @@ type Comment struct {
 
 // CreateCommentRequest 定義建立留言的請求結構
 type CreateCommentRequest struct {
-	Content string `json:"content" binding:"required,min=1,max=1000"` // 留言內容（1-1000 字元）
+	Content string `json:"content" binding:"required,min=1,max=1000" example:"寫得很好，感謝分享！"`
 }
 
 // UpdateCommentRequest 定義更新留言的請求結構
 type UpdateCommentRequest struct {
-	Content string `json:"content" binding:"required,min=1,max=1000"` // 留言內容
+	Content string `json:"content" binding:"required,min=1,max=1000" example:"更新後的留言內容"`
 }
 
 // CommentRepository 定義留言的資料存取介面

@@ -49,11 +49,11 @@ definitions:
   domain.CreateArticleRequest:
     properties:
       content:
-        description: 文章內容（至少 1 字元）
+        example: 這是文章的內容，支援很長的文字...
         minLength: 1
         type: string
       title:
-        description: 文章標題（1-200 字元）
+        example: 我的第一篇文章
         maxLength: 200
         minLength: 1
         type: string
@@ -64,7 +64,7 @@ definitions:
   domain.CreateCommentRequest:
     properties:
       content:
-        description: 留言內容（1-1000 字元）
+        example: 寫得很好，感謝分享！
         maxLength: 1000
         minLength: 1
         type: string
@@ -74,10 +74,10 @@ definitions:
   domain.LoginRequest:
     properties:
       email:
-        description: 電子信箱
+        example: alice@example.com
         type: string
       password:
-        description: 密碼
+        example: password123
         type: string
     required:
     - email
@@ -96,15 +96,15 @@ definitions:
   domain.RegisterRequest:
     properties:
       email:
-        description: 電子信箱
+        example: newuser@example.com
         type: string
       password:
-        description: 密碼（至少 6 字元）
+        example: password123
         maxLength: 100
         minLength: 6
         type: string
       username:
-        description: 使用者名稱（3-50 字元）
+        example: newuser
         maxLength: 50
         minLength: 3
         type: string
@@ -116,11 +116,11 @@ definitions:
   domain.UpdateArticleRequest:
     properties:
       content:
-        description: 文章內容（可選）
+        example: 更新後的內容
         minLength: 1
         type: string
       title:
-        description: 文章標題（可選）
+        example: 更新後的標題
         maxLength: 200
         minLength: 1
         type: string
@@ -128,7 +128,7 @@ definitions:
   domain.UpdateCommentRequest:
     properties:
       content:
-        description: 留言內容
+        example: 更新後的留言內容
         maxLength: 1000
         minLength: 1
         type: string
