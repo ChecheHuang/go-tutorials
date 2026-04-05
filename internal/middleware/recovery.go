@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 	"runtime/debug"
 
@@ -16,10 +16,10 @@ func Recovery() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
-				// 記錄 panic 的堆疊追蹤資訊，方便除錯
-				log.Printf("[Recovery] panic recovered: %v\n%s", err, debug.Stack())
-
-				// 回傳 500 錯誤回應
+				slog.Error("panic recovered",
+					"error", err,
+					"stack", string(debug.Stack()),
+				)
 				response.Error(c, http.StatusInternalServerError, "伺服器內部錯誤")
 				c.Abort()
 			}

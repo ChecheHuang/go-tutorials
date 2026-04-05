@@ -34,7 +34,6 @@ func NewCommentHandler(commentUsecase usecase.CommentUsecase) *CommentHandler {
 // @Failure     401 {object} response.Response
 // @Router      /articles/{id}/comments [post]
 func (h *CommentHandler) Create(c *gin.Context) {
-	// 從 URL 路徑取得文章 ID
 	articleID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		response.BadRequest(c, "無效的文章 ID")
@@ -51,7 +50,7 @@ func (h *CommentHandler) Create(c *gin.Context) {
 
 	comment, err := h.commentUsecase.Create(uint(articleID), userID, req)
 	if err != nil {
-		response.BadRequest(c, err.Error())
+		handleError(c, err)
 		return
 	}
 
@@ -76,7 +75,7 @@ func (h *CommentHandler) GetByArticleID(c *gin.Context) {
 
 	comments, err := h.commentUsecase.GetByArticleID(uint(articleID))
 	if err != nil {
-		response.InternalServerError(c, "取得留言失敗")
+		handleError(c, err)
 		return
 	}
 
@@ -113,7 +112,7 @@ func (h *CommentHandler) Update(c *gin.Context) {
 
 	comment, err := h.commentUsecase.Update(uint(id), userID, req)
 	if err != nil {
-		response.BadRequest(c, err.Error())
+		handleError(c, err)
 		return
 	}
 
@@ -141,7 +140,7 @@ func (h *CommentHandler) Delete(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
 	if err := h.commentUsecase.Delete(uint(id), userID); err != nil {
-		response.BadRequest(c, err.Error())
+		handleError(c, err)
 		return
 	}
 

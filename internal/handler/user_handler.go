@@ -33,8 +33,6 @@ func NewUserHandler(userUsecase usecase.UserUsecase) *UserHandler {
 func (h *UserHandler) Register(c *gin.Context) {
 	var req domain.RegisterRequest
 
-	// 綁定並驗證 JSON 請求body
-	// Gin 的 ShouldBindJSON 會根據 binding tag 自動驗證
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, "請求參數驗證失敗："+err.Error())
 		return
@@ -42,7 +40,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 
 	user, err := h.userUsecase.Register(req)
 	if err != nil {
-		response.BadRequest(c, err.Error())
+		handleError(c, err)
 		return
 	}
 
@@ -69,7 +67,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 
 	loginResp, err := h.userUsecase.Login(req)
 	if err != nil {
-		response.BadRequest(c, err.Error())
+		handleError(c, err)
 		return
 	}
 
@@ -86,12 +84,11 @@ func (h *UserHandler) Login(c *gin.Context) {
 // @Failure     401 {object} response.Response
 // @Router      /auth/profile [get]
 func (h *UserHandler) GetProfile(c *gin.Context) {
-	// 從 JWT 中介層設定的 context 中取得使用者 ID
 	userID := c.GetUint("user_id")
 
 	user, err := h.userUsecase.GetByID(userID)
 	if err != nil {
-		response.NotFound(c, "使用者不存在")
+		handleError(c, err)
 		return
 	}
 

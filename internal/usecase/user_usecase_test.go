@@ -3,17 +3,19 @@ package usecase
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"blog-api/internal/domain"
+	"blog-api/pkg/apperror"
 	"blog-api/pkg/config"
 
-	"golang.org/x/crypto/bcrypt"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // === Mock Repository ===
-// mockUserRepository 是 UserRepository 的模擬實作，用於單元測試
 type mockUserRepository struct {
-	users map[string]*domain.User // 以 email 為 key 的使用者儲存
+	users  map[string]*domain.User
 	nextID uint
 }
 
@@ -25,7 +27,6 @@ func newMockUserRepository() *mockUserRepository {
 }
 
 func (m *mockUserRepository) Create(user *domain.User) error {
-	// 模擬唯一性檢查
 	if _, exists := m.users[user.Email]; exists {
 		return errors.New("duplicate email")
 	}
@@ -52,170 +53,121 @@ func (m *mockUserRepository) FindByEmail(email string) (*domain.User, error) {
 	return user, nil
 }
 
-// === 測試用的設定 ===
 func testConfig() *config.Config {
 	return &config.Config{
 		JWT: config.JWTConfig{
 			Secret:     "test-secret-key",
-			Expiration: 3600,
+			Expiration: 1 * time.Hour,
 		},
 	}
 }
 
-// TestRegister_Success 測試正常的使用者註冊流程
-func TestRegister_Success(t *testing.T) {
-	repo := newMockUserRepository()
-	uc := NewUserUsecase(repo, testConfig())
+func TestUserUsecase_Register(t *testing.T) {
+	t.Run("註冊成功", func(t *testing.T) {
+		repo := newMockUserRepository()
+		uc := NewUserUsecase(repo, testConfig())
 
-	req := domain.RegisterRequest{
-		Username: "testuser",
-		Email:    "test@example.com",
-		Password: "password123",
-	}
+		user, err := uc.Register(domain.RegisterRequest{
+			Username: "testuser",
+			Email:    "test@example.com",
+			Password: "password123",
+		})
 
-	user, err := uc.Register(req)
-	if err != nil {
-		t.Fatalf("預期註冊成功，但得到錯誤：%v", err)
-	}
+		require.NoError(t, err)
+		assert.Equal(t, "testuser", user.Username)
+		assert.Equal(t, "test@example.com", user.Email)
+		assert.NotEqual(t, "password123", user.Password, "密碼應該被雜湊")
+	})
 
-	if user.Username != req.Username {
-		t.Errorf("使用者名稱不符：預期 %s，得到 %s", req.Username, user.Username)
-	}
+	t.Run("重複 Email 回傳 ErrConflict", func(t *testing.T) {
+		repo := newMockUserRepository()
+		uc := NewUserUsecase(repo, testConfig())
 
-	if user.Email != req.Email {
-		t.Errorf("Email 不符：預期 %s，得到 %s", req.Email, user.Email)
-	}
+		req := domain.RegisterRequest{
+			Username: "testuser",
+			Email:    "test@example.com",
+			Password: "password123",
+		}
 
-	// 確認密碼已被雜湊
-	if user.Password == req.Password {
-		t.Error("密碼應該被雜湊處理，但儲存了明文密碼")
-	}
+		_, err := uc.Register(req)
+		require.NoError(t, err)
+
+		_, err = uc.Register(req)
+		assert.Error(t, err)
+		assert.True(t, errors.Is(err, apperror.ErrConflict), "應該是 ErrConflict，但得到：%v", err)
+	})
 }
 
-// TestRegister_DuplicateEmail 測試重複 Email 註冊
-func TestRegister_DuplicateEmail(t *testing.T) {
-	repo := newMockUserRepository()
-	uc := NewUserUsecase(repo, testConfig())
-
-	req := domain.RegisterRequest{
-		Username: "testuser",
-		Email:    "test@example.com",
-		Password: "password123",
+func TestUserUsecase_Login(t *testing.T) {
+	setup := func() UserUsecase {
+		repo := newMockUserRepository()
+		uc := NewUserUsecase(repo, testConfig())
+		uc.Register(domain.RegisterRequest{
+			Username: "testuser",
+			Email:    "test@example.com",
+			Password: "password123",
+		})
+		return uc
 	}
 
-	// 第一次註冊應該成功
-	_, err := uc.Register(req)
-	if err != nil {
-		t.Fatalf("第一次註冊應該成功：%v", err)
-	}
+	t.Run("登入成功", func(t *testing.T) {
+		uc := setup()
 
-	// 第二次註冊相同 Email 應該失敗
-	_, err = uc.Register(req)
-	if err == nil {
-		t.Error("重複 Email 註冊應該失敗")
-	}
+		resp, err := uc.Login(domain.LoginRequest{
+			Email:    "test@example.com",
+			Password: "password123",
+		})
+
+		require.NoError(t, err)
+		assert.NotEmpty(t, resp.Token)
+		assert.Equal(t, "test@example.com", resp.User.Email)
+	})
+
+	t.Run("密碼錯誤回傳 ErrUnauthorized", func(t *testing.T) {
+		uc := setup()
+
+		_, err := uc.Login(domain.LoginRequest{
+			Email:    "test@example.com",
+			Password: "wrong-password",
+		})
+
+		assert.Error(t, err)
+		assert.True(t, errors.Is(err, apperror.ErrUnauthorized))
+	})
+
+	t.Run("使用者不存在回傳 ErrUnauthorized", func(t *testing.T) {
+		uc := setup()
+
+		_, err := uc.Login(domain.LoginRequest{
+			Email:    "nonexistent@example.com",
+			Password: "password",
+		})
+
+		assert.Error(t, err)
+		assert.True(t, errors.Is(err, apperror.ErrUnauthorized))
+	})
 }
 
-// TestLogin_Success 測試正常的登入流程
-func TestLogin_Success(t *testing.T) {
+func TestUserUsecase_GetByID(t *testing.T) {
 	repo := newMockUserRepository()
 	uc := NewUserUsecase(repo, testConfig())
 
-	// 先註冊一個使用者
-	password := "password123"
-	_, err := uc.Register(domain.RegisterRequest{
-		Username: "testuser",
-		Email:    "test@example.com",
-		Password: password,
-	})
-	if err != nil {
-		t.Fatalf("註冊失敗：%v", err)
-	}
-
-	// 嘗試登入
-	loginResp, err := uc.Login(domain.LoginRequest{
-		Email:    "test@example.com",
-		Password: password,
-	})
-	if err != nil {
-		t.Fatalf("預期登入成功，但得到錯誤：%v", err)
-	}
-
-	// 確認回傳了 Token
-	if loginResp.Token == "" {
-		t.Error("登入成功應該回傳 Token")
-	}
-
-	// 確認回傳了使用者資訊
-	if loginResp.User.Email != "test@example.com" {
-		t.Errorf("使用者 Email 不符：預期 test@example.com，得到 %s", loginResp.User.Email)
-	}
-}
-
-// TestLogin_WrongPassword 測試錯誤密碼登入
-func TestLogin_WrongPassword(t *testing.T) {
-	repo := newMockUserRepository()
-	uc := NewUserUsecase(repo, testConfig())
-
-	// 先註冊一個使用者
-	_, err := uc.Register(domain.RegisterRequest{
-		Username: "testuser",
-		Email:    "test@example.com",
-		Password: "correct-password",
-	})
-	if err != nil {
-		t.Fatalf("註冊失敗：%v", err)
-	}
-
-	// 使用錯誤密碼登入
-	_, err = uc.Login(domain.LoginRequest{
-		Email:    "test@example.com",
-		Password: "wrong-password",
-	})
-	if err == nil {
-		t.Error("使用錯誤密碼登入應該失敗")
-	}
-}
-
-// TestLogin_NonExistentUser 測試不存在的使用者登入
-func TestLogin_NonExistentUser(t *testing.T) {
-	repo := newMockUserRepository()
-	uc := NewUserUsecase(repo, testConfig())
-
-	_, err := uc.Login(domain.LoginRequest{
-		Email:    "nonexistent@example.com",
-		Password: "password",
-	})
-	if err == nil {
-		t.Error("不存在的使用者登入應該失敗")
-	}
-}
-
-// TestGetByID_Success 測試根據 ID 取得使用者
-func TestGetByID_Success(t *testing.T) {
-	repo := newMockUserRepository()
-	uc := NewUserUsecase(repo, testConfig())
-
-	// 先註冊一個使用者
 	registered, err := uc.Register(domain.RegisterRequest{
 		Username: "testuser",
 		Email:    "test@example.com",
 		Password: "password123",
 	})
-	if err != nil {
-		t.Fatalf("註冊失敗：%v", err)
-	}
+	require.NoError(t, err)
 
-	// 根據 ID 查詢
-	user, err := uc.GetByID(registered.ID)
-	if err != nil {
-		t.Fatalf("預期查詢成功，但得到錯誤：%v", err)
-	}
+	t.Run("找到使用者", func(t *testing.T) {
+		user, err := uc.GetByID(registered.ID)
+		require.NoError(t, err)
+		assert.Equal(t, registered.ID, user.ID)
+	})
 
-	if user.ID != registered.ID {
-		t.Errorf("使用者 ID 不符：預期 %d，得到 %d", registered.ID, user.ID)
-	}
+	t.Run("使用者不存在回傳 ErrNotFound", func(t *testing.T) {
+		_, err := uc.GetByID(999)
+		assert.Error(t, err)
+		assert.True(t, errors.Is(err, apperror.ErrNotFound))
+	})
 }
-
-// 避免 import 未使用警告
-var _ = bcrypt.DefaultCost

@@ -1,0 +1,23 @@
+# Blog API 設定檔
+# 環境變數會覆蓋此檔案中的設定（例如 SERVER_PORT=9090）
+
+server:
+  port: "8080"
+  mode: "debug"    # debug / release / test
+
+database:
+  dsn: "blog.db"   # SQLite 檔案路徑
+
+jwt:
+  secret: "my-secret-key-change-in-production"
+  expiration: "24h"
+
+log:
+  level: "info"    # debug / info / warn / error
+  format: "text"   # json / text（生產環境建議用 json）
+
+redis:
+  addr: "localhost:6379"
+  password: ""
+  db: 0
+  enabled: false   # 設為 true 啟用 Redis 快取

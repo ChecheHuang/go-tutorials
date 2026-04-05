@@ -1,17 +1,22 @@
 package domain
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 // Article 定義文章實體
 type Article struct {
-	ID        uint      `json:"id" gorm:"primaryKey"`
-	Title     string    `json:"title" gorm:"size:200;not null"`
-	Content   string    `json:"content" gorm:"type:text;not null"`
-	UserID    uint      `json:"user_id" gorm:"index;not null"`       // 作者 ID（外鍵）
-	User      User      `json:"user" gorm:"foreignKey:UserID"`       // 關聯的使用者資料
-	Comments  []Comment `json:"comments,omitempty" gorm:"foreignKey:ArticleID"` // 文章的留言列表
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        uint           `json:"id" gorm:"primaryKey"`
+	Title     string         `json:"title" gorm:"size:200;not null"`
+	Content   string         `json:"content" gorm:"type:text;not null"`
+	UserID    uint           `json:"user_id" gorm:"index;not null"`                    // 作者 ID（外鍵）
+	User      User           `json:"user" gorm:"foreignKey:UserID"`                    // 關聯的使用者資料
+	Comments  []Comment      `json:"comments,omitempty" gorm:"foreignKey:ArticleID"`   // 文章的留言列表
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at,omitempty" gorm:"index"`                // 軟刪除
 }
 
 // CreateArticleRequest 定義建立文章的請求結構

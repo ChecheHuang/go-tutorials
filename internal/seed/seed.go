@@ -3,7 +3,7 @@
 package seed
 
 import (
-	"log"
+	"log/slog"
 
 	"blog-api/internal/domain"
 
@@ -16,12 +16,11 @@ func Run(db *gorm.DB) {
 	var count int64
 	db.Model(&domain.User{}).Count(&count)
 	if count > 0 {
-		return // 已有資料，跳過
+		return
 	}
 
-	log.Println("[種子] 資料庫為空，開始填入初始資料...")
+	slog.Info("資料庫為空，開始填入初始資料")
 
-	// === 建立使用者 ===
 	password, _ := bcrypt.GenerateFromPassword([]byte("password123"), bcrypt.DefaultCost)
 	users := []domain.User{
 		{Username: "alice", Email: "alice@example.com", Password: string(password)},
@@ -31,9 +30,8 @@ func Run(db *gorm.DB) {
 	for i := range users {
 		db.Create(&users[i])
 	}
-	log.Printf("[種子] 建立了 %d 位使用者（密碼皆為 password123）", len(users))
+	slog.Info("建立使用者", "count", len(users))
 
-	// === 建立文章 ===
 	articles := []domain.Article{
 		{Title: "Go 語言入門：為什麼選擇 Go？", Content: "Go 語言由 Google 開發，具有簡潔的語法、強大的並行處理能力，以及極快的編譯速度。本文將帶你了解 Go 的核心優勢與適用場景。", UserID: users[0].ID},
 		{Title: "使用 Gin 框架建立 REST API", Content: "Gin 是 Go 語言最受歡迎的 Web 框架之一。本文將示範如何用 Gin 建立一個完整的 RESTful API，包含路由設定、中介層與錯誤處理。", UserID: users[0].ID},
@@ -45,9 +43,8 @@ func Run(db *gorm.DB) {
 	for i := range articles {
 		db.Create(&articles[i])
 	}
-	log.Printf("[種子] 建立了 %d 篇文章", len(articles))
+	slog.Info("建立文章", "count", len(articles))
 
-	// === 建立留言 ===
 	comments := []domain.Comment{
 		{Content: "寫得很清楚，對初學者很有幫助！", ArticleID: articles[0].ID, UserID: users[1].ID},
 		{Content: "請問 Go 和 Rust 相比有什麼優劣？", ArticleID: articles[0].ID, UserID: users[2].ID},
@@ -61,7 +58,7 @@ func Run(db *gorm.DB) {
 	for i := range comments {
 		db.Create(&comments[i])
 	}
-	log.Printf("[種子] 建立了 %d 則留言", len(comments))
+	slog.Info("建立留言", "count", len(comments))
 
-	log.Println("[種子] 初始資料填入完成！")
+	slog.Info("初始資料填入完成")
 }

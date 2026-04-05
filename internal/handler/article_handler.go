@@ -40,12 +40,11 @@ func (h *ArticleHandler) Create(c *gin.Context) {
 		return
 	}
 
-	// 從 JWT context 取得目前登入的使用者 ID
 	userID := c.GetUint("user_id")
 
 	article, err := h.articleUsecase.Create(userID, req)
 	if err != nil {
-		response.BadRequest(c, err.Error())
+		handleError(c, err)
 		return
 	}
 
@@ -62,7 +61,6 @@ func (h *ArticleHandler) Create(c *gin.Context) {
 // @Failure     404 {object} response.Response
 // @Router      /articles/{id} [get]
 func (h *ArticleHandler) GetByID(c *gin.Context) {
-	// 從 URL 路徑參數取得文章 ID
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		response.BadRequest(c, "無效的文章 ID")
@@ -71,7 +69,7 @@ func (h *ArticleHandler) GetByID(c *gin.Context) {
 
 	article, err := h.articleUsecase.GetByID(uint(id))
 	if err != nil {
-		response.NotFound(c, err.Error())
+		handleError(c, err)
 		return
 	}
 
@@ -92,13 +90,11 @@ func (h *ArticleHandler) GetByID(c *gin.Context) {
 func (h *ArticleHandler) GetAll(c *gin.Context) {
 	var query domain.ArticleQuery
 
-	// 使用 ShouldBindQuery 綁定 URL 查詢參數
 	if err := c.ShouldBindQuery(&query); err != nil {
 		response.BadRequest(c, "查詢參數驗證失敗："+err.Error())
 		return
 	}
 
-	// 設定分頁預設值
 	if query.Page <= 0 {
 		query.Page = 1
 	}
@@ -108,7 +104,7 @@ func (h *ArticleHandler) GetAll(c *gin.Context) {
 
 	articles, total, err := h.articleUsecase.GetAll(query)
 	if err != nil {
-		response.InternalServerError(c, "取得文章列表失敗")
+		handleError(c, err)
 		return
 	}
 
@@ -146,7 +142,7 @@ func (h *ArticleHandler) Update(c *gin.Context) {
 
 	article, err := h.articleUsecase.Update(uint(id), userID, req)
 	if err != nil {
-		response.BadRequest(c, err.Error())
+		handleError(c, err)
 		return
 	}
 
@@ -175,7 +171,7 @@ func (h *ArticleHandler) Delete(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
 	if err := h.articleUsecase.Delete(uint(id), userID); err != nil {
-		response.BadRequest(c, err.Error())
+		handleError(c, err)
 		return
 	}
 
