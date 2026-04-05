@@ -1,0 +1,83 @@
+# ==========================================================================
+# docker-compose.dev.yml — 開發環境外部服務
+# ==========================================================================
+#
+# 這個檔案用來在本地啟動所有開發所需的外部服務（Redis、未來的 DB 等）
+# 與 docker-compose.yml（正式環境）分開管理
+#
+# 使用方式：
+#   啟動全部：docker-compose -f docker-compose.dev.yml up -d
+#   查看狀態：docker-compose -f docker-compose.dev.yml ps
+#   查看日誌：docker-compose -f docker-compose.dev.yml logs -f
+#   關閉全部：docker-compose -f docker-compose.dev.yml down
+#   關閉並刪資料：docker-compose -f docker-compose.dev.yml down -v
+#
+# 前置需求：安裝 Docker Desktop（https://www.docker.com/products/docker-desktop/）
+# ==========================================================================
+
+version: "3.8"
+
+services:
+
+  # ==========================================================================
+  # Redis — 快取、Session、Rate Limiting、分散式鎖
+  # 第 20 課開始使用
+  # ==========================================================================
+  redis:
+    image: redis:7-alpine           # Redis 7.x 穩定版，alpine 是最小的 Linux 映像（~10MB）
+    container_name: go-tutorials-redis  # 容器名稱（方便識別）
+    ports:
+      - "6379:6379"                 # 主機埠:容器埠，讓本地程式碼可以連到容器內的 Redis
+    volumes:
+      - redis-data:/data            # 持久化 Redis 資料（容器刪掉後資料不會消失）
+    command: redis-server --appendonly yes  # 啟用 AOF 持久化（寫入操作都記錄到日誌）
+    restart: unless-stopped         # 電腦重開機後自動重啟
+    healthcheck:                    # 健康檢查：確認 Redis 真的在跑
+      test: ["CMD", "redis-cli", "ping"]  # 用 ping 指令確認服務正常
+      interval: 10s                 # 每 10 秒檢查一次
+      timeout: 5s                   # 超過 5 秒沒回應算失敗
+      retries: 3                    # 連續失敗 3 次才標記為不健康
+
+  # ==========================================================================
+  # PostgreSQL — 正式環境等級的關聯式資料庫（未來替換 SQLite 時使用）
+  # 目前先保留設定，需要時取消註解
+  # ==========================================================================
+  # postgres:
+  #   image: postgres:16-alpine
+  #   container_name: go-tutorials-postgres
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: password
+  #     POSTGRES_DB: blog
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U postgres"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 3
+
+  # ==========================================================================
+  # Redis Commander — Redis 的網頁 GUI（方便查看資料，可選）
+  # 取消以下註解即可啟用，然後開啟 http://localhost:8081
+  # ==========================================================================
+  # redis-commander:
+  #   image: rediscommander/redis-commander:latest
+  #   container_name: go-tutorials-redis-ui
+  #   ports:
+  #     - "8081:8081"
+  #   environment:
+  #     REDIS_HOSTS: local:redis:6379
+  #   depends_on:
+  #     - redis
+
+# ==========================================================================
+# 命名資料卷（Named Volumes）
+# 讓資料在容器重啟後仍然保留
+# ==========================================================================
+volumes:
+  redis-data:       # Redis 資料持久化
+  # postgres-data:  # PostgreSQL 資料持久化（取消 postgres 服務時一起取消）
