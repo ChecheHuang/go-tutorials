@@ -1,0 +1,24 @@
+# Docker Compose 設定檔
+# 使用方式：docker-compose up -d
+version: "3.8"
+
+services:
+  # Blog API 服務
+  blog-api:
+    build: .
+    container_name: blog-api
+    ports:
+      - "8080:8080" # 將容器的 8080 埠映射到主機的 8080 埠
+    environment:
+      - GIN_MODE=release                              # Gin 使用 release 模式
+      - DB_DSN=/app/data/blog.db                      # SQLite 資料庫路徑
+      - JWT_SECRET=please-change-this-in-production   # JWT 密鑰（請在生產環境更換）
+      - JWT_EXPIRATION=24h                            # Token 有效期
+      - SERVER_PORT=8080                              # 伺服器埠號
+    volumes:
+      - blog-data:/app/data # 持久化資料庫檔案
+    restart: unless-stopped  # 除非手動停止，否則自動重啟
+
+# 命名卷（Named Volume），用於持久化 SQLite 資料庫
+volumes:
+  blog-data:

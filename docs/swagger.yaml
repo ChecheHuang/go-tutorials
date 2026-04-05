@@ -1,0 +1,605 @@
+basePath: /api/v1
+definitions:
+  domain.Article:
+    properties:
+      comments:
+        description: 文章的留言列表
+        items:
+          $ref: '#/definitions/domain.Comment'
+        type: array
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/domain.User'
+        description: 關聯的使用者資料
+      user_id:
+        description: 作者 ID（外鍵）
+        type: integer
+    type: object
+  domain.Comment:
+    properties:
+      article_id:
+        description: 所屬文章 ID（外鍵）
+        type: integer
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      updated_at:
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/domain.User'
+        description: 關聯的使用者資料
+      user_id:
+        description: 留言者 ID（外鍵）
+        type: integer
+    type: object
+  domain.CreateArticleRequest:
+    properties:
+      content:
+        description: 文章內容（至少 1 字元）
+        minLength: 1
+        type: string
+      title:
+        description: 文章標題（1-200 字元）
+        maxLength: 200
+        minLength: 1
+        type: string
+    required:
+    - content
+    - title
+    type: object
+  domain.CreateCommentRequest:
+    properties:
+      content:
+        description: 留言內容（1-1000 字元）
+        maxLength: 1000
+        minLength: 1
+        type: string
+    required:
+    - content
+    type: object
+  domain.LoginRequest:
+    properties:
+      email:
+        description: 電子信箱
+        type: string
+      password:
+        description: 密碼
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  domain.LoginResponse:
+    properties:
+      token:
+        description: JWT Token
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/domain.User'
+        description: 使用者資訊
+    type: object
+  domain.RegisterRequest:
+    properties:
+      email:
+        description: 電子信箱
+        type: string
+      password:
+        description: 密碼（至少 6 字元）
+        maxLength: 100
+        minLength: 6
+        type: string
+      username:
+        description: 使用者名稱（3-50 字元）
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  domain.UpdateArticleRequest:
+    properties:
+      content:
+        description: 文章內容（可選）
+        minLength: 1
+        type: string
+      title:
+        description: 文章標題（可選）
+        maxLength: 200
+        minLength: 1
+        type: string
+    type: object
+  domain.UpdateCommentRequest:
+    properties:
+      content:
+        description: 留言內容
+        maxLength: 1000
+        minLength: 1
+        type: string
+    required:
+    - content
+    type: object
+  domain.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  response.PaginatedData:
+    properties:
+      items:
+        description: 資料列表
+      page:
+        description: 目前頁碼
+        type: integer
+      page_size:
+        description: 每頁筆數
+        type: integer
+      total:
+        description: 總筆數
+        type: integer
+      total_pages:
+        description: 總頁數
+        type: integer
+    type: object
+  response.Response:
+    properties:
+      code:
+        description: HTTP 狀態碼
+        type: integer
+      data:
+        description: 回應資料（可選）
+      message:
+        description: 回應訊息
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: 教學用的部落格系統 REST API，使用 Go + Gin + GORM + SQLite
+  title: Blog API
+  version: "1.0"
+paths:
+  /api/v1/articles:
+    get:
+      description: 取得文章列表，支援分頁、關鍵字搜尋與依作者篩選
+      parameters:
+      - description: 頁碼（預設 1）
+        in: query
+        name: page
+        type: integer
+      - description: 每頁筆數（預設 10，最大 100）
+        in: query
+        name: page_size
+        type: integer
+      - description: 搜尋關鍵字
+        in: query
+        name: search
+        type: string
+      - description: 依作者 ID 篩選
+        in: query
+        name: user_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.PaginatedData'
+              type: object
+      summary: 取得文章列表
+      tags:
+      - articles
+    post:
+      consumes:
+      - application/json
+      description: 建立一篇新文章（需要登入）
+      parameters:
+      - description: 文章資訊
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateArticleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Article'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 建立文章
+      tags:
+      - articles
+  /api/v1/articles/{articleId}/comments:
+    get:
+      description: 取得指定文章下的所有留言
+      parameters:
+      - description: 文章 ID
+        in: path
+        name: articleId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Comment'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 取得文章留言
+      tags:
+      - comments
+    post:
+      consumes:
+      - application/json
+      description: 在指定文章下建立新留言（需要登入）
+      parameters:
+      - description: 文章 ID
+        in: path
+        name: articleId
+        required: true
+        type: integer
+      - description: 留言內容
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Comment'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 建立留言
+      tags:
+      - comments
+  /api/v1/articles/{articleId}/comments/{id}:
+    delete:
+      description: 刪除指定留言（只有留言者本人可以刪除）
+      parameters:
+      - description: 文章 ID
+        in: path
+        name: articleId
+        required: true
+        type: integer
+      - description: 留言 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 刪除留言
+      tags:
+      - comments
+    put:
+      consumes:
+      - application/json
+      description: 更新指定留言（只有留言者本人可以更新）
+      parameters:
+      - description: 文章 ID
+        in: path
+        name: articleId
+        required: true
+        type: integer
+      - description: 留言 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新內容
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Comment'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 更新留言
+      tags:
+      - comments
+  /api/v1/articles/{id}:
+    delete:
+      description: 刪除指定文章（只有作者本人可以刪除）
+      parameters:
+      - description: 文章 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 刪除文章
+      tags:
+      - articles
+    get:
+      description: 根據 ID 取得文章詳情，包含作者與留言
+      parameters:
+      - description: 文章 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Article'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 取得文章詳情
+      tags:
+      - articles
+    put:
+      consumes:
+      - application/json
+      description: 更新指定文章（只有作者本人可以更新）
+      parameters:
+      - description: 文章 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新資訊
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateArticleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Article'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 更新文章
+      tags:
+      - articles
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 驗證使用者身份並回傳 JWT Token
+      parameters:
+      - description: 登入資訊
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.LoginResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 使用者登入
+      tags:
+      - auth
+  /api/v1/auth/profile:
+    get:
+      description: 取得目前登入使用者的詳細資料
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.User'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 取得個人資料
+      tags:
+      - auth
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: 建立新的使用者帳號
+      parameters:
+      - description: 註冊資訊
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.User'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 使用者註冊
+      tags:
+      - auth
+securityDefinitions:
+  BearerAuth:
+    description: 在此輸入 Bearer Token，格式：Bearer <token>
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

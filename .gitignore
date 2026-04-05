@@ -1,0 +1,26 @@
+# 編譯產物
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+server
+
+# 測試
+*.test
+*.out
+
+# 依賴
+/vendor
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 資料庫
+*.db
+
+# 環境變數
+.env
