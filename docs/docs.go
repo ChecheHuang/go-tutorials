@@ -14,6 +14,20 @@ const docTemplate = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
+    "tags": [
+        {
+            "name": "auth",
+            "description": "使用者認證（註冊、登入、個人資料）"
+        },
+        {
+            "name": "articles",
+            "description": "文章管理（CRUD、分頁、搜尋）"
+        },
+        {
+            "name": "comments",
+            "description": "留言管理（CRUD）"
+        }
+    ],
     "paths": {
         "/api/v1/articles": {
             "get": {
