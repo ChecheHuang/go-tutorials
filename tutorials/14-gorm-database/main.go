@@ -3,7 +3,7 @@
 //
 // 執行前安裝：
 //   go get gorm.io/gorm
-//   go get gorm.io/driver/sqlite
+//   go get github.com/glebarez/sqlite
 //
 // 執行方式：go run main.go
 package main
@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"log"
 
-	"gorm.io/driver/sqlite"
+	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 )
 

@@ -64,46 +64,46 @@
 
 ### 第一階段：Go 語言基礎
 
-| # | 中文名稱 | English | 重點內容 | 類型 |
-|---|---------|---------|---------|------|
-| [01](./01-變數與型別-variables-types/) | 變數與型別 | Variables & Types | `var`、`:=`、基本型別、零值、`fmt` | `go run` |
-| [02](./02-控制流程-control-flow/) | 控制流程 | Control Flow | `if`、`for`、`switch`、`for range` | `go run` |
-| [03](./03-函式-functions/) | 函式 | Functions | 多重回傳、閉包、`defer`、匿名函式 | `go run` |
-| [04](./04-結構體與方法-structs-methods/) | 結構體與方法 | Structs & Methods | struct、方法、嵌套、建構函式模式 | `go run` |
-| [05](./05-指標-pointers/) | 指標 | Pointers | `&`、`*`、傳值 vs 傳參考、`nil` | `go run` |
+| # | 中文 | English | 重點內容 | 執行方式 |
+|---|------|---------|---------|---------|
+| [01](./01-variables-types/) | 變數與型別 | Variables & Types | `var`、`:=`、基本型別、零值、`fmt` | `go run main.go` |
+| [02](./02-control-flow/) | 控制流程 | Control Flow | `if`、`for`、`switch`、`for range` | `go run main.go` |
+| [03](./03-functions/) | 函式 | Functions | 多重回傳、閉包、`defer`、匿名函式 | `go run main.go` |
+| [04](./04-structs-methods/) | 結構體與方法 | Structs & Methods | struct、方法、嵌套、建構函式模式 | `go run main.go` |
+| [05](./05-pointers/) | 指標 | Pointers | `&`、`*`、傳值 vs 傳參考、`nil` | `go run main.go` |
 
 ### 第二階段：Go 進階概念
 
-| # | 中文名稱 | English | 重點內容 | 類型 |
-|---|---------|---------|---------|------|
-| [06](./06-介面-interfaces/) | 介面 | Interfaces | 隱式實作、多型、依賴注入入門 | `go run` |
-| [07](./07-錯誤處理-error-handling/) | 錯誤處理 | Error Handling | `error`、自訂錯誤、`errors.Is/As`、`panic/recover` | `go run` |
-| [08](./08-套件與模組-packages-modules/) | 套件與模組 | Packages & Modules | `go mod`、可見性規則（大小寫）、`internal/` | 閱讀 |
-| [09](./09-切片與映射-slices-maps/) | 切片與映射 | Slices & Maps | 切片操作、Map CRUD、`filter/map` 模式 | `go run` |
+| # | 中文 | English | 重點內容 | 執行方式 |
+|---|------|---------|---------|---------|
+| [06](./06-interfaces/) | 介面 | Interfaces | 隱式實作、多型、依賴注入入門 | `go run main.go` |
+| [07](./07-error-handling/) | 錯誤處理 | Error Handling | `error`、自訂錯誤、`errors.Is/As`、`panic/recover` | `go run main.go` |
+| [08](./08-packages-modules/) | 套件與模組 | Packages & Modules | `go mod`、可見性規則（大小寫）、`internal/` | 閱讀 README |
+| [09](./09-slices-maps/) | 切片與映射 | Slices & Maps | 切片操作、Map CRUD、`filter/map` 模式 | `go run main.go` |
 
-### 第三階段：架構設計（★ 最重要）
+### ★ 第三階段：架構設計（最重要）
 
-| # | 中文名稱 | English | 重點內容 | 類型 |
-|---|---------|---------|---------|------|
-| [10](./10-架構設計-clean-architecture/) | **架構設計** | **Clean Architecture** | **四層結構、依賴反轉、依賴注入、可替換性** | `go run` |
+| # | 中文 | English | 重點內容 | 執行方式 |
+|---|------|---------|---------|---------|
+| [10](./10-clean-architecture/) | **架構設計** | **Clean Architecture** | **四層結構、依賴反轉、依賴注入、可替換性** | `go run main.go` |
 
 ### 第四階段：Web 開發技術
 
-| # | 中文名稱 | English | 重點內容 | 類型 |
-|---|---------|---------|---------|------|
-| [11](./11-HTTP基礎-http-basics/) | HTTP 基礎 | HTTP Basics | `net/http`、Handler、狀態碼、請求/回應 | `go run` |
-| [12](./12-Gin框架-gin-framework/) | Gin 框架 | Gin Framework | 路由、路由群組、`gin.Context` API | 需 `go mod init` |
-| [13](./13-JSON處理-json-binding/) | JSON 處理 | JSON & Struct Tags | `json`/`binding`/`gorm` 三種標籤、Marshal/Unmarshal | `go run` |
-| [14](./14-GORM資料庫-gorm-database/) | GORM 資料庫 | GORM Database | CRUD、Preload、分頁、搜尋、鏈式查詢 | 需 `go mod init` |
+| # | 中文 | English | 重點內容 | 執行方式 |
+|---|------|---------|---------|---------|
+| [11](./11-http-basics/) | HTTP 基礎 | HTTP Basics | `net/http`、Handler、狀態碼、請求/回應 | `go run main.go` |
+| [12](./12-gin-framework/) | Gin 框架 | Gin Framework | 路由、路由群組、`gin.Context` API | `go run main.go` |
+| [13](./13-json-binding/) | JSON 處理 | JSON & Struct Tags | `json`/`binding`/`gorm` 三種標籤 | `go run main.go` |
+| [14](./14-gorm-database/) | GORM 資料庫 | GORM Database | CRUD、Preload、分頁、搜尋 | `go run main.go` |
 
 ### 第五階段：進階功能
 
-| # | 中文名稱 | English | 重點內容 | 類型 |
-|---|---------|---------|---------|------|
-| [15](./15-中介層-middleware/) | 中介層 | Middleware | 洋蔥模型、Logger、Auth、CORS、Recovery | 需 `go mod init` |
-| [16](./16-JWT認證-jwt-auth/) | JWT 認證 | JWT Authentication | bcrypt 密碼雜湊、JWT 產生/驗證、完整登入流程 | 需 `go mod init` |
-| [17](./17-單元測試-testing/) | 單元測試 | Unit Testing | 表格驅動測試、Mock、`testing` 套件 | `go test -v` |
-| [18](./18-Docker部署-docker/) | Docker 部署 | Docker Deployment | Dockerfile 多階段建置、docker-compose | 閱讀 |
+| # | 中文 | English | 重點內容 | 執行方式 |
+|---|------|---------|---------|---------|
+| [15](./15-middleware/) | 中介層 | Middleware | 洋蔥模型、Logger、Auth、CORS、Recovery | `go run main.go` |
+| [16](./16-jwt-auth/) | JWT 認證 | JWT Authentication | bcrypt、JWT 產生/驗證、完整登入流程 | `go run main.go` |
+| [17](./17-testing/) | 單元測試 | Unit Testing | 表格驅動測試、Mock、`testing` 套件 | `go test -v` |
+| [18](./18-docker/) | Docker 部署 | Docker Deployment | Dockerfile 多階段建置、docker-compose | 閱讀 README |
 
 ---
 
