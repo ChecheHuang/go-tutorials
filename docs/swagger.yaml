@@ -183,7 +183,7 @@ info:
   title: Blog API
   version: "1.0"
 paths:
-  /api/v1/articles:
+  /articles:
     get:
       description: 取得文章列表，支援分頁、關鍵字搜尋與依作者篩選
       parameters:
@@ -254,7 +254,7 @@ paths:
       summary: 建立文章
       tags:
       - articles
-  /api/v1/articles/{id}:
+  /articles/{id}:
     delete:
       description: 刪除指定文章（只有作者本人可以刪除）
       parameters:
@@ -361,7 +361,7 @@ paths:
       summary: 更新文章
       tags:
       - articles
-  /api/v1/articles/{id}/comments:
+  /articles/{id}/comments:
     get:
       description: 取得指定文章下的所有留言
       parameters:
@@ -434,7 +434,7 @@ paths:
       summary: 建立留言
       tags:
       - comments
-  /api/v1/auth/login:
+  /auth/login:
     post:
       consumes:
       - application/json
@@ -465,7 +465,7 @@ paths:
       summary: 使用者登入
       tags:
       - auth
-  /api/v1/auth/profile:
+  /auth/profile:
     get:
       description: 取得目前登入使用者的詳細資料
       produces:
@@ -489,7 +489,7 @@ paths:
       summary: 取得個人資料
       tags:
       - auth
-  /api/v1/auth/register:
+  /auth/register:
     post:
       consumes:
       - application/json
@@ -520,7 +520,7 @@ paths:
       summary: 使用者註冊
       tags:
       - auth
-  /api/v1/comments/{id}:
+  /comments/{id}:
     delete:
       description: 刪除指定留言（只有留言者本人可以刪除）
       parameters:

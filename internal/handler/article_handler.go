@@ -31,7 +31,7 @@ func NewArticleHandler(articleUsecase usecase.ArticleUsecase) *ArticleHandler {
 // @Success     201 {object} response.Response{data=domain.Article}
 // @Failure     400 {object} response.Response
 // @Failure     401 {object} response.Response
-// @Router      /api/v1/articles [post]
+// @Router      /articles [post]
 func (h *ArticleHandler) Create(c *gin.Context) {
 	var req domain.CreateArticleRequest
 
@@ -60,7 +60,7 @@ func (h *ArticleHandler) Create(c *gin.Context) {
 // @Param       id path int true "文章 ID" example(1)
 // @Success     200 {object} response.Response{data=domain.Article}
 // @Failure     404 {object} response.Response
-// @Router      /api/v1/articles/{id} [get]
+// @Router      /articles/{id} [get]
 func (h *ArticleHandler) GetByID(c *gin.Context) {
 	// 從 URL 路徑參數取得文章 ID
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
@@ -88,7 +88,7 @@ func (h *ArticleHandler) GetByID(c *gin.Context) {
 // @Param       search    query string false "搜尋關鍵字"
 // @Param       user_id   query int    false "依作者 ID 篩選"
 // @Success     200 {object} response.Response{data=response.PaginatedData}
-// @Router      /api/v1/articles [get]
+// @Router      /articles [get]
 func (h *ArticleHandler) GetAll(c *gin.Context) {
 	var query domain.ArticleQuery
 
@@ -128,7 +128,7 @@ func (h *ArticleHandler) GetAll(c *gin.Context) {
 // @Failure     400 {object} response.Response
 // @Failure     401 {object} response.Response
 // @Failure     403 {object} response.Response
-// @Router      /api/v1/articles/{id} [put]
+// @Router      /articles/{id} [put]
 func (h *ArticleHandler) Update(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -164,7 +164,7 @@ func (h *ArticleHandler) Update(c *gin.Context) {
 // @Failure     400 {object} response.Response
 // @Failure     401 {object} response.Response
 // @Failure     403 {object} response.Response
-// @Router      /api/v1/articles/{id} [delete]
+// @Router      /articles/{id} [delete]
 func (h *ArticleHandler) Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {

@@ -9,7 +9,7 @@
     "host": "localhost:8080",
     "basePath": "/api/v1",
     "paths": {
-        "/api/v1/articles": {
+        "/articles": {
             "get": {
                 "description": "取得文章列表，支援分頁、關鍵字搜尋與依作者篩選",
                 "produces": [
@@ -128,7 +128,7 @@
                 }
             }
         },
-        "/api/v1/articles/{id}": {
+        "/articles/{id}": {
             "get": {
                 "description": "根據 ID 取得文章詳情，包含作者與留言",
                 "produces": [
@@ -301,7 +301,7 @@
                 }
             }
         },
-        "/api/v1/articles/{id}/comments": {
+        "/articles/{id}/comments": {
             "get": {
                 "description": "取得指定文章下的所有留言",
                 "produces": [
@@ -421,7 +421,7 @@
                 }
             }
         },
-        "/api/v1/auth/login": {
+        "/auth/login": {
             "post": {
                 "description": "驗證使用者身份並回傳 JWT Token",
                 "consumes": [
@@ -473,7 +473,7 @@
                 }
             }
         },
-        "/api/v1/auth/profile": {
+        "/auth/profile": {
             "get": {
                 "security": [
                     {
@@ -516,7 +516,7 @@
                 }
             }
         },
-        "/api/v1/auth/register": {
+        "/auth/register": {
             "post": {
                 "description": "建立新的使用者帳號",
                 "consumes": [
@@ -568,7 +568,7 @@
                 }
             }
         },
-        "/api/v1/comments/{id}": {
+        "/comments/{id}": {
             "put": {
                 "security": [
                     {

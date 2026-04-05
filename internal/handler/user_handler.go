@@ -29,7 +29,7 @@ func NewUserHandler(userUsecase usecase.UserUsecase) *UserHandler {
 // @Param       request body domain.RegisterRequest true "註冊資訊"
 // @Success     201 {object} response.Response{data=domain.User}
 // @Failure     400 {object} response.Response
-// @Router      /api/v1/auth/register [post]
+// @Router      /auth/register [post]
 func (h *UserHandler) Register(c *gin.Context) {
 	var req domain.RegisterRequest
 
@@ -58,7 +58,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 // @Param       request body domain.LoginRequest true "登入資訊"
 // @Success     200 {object} response.Response{data=domain.LoginResponse}
 // @Failure     400 {object} response.Response
-// @Router      /api/v1/auth/login [post]
+// @Router      /auth/login [post]
 func (h *UserHandler) Login(c *gin.Context) {
 	var req domain.LoginRequest
 
@@ -84,7 +84,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 // @Security    BearerAuth
 // @Success     200 {object} response.Response{data=domain.User}
 // @Failure     401 {object} response.Response
-// @Router      /api/v1/auth/profile [get]
+// @Router      /auth/profile [get]
 func (h *UserHandler) GetProfile(c *gin.Context) {
 	// 從 JWT 中介層設定的 context 中取得使用者 ID
 	userID := c.GetUint("user_id")

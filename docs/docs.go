@@ -16,7 +16,7 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "tags": [{"name":"auth","description":"使用者認證（註冊、登入、個人資料）"},{"name":"articles","description":"文章管理（CRUD、分頁、搜尋）"},{"name":"comments","description":"留言管理（CRUD）"}],
     "paths": {
-        "/api/v1/articles": {
+        "/articles": {
             "get": {
                 "description": "取得文章列表，支援分頁、關鍵字搜尋與依作者篩選",
                 "produces": [
@@ -135,7 +135,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/articles/{id}": {
+        "/articles/{id}": {
             "get": {
                 "description": "根據 ID 取得文章詳情，包含作者與留言",
                 "produces": [
@@ -308,7 +308,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/articles/{id}/comments": {
+        "/articles/{id}/comments": {
             "get": {
                 "description": "取得指定文章下的所有留言",
                 "produces": [
@@ -428,7 +428,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/auth/login": {
+        "/auth/login": {
             "post": {
                 "description": "驗證使用者身份並回傳 JWT Token",
                 "consumes": [
@@ -480,7 +480,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/auth/profile": {
+        "/auth/profile": {
             "get": {
                 "security": [
                     {
@@ -523,7 +523,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/auth/register": {
+        "/auth/register": {
             "post": {
                 "description": "建立新的使用者帳號",
                 "consumes": [
@@ -575,7 +575,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/comments/{id}": {
+        "/comments/{id}": {
             "put": {
                 "security": [
                     {

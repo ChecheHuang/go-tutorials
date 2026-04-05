@@ -32,7 +32,7 @@ func NewCommentHandler(commentUsecase usecase.CommentUsecase) *CommentHandler {
 // @Success     201 {object} response.Response{data=domain.Comment}
 // @Failure     400 {object} response.Response
 // @Failure     401 {object} response.Response
-// @Router      /api/v1/articles/{id}/comments [post]
+// @Router      /articles/{id}/comments [post]
 func (h *CommentHandler) Create(c *gin.Context) {
 	// 從 URL 路徑取得文章 ID
 	articleID, err := strconv.ParseUint(c.Param("id"), 10, 32)
@@ -66,7 +66,7 @@ func (h *CommentHandler) Create(c *gin.Context) {
 // @Param       id path int true "文章 ID" example(1)
 // @Success     200 {object} response.Response{data=[]domain.Comment}
 // @Failure     400 {object} response.Response
-// @Router      /api/v1/articles/{id}/comments [get]
+// @Router      /articles/{id}/comments [get]
 func (h *CommentHandler) GetByArticleID(c *gin.Context) {
 	articleID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -95,7 +95,7 @@ func (h *CommentHandler) GetByArticleID(c *gin.Context) {
 // @Success     200 {object} response.Response{data=domain.Comment}
 // @Failure     400 {object} response.Response
 // @Failure     401 {object} response.Response
-// @Router      /api/v1/comments/{id} [put]
+// @Router      /comments/{id} [put]
 func (h *CommentHandler) Update(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -130,7 +130,7 @@ func (h *CommentHandler) Update(c *gin.Context) {
 // @Success     200 {object} response.Response
 // @Failure     400 {object} response.Response
 // @Failure     401 {object} response.Response
-// @Router      /api/v1/comments/{id} [delete]
+// @Router      /comments/{id} [delete]
 func (h *CommentHandler) Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
