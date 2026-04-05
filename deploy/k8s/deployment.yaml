@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blog-api
+  namespace: blog
+  labels:
+    app: blog-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: blog-api
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0  # 零停機更新
+
+  template:
+    metadata:
+      labels:
+        app: blog-api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+
+    spec:
+      terminationGracePeriodSeconds: 30
+
+      containers:
+        - name: blog-api
+          image: ghcr.io/your-org/blog-api:latest
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 8080
+              name: http
+
+          # 從 ConfigMap 載入非敏感設定
+          envFrom:
+            - configMapRef:
+                name: blog-api-config
+
+          # 從 Secret 載入敏感設定
+          env:
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: blog-api-secrets
+                  key: JWT_SECRET
+
+          # 資源限制
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "500m"
+              memory: "128Mi"
+
+          # 存活探針：失敗則重啟 Pod
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            failureThreshold: 3
+
+          # 就緒探針：失敗則從 Service 移除
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            failureThreshold: 3
+
+          # 啟動探針：給慢啟動更多時間
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            failureThreshold: 10
+            periodSeconds: 5
+
+          # 掛載資料卷（SQLite 持久化）
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: blog-api-data

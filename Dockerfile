@@ -26,16 +26,19 @@ RUN apk add --no-cache ca-certificates sqlite-libs
 
 WORKDIR /app
 
-# 從建置階段複製編譯好的二進位檔
+# 從建置階段複製編譯好的二進位檔和設定檔
 COPY --from=builder /app/server .
+COPY --from=builder /app/config.yaml .
 
 # 建立資料目錄
 RUN mkdir -p /app/data
 
-# 設定環境變數
-ENV GIN_MODE=release
-ENV DB_DSN=/app/data/blog.db
+# 設定環境變數（覆蓋 config.yaml 的預設值）
+ENV SERVER_MODE=release
+ENV DATABASE_DSN=/app/data/blog.db
 ENV SERVER_PORT=8080
+ENV LOG_FORMAT=json
+ENV LOG_LEVEL=info
 
 # 開放埠號
 EXPOSE 8080

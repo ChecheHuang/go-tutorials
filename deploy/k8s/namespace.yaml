@@ -1,0 +1,14 @@
+# Blog API Kubernetes 部署
+# 對應教學：第 36 課 Kubernetes
+#
+# 使用方式：
+#   kubectl apply -f deploy/k8s/
+#   kubectl get pods -n blog
+#   kubectl logs -f deployment/blog-api -n blog
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: blog
+  labels:
+    app: blog-api

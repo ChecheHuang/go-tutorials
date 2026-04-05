@@ -38,6 +38,7 @@ import (
 	"blog-api/internal/repository"
 	"blog-api/internal/seed"
 	"blog-api/internal/usecase"
+	"blog-api/pkg/cache"
 	"blog-api/pkg/config"
 	"blog-api/pkg/logger"
 
@@ -45,6 +46,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/glebarez/sqlite"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -72,26 +74,45 @@ func main() {
 
 	seed.Run(db)
 
-	// === 4. 依賴注入：按照 Clean Architecture 由內而外初始化 ===
+	// === 4. 初始化 Redis（可選）===
+	var appCache cache.Cache
+	var redisClient *redis.Client
+
+	if cfg.Redis.Enabled {
+		rc, err := cache.NewRedisCache(cfg.Redis.Addr, cfg.Redis.Password, cfg.Redis.DB)
+		if err != nil {
+			slog.Warn("Redis 連線失敗，降級為無快取模式", "error", err)
+			appCache = cache.NewNoOpCache()
+		} else {
+			redisClient = rc.Client()
+			appCache = rc
+		}
+	} else {
+		slog.Info("Redis 未啟用，使用無快取模式")
+		appCache = cache.NewNoOpCache()
+	}
+
+	// === 5. 依賴注入：按照 Clean Architecture 由內而外初始化 ===
 	userRepo := repository.NewUserRepository(db)
 	articleRepo := repository.NewArticleRepository(db)
+	cachedArticleRepo := repository.NewCachedArticleRepository(articleRepo, appCache)
 	commentRepo := repository.NewCommentRepository(db)
 
 	userUsecase := usecase.NewUserUsecase(userRepo, cfg)
-	articleUsecase := usecase.NewArticleUsecase(articleRepo)
-	commentUsecase := usecase.NewCommentUsecase(commentRepo, articleRepo)
+	articleUsecase := usecase.NewArticleUsecase(cachedArticleRepo)
+	commentUsecase := usecase.NewCommentUsecase(commentRepo, cachedArticleRepo)
 
 	userHandler := handler.NewUserHandler(userUsecase)
 	articleHandler := handler.NewArticleHandler(articleUsecase)
 	commentHandler := handler.NewCommentHandler(commentUsecase)
-	healthHandler := handler.NewHealthHandler(db)
+	healthHandler := handler.NewHealthHandler(db, redisClient)
 
-	// === 5. 設定路由 ===
+	// === 6. 設定路由 ===
 	router := handler.SetupRouter(cfg, userHandler, articleHandler, commentHandler, healthHandler)
 
 	printRoutes(cfg.Server.Port)
 
-	// === 6. Graceful Shutdown ===
+	// === 7. Graceful Shutdown ===
 	srv := &http.Server{
 		Addr:    ":" + cfg.Server.Port,
 		Handler: router,
@@ -146,6 +167,10 @@ func printRoutes(port string) {
 	green.Printf("http://localhost:%s/swagger/index.html\n", port)
 	fmt.Printf("     Health:  ")
 	green.Printf("http://localhost:%s/healthz\n", port)
+	fmt.Printf("     Metrics: ")
+	green.Printf("http://localhost:%s/metrics\n", port)
+	fmt.Printf("     Pprof:   ")
+	green.Printf("http://localhost:%s/debug/pprof/\n", port)
 	fmt.Println()
 
 	white.Println("  📋 路由表")
@@ -154,6 +179,8 @@ func printRoutes(port string) {
 	dim.Println("  系統 (System)")
 	printRoute(green, " GET", "/healthz", "存活探針", "")
 	printRoute(green, " GET", "/readyz", "就緒探針", "")
+	printRoute(green, " GET", "/metrics", "Prometheus 指標", "")
+	printRoute(green, " GET", "/debug/pprof/", "效能分析（debug 模式）", "")
 
 	fmt.Println()
 	dim.Println("  認證 (Auth)")

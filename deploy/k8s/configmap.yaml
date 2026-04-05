@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: blog-api-config
+  namespace: blog
+data:
+  SERVER_PORT: "8080"
+  SERVER_MODE: "release"
+  DATABASE_DSN: "/app/data/blog.db"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  REDIS_ENABLED: "false"

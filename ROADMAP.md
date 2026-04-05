@@ -457,27 +457,34 @@ graph LR
         T14["14 GORM"]:::tutorial --> B5
         T15["15 中介層"]:::tutorial --> B4
         T16["16 JWT"]:::tutorial --> B6
+        T17["17 測試"]:::tutorial --> B1
         T18["18 Docker"]:::tutorial --> B7
         T20["20 Redis"]:::tutorial --> B2
+        T21["21 slog"]:::tutorial --> B8
         T22["22 DB 進階"]:::tutorial --> B5
-        T24["24 Clean Arch"]:::tutorial --> B1
+        T24["24 Graceful"]:::tutorial --> B4
+        T25["25 Error Wrap"]:::tutorial --> B1
+        T26["26 Viper"]:::tutorial --> B4
         T29["29 Prometheus"]:::tutorial --> B8
         T30["30 CI/CD"]:::tutorial --> B7
+        T32["32 pprof"]:::tutorial --> B8
         T36["36 K8s"]:::tutorial --> B7
     end
 ```
 
 | 部落格功能 | 用到的課程 | 學完就能做 |
 |-----------|-----------|-----------|
-| 使用者註冊/登入 | 04, 12, 14, 16 | 完整的認證系統 |
-| 文章 CRUD | 12, 13, 14, 22 | RESTful 文章 API |
+| 使用者註冊/登入 | 04, 12, 14, 16, 25 | 完整的認證系統 + Error Wrapping |
+| 文章 CRUD | 12, 13, 14, 20, 22 | RESTful API + Redis 快取 + 軟刪除 |
 | 留言系統 | 12, 13, 14 | 巢狀留言功能 |
-| 快取加速 | 20 | Redis 快取熱門文章 |
-| 即時通知 | 19, 23 | WebSocket 新留言通知 |
-| 結構化日誌 | 21 | JSON 格式的請求日誌 |
-| 容器化部署 | 18, 30 | Docker + CI/CD |
-| 生產監控 | 29, 35 | Prometheus + Tracing |
-| K8s 部署 | 36 | 自動擴展、零停機更新 |
+| 設定管理 | 26 | Viper config.yaml + 環境變數 |
+| 結構化日誌 | 21 | slog JSON 格式的請求日誌 |
+| 健康檢查 | 24 | /healthz + /readyz + Graceful Shutdown |
+| 單元測試 | 17 | testify + t.Run 子測試 + errors.Is 驗證 |
+| 效能分析 | 32 | pprof /debug/pprof/ 端點 |
+| 容器化部署 | 18, 30 | Docker + GitHub Actions CI/CD |
+| 生產監控 | 29 | Prometheus /metrics 端點 |
+| K8s 部署 | 36 | Deployment + HPA + Probe + Ingress |
 
 ---
 
