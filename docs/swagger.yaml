@@ -254,162 +254,12 @@ paths:
       summary: 建立文章
       tags:
       - articles
-  /api/v1/articles/{articleId}/comments:
-    get:
-      description: 取得指定文章下的所有留言
-      parameters:
-      - description: 文章 ID
-        in: path
-        name: articleId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/domain.Comment'
-                  type: array
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-      summary: 取得文章留言
-      tags:
-      - comments
-    post:
-      consumes:
-      - application/json
-      description: 在指定文章下建立新留言（需要登入）
-      parameters:
-      - description: 文章 ID
-        in: path
-        name: articleId
-        required: true
-        type: integer
-      - description: 留言內容
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/domain.CreateCommentRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/domain.Comment'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - BearerAuth: []
-      summary: 建立留言
-      tags:
-      - comments
-  /api/v1/articles/{articleId}/comments/{id}:
-    delete:
-      description: 刪除指定留言（只有留言者本人可以刪除）
-      parameters:
-      - description: 文章 ID
-        in: path
-        name: articleId
-        required: true
-        type: integer
-      - description: 留言 ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - BearerAuth: []
-      summary: 刪除留言
-      tags:
-      - comments
-    put:
-      consumes:
-      - application/json
-      description: 更新指定留言（只有留言者本人可以更新）
-      parameters:
-      - description: 文章 ID
-        in: path
-        name: articleId
-        required: true
-        type: integer
-      - description: 留言 ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 更新內容
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/domain.UpdateCommentRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/domain.Comment'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - BearerAuth: []
-      summary: 更新留言
-      tags:
-      - comments
   /api/v1/articles/{id}:
     delete:
       description: 刪除指定文章（只有作者本人可以刪除）
       parameters:
       - description: 文章 ID
+        example: 1
         in: path
         name: id
         required: true
@@ -442,6 +292,7 @@ paths:
       description: 根據 ID 取得文章詳情，包含作者與留言
       parameters:
       - description: 文章 ID
+        example: 1
         in: path
         name: id
         required: true
@@ -510,6 +361,79 @@ paths:
       summary: 更新文章
       tags:
       - articles
+  /api/v1/articles/{id}/comments:
+    get:
+      description: 取得指定文章下的所有留言
+      parameters:
+      - description: 文章 ID
+        example: 1
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Comment'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 取得文章留言
+      tags:
+      - comments
+    post:
+      consumes:
+      - application/json
+      description: 在指定文章下建立新留言（需要登入）
+      parameters:
+      - description: 文章 ID
+        example: 1
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 留言內容
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Comment'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 建立留言
+      tags:
+      - comments
   /api/v1/auth/login:
     post:
       consumes:
@@ -596,6 +520,78 @@ paths:
       summary: 使用者註冊
       tags:
       - auth
+  /api/v1/comments/{id}:
+    delete:
+      description: 刪除指定留言（只有留言者本人可以刪除）
+      parameters:
+      - description: 留言 ID
+        example: 1
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 刪除留言
+      tags:
+      - comments
+    put:
+      consumes:
+      - application/json
+      description: 更新指定留言（只有留言者本人可以更新）
+      parameters:
+      - description: 留言 ID
+        example: 1
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新內容
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Comment'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 更新留言
+      tags:
+      - comments
 securityDefinitions:
   BearerAuth:
     description: 在此輸入 Bearer Token，格式：Bearer <token>

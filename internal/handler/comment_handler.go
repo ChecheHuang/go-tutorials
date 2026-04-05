@@ -27,12 +27,12 @@ func NewCommentHandler(commentUsecase usecase.CommentUsecase) *CommentHandler {
 // @Accept      json
 // @Produce     json
 // @Security    BearerAuth
-// @Param       articleId path int                        true "文章 ID"
-// @Param       request   body domain.CreateCommentRequest true "留言內容"
+// @Param       id      path int                        true "文章 ID" example(1)
+// @Param       request body domain.CreateCommentRequest true "留言內容"
 // @Success     201 {object} response.Response{data=domain.Comment}
 // @Failure     400 {object} response.Response
 // @Failure     401 {object} response.Response
-// @Router      /api/v1/articles/{articleId}/comments [post]
+// @Router      /api/v1/articles/{id}/comments [post]
 func (h *CommentHandler) Create(c *gin.Context) {
 	// 從 URL 路徑取得文章 ID
 	articleID, err := strconv.ParseUint(c.Param("id"), 10, 32)
@@ -63,10 +63,10 @@ func (h *CommentHandler) Create(c *gin.Context) {
 // @Description 取得指定文章下的所有留言
 // @Tags        comments
 // @Produce     json
-// @Param       articleId path int true "文章 ID"
+// @Param       id path int true "文章 ID" example(1)
 // @Success     200 {object} response.Response{data=[]domain.Comment}
 // @Failure     400 {object} response.Response
-// @Router      /api/v1/articles/{articleId}/comments [get]
+// @Router      /api/v1/articles/{id}/comments [get]
 func (h *CommentHandler) GetByArticleID(c *gin.Context) {
 	articleID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -90,13 +90,12 @@ func (h *CommentHandler) GetByArticleID(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Security    BearerAuth
-// @Param       articleId path int                        true "文章 ID"
-// @Param       id        path int                        true "留言 ID"
-// @Param       request   body domain.UpdateCommentRequest true "更新內容"
+// @Param       id      path int                        true "留言 ID" example(1)
+// @Param       request body domain.UpdateCommentRequest true "更新內容"
 // @Success     200 {object} response.Response{data=domain.Comment}
 // @Failure     400 {object} response.Response
 // @Failure     401 {object} response.Response
-// @Router      /api/v1/articles/{articleId}/comments/{id} [put]
+// @Router      /api/v1/comments/{id} [put]
 func (h *CommentHandler) Update(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -127,12 +126,11 @@ func (h *CommentHandler) Update(c *gin.Context) {
 // @Tags        comments
 // @Produce     json
 // @Security    BearerAuth
-// @Param       articleId path int true "文章 ID"
-// @Param       id        path int true "留言 ID"
+// @Param       id path int true "留言 ID" example(1)
 // @Success     200 {object} response.Response
 // @Failure     400 {object} response.Response
 // @Failure     401 {object} response.Response
-// @Router      /api/v1/articles/{articleId}/comments/{id} [delete]
+// @Router      /api/v1/comments/{id} [delete]
 func (h *CommentHandler) Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {

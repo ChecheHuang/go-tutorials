@@ -57,7 +57,7 @@ func (h *ArticleHandler) Create(c *gin.Context) {
 // @Description 根據 ID 取得文章詳情，包含作者與留言
 // @Tags        articles
 // @Produce     json
-// @Param       id path int true "文章 ID"
+// @Param       id path int true "文章 ID" example(1)
 // @Success     200 {object} response.Response{data=domain.Article}
 // @Failure     404 {object} response.Response
 // @Router      /api/v1/articles/{id} [get]
@@ -159,7 +159,7 @@ func (h *ArticleHandler) Update(c *gin.Context) {
 // @Tags        articles
 // @Produce     json
 // @Security    BearerAuth
-// @Param       id path int true "文章 ID"
+// @Param       id path int true "文章 ID" example(1)
 // @Success     200 {object} response.Response
 // @Failure     400 {object} response.Response
 // @Failure     401 {object} response.Response
