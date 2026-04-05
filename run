@@ -1,0 +1,23 @@
+#!/bin/bash
+# Blog API 快速指令
+
+case "${1:-run}" in
+  run)     go run ./cmd/server/ ;;
+  build)   go build -o blog-api.exe ./cmd/server/ && echo "[OK] blog-api.exe" ;;
+  test)    go test -v ./internal/... ;;
+  cover)   go test -cover ./internal/... ;;
+  clean)   rm -f blog-api.exe blog.db && echo "[OK] clean" ;;
+  swagger) swag init -g cmd/server/main.go -o docs ;;
+  tidy)    go mod tidy ;;
+  *)
+    echo ""
+    echo "  ./run          啟動伺服器"
+    echo "  ./run build    編譯為 blog-api.exe"
+    echo "  ./run test     執行測試"
+    echo "  ./run cover    測試覆蓋率"
+    echo "  ./run clean    清除 DB 與編譯產物"
+    echo "  ./run swagger  重新產生 Swagger 文件"
+    echo "  ./run tidy     整理依賴"
+    echo ""
+    ;;
+esac
