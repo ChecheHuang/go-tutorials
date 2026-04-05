@@ -1,0 +1,20 @@
+# 搶票系統設定檔
+
+server:
+  port: "8080"
+  mode: "debug"
+
+database:
+  dsn: "ticket.db"
+
+redis:
+  addr: "localhost:6379"
+  password: ""
+  db: 0
+
+log:
+  level: "info"
+  format: "text"
+
+grpc:
+  port: "9090"
