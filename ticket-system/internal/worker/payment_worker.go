@@ -20,7 +20,7 @@ import (
 type PaymentWorker struct {
 	broker      *mq.Broker
 	orderWrite  domain.OrderWriteRepository
-	paymentSvc  payment.PaymentService
+	paymentSvc  payment.PaymentServiceClient
 	breaker     *gobreaker.CircuitBreaker[*payment.PaymentResponse]
 	hub         *ws.Hub
 	tracer      trace.Tracer
@@ -31,7 +31,7 @@ type PaymentWorker struct {
 func NewPaymentWorker(
 	broker *mq.Broker,
 	orderWrite domain.OrderWriteRepository,
-	paymentSvc payment.PaymentService,
+	paymentSvc payment.PaymentServiceClient,
 	breaker *gobreaker.CircuitBreaker[*payment.PaymentResponse],
 	hub *ws.Hub,
 	tracer trace.Tracer,
