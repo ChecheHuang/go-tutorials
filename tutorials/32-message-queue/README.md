@@ -362,6 +362,32 @@ func (b *Broker) Publish(topic string, payload any) {
 
 ---
 
+## 常見問題 FAQ
+
+### Q: 什麼時候該用 MQ 而不是直接呼叫？
+
+當你需要**解耦**（發送方不需要知道接收方是誰）、**非同步**（不需要等結果）、或**削峰**（突然大量請求時先排隊）。如果需要即時回應，直接呼叫更簡單。
+
+### Q: Redis Streams 和 Kafka 怎麼選？
+
+- **Redis Streams**：輕量、延遲低、適合中小規模（<10 萬 msg/s）
+- **Kafka**：高吞吐、持久化、適合大規模（百萬 msg/s）、支援重播
+- 經驗法則：先用 Redis Streams，不夠再換 Kafka
+
+### Q: 怎麼保證訊息不丟失？
+
+三個層面：1) **生產者**確認訊息已寫入 broker（ACK），2) **broker** 持久化到磁碟（Kafka 預設做、Redis 需要設定 AOF），3) **消費者**處理完才 ACK（At-least-once）。
+
+### Q: 訊息順序重要嗎？
+
+看場景。搶票系統的訂單處理需要保證同一使用者的操作有序，但不同使用者之間可以並行。Kafka 用 partition key 保證同一 key 的訊息有序。
+
+### Q: 本課用 Go channel 當 MQ，生產環境能用嗎？
+
+不行。Go channel 是進程內的，程式重啟就沒了。但它非常適合**學習 MQ 概念**和**單元測試**。搶票系統的 `mq/broker.go` 就是這個思路——先跑通邏輯，之後換成 Redis Streams 只需改 broker 實作。
+
+---
+
 ## 練習題
 
 ### 練習 1：實作 Dead Letter Queue

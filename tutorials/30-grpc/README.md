@@ -394,6 +394,33 @@ func (s *paymentServer) ProcessPayment(ctx context.Context, req *PaymentRequest)
 
 ---
 
+## 常見問題 FAQ
+
+### Q: gRPC 和 REST 能共存嗎？
+
+可以。常見做法是對外用 REST（瀏覽器友好），服務間用 gRPC（效率高）。也可以用 gRPC-Gateway 自動把 gRPC 轉成 REST API。
+
+### Q: 一定要用 protobuf 嗎？
+
+不一定。gRPC 預設用 protobuf，但也支援 JSON codec（搶票系統就是用 JSON codec 來簡化教學）。不過生產環境建議用 protobuf，序列化速度快 5-10 倍。
+
+### Q: gRPC 能用在瀏覽器嗎？
+
+原生 gRPC 不行（需要 HTTP/2 + 二進位框架）。但可以用 gRPC-Web 或 Connect 框架讓瀏覽器透過 HTTP/1.1 呼叫 gRPC 服務。
+
+### Q: Streaming 什麼時候該用？
+
+- **Server Streaming**：伺服器要回傳大量資料（如日誌串流、即時報價）
+- **Client Streaming**：客戶端要上傳大量資料（如檔案上傳）
+- **Bidirectional**：即時雙向通訊（如聊天、遊戲）
+- 大多數情況 **Unary 就夠了**，不要為了用 Streaming 而用
+
+### Q: gRPC 的錯誤處理和 HTTP 狀態碼有什麼關係？
+
+gRPC 有自己的 status code 體系（如 `codes.NotFound`、`codes.Internal`），和 HTTP 狀態碼是不同的。gRPC-Gateway 會自動把 gRPC status code 對應到 HTTP 狀態碼（如 `NotFound` → 404）。
+
+---
+
 ## 練習題
 
 ### 練習 1：新增一個 UpdateArticle RPC

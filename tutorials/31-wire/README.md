@@ -415,6 +415,30 @@ func InitializeApp(cfg *config.Config, tracer trace.Tracer) (*App, func(), error
 
 ---
 
+## 常見問題 FAQ
+
+### Q: Wire 和 fx（Uber）有什麼差別？
+
+Wire 是**編譯時** DI（生成程式碼），fx 是**執行時** DI（用反射）。Wire 的好處是錯誤在編譯時就能發現，fx 的好處是不需要 code generation 步驟。Go 社群目前傾向 Wire。
+
+### Q: 小專案需要用 Wire 嗎？
+
+不需要。如果依賴不超過 10 個，手動 DI 在 `main()` 裡直接 `New` 就好。Wire 的價值在於依賴數量超過 20-30 個時，手動管理容易出錯。
+
+### Q: wire_gen.go 應該加入 git 嗎？
+
+建議加入。這樣其他開發者 clone 後不需要安裝 Wire 工具就能直接編譯。CI/CD 也不需要額外的 code generation 步驟。
+
+### Q: 如何測試用 Wire 組裝的程式？
+
+Wire 支援 `wire.Bind` 把介面綁到 mock 實作。你可以建立一個 `wire_test.go` 的 injector，用測試版的 Provider（如 mock DB、mock cache）來組裝測試用的依賴。
+
+### Q: Wire 支援條件式注入嗎（根據環境選擇不同實作）？
+
+Wire 本身不支援 if/else。常見做法是建立多個 injector（如 `InitializeApp` 和 `InitializeTestApp`），分別用不同的 ProviderSet。
+
+---
+
 ## 練習題
 
 ### 練習 1：新增 CacheService Provider
