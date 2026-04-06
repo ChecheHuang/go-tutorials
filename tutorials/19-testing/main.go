@@ -123,7 +123,7 @@ func (s *UserService) GetUser(id int) (*User, error) { // 方法：根據 ID 取
 // CreateUser 建立新使用者（先驗證，再存入）
 func (s *UserService) CreateUser(name, email string, age int) (*User, error) { // 方法：建立使用者
 	user := &User{Name: name, Email: email, Age: age} // 建立 User 物件
-	if err := user.Validate(); err != nil {            // 先驗證資料是否合法
+	if err := user.Validate(); err != nil {           // 先驗證資料是否合法
 		return nil, err // 驗證失敗直接回傳錯誤
 	}
 	if err := s.repo.Create(user); err != nil { // 驗證通過，存入 Repository
@@ -162,15 +162,15 @@ func (h *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) { /
 
 	if idStr == "" { // 如果沒有提供 id 參數
 		http.Error(w, "缺少 id 參數", http.StatusBadRequest) // 回傳 400 Bad Request
-		return                                                // 提前返回
+		return                                           // 提前返回
 	}
 
 	// 簡化版本：這裡只示範基本的 HTTP 測試流程
 	// 實際上應該用 strconv.Atoi 轉換 idStr → int，再查詢資料庫
 	if idStr == "1" { // 模擬 ID=1 存在
 		w.Header().Set("Content-Type", "application/json") // 設定回應格式為 JSON
-		w.WriteHeader(http.StatusOK)                        // 設定 HTTP 狀態碼 200
-		fmt.Fprintf(w, `{"id":1,"name":"Alice"}`)           // 寫入 JSON 回應內容
+		w.WriteHeader(http.StatusOK)                       // 設定 HTTP 狀態碼 200
+		fmt.Fprintf(w, `{"id":1,"name":"Alice"}`)          // 寫入 JSON 回應內容
 	} else { // 其他 ID 視為不存在
 		http.Error(w, "使用者不存在", http.StatusNotFound) // 回傳 404 Not Found
 	}
@@ -180,12 +180,12 @@ func (h *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) { /
 func (h *UserHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request) { // HTTP Handler 函式
 	if r.Method != http.MethodPost { // 如果不是 POST 方法
 		http.Error(w, "只允許 POST 方法", http.StatusMethodNotAllowed) // 回傳 405 Method Not Allowed
-		return                                                          // 提前返回
+		return                                                    // 提前返回
 	}
 
 	// 模擬成功建立使用者
-	w.Header().Set("Content-Type", "application/json") // 設定回應格式
-	w.WriteHeader(http.StatusCreated)                   // 設定狀態碼 201 Created
+	w.Header().Set("Content-Type", "application/json")       // 設定回應格式
+	w.WriteHeader(http.StatusCreated)                        // 設定狀態碼 201 Created
 	fmt.Fprintf(w, `{"id":2,"name":"Bob","message":"建立成功"}`) // 寫入 JSON 回應
 }
 
@@ -194,14 +194,14 @@ func (h *UserHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request) 
 // ==========================================================================
 
 func main() { // 程式進入點
-	fmt.Println("這個檔案主要用於被測試") // 說明這個檔案的用途
+	fmt.Println("這個檔案主要用於被測試")                             // 說明這個檔案的用途
 	fmt.Println("請執行: go test -v ./tutorials/17-testing/") // 提示測試指令
-	fmt.Println()                                              // 空行
+	fmt.Println()                                          // 空行
 
 	// 示範依賴注入：UserHandler 依賴 UserService，UserService 依賴 UserRepository
 	// 在真實專案中，這些依賴會在 main.go 中組裝（依賴注入）
 	// 在測試中，我們用 Mock 替換真實的 Repository
-	fmt.Println("程式架構示意：")                              // 說明架構
+	fmt.Println("程式架構示意：")                                      // 說明架構
 	fmt.Println("  UserHandler → UserService → UserRepository") // 依賴關係
-	fmt.Println("  測試時：把 UserRepository 換成 MockRepository") // 測試策略
+	fmt.Println("  測試時：把 UserRepository 換成 MockRepository")     // 測試策略
 }

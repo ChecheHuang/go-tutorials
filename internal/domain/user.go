@@ -36,7 +36,7 @@ type LoginResponse struct {
 // UserRepository 定義使用者的資料存取介面
 // Clean Architecture 中，此介面定義在 domain 層，由 repository 層實作
 type UserRepository interface {
-	Create(user *User) error             // 建立使用者
-	FindByID(id uint) (*User, error)     // 根據 ID 查詢使用者
+	Create(user *User) error                 // 建立使用者
+	FindByID(id uint) (*User, error)         // 根據 ID 查詢使用者
 	FindByEmail(email string) (*User, error) // 根據 Email 查詢使用者
 }

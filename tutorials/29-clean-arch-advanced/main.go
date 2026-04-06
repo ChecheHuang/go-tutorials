@@ -51,24 +51,24 @@
 package main // 宣告這是 main 套件
 
 import (
-	"context"       // 用於 Graceful Shutdown 的超時控制
-	"errors"        // 標準錯誤處理
-	"fmt"           // 格式化輸出
-	"log"           // 日誌輸出（初始化前用）
-	"net/http"      // HTTP 伺服器 + 狀態碼
-	"os"            // 環境變數 + 系統信號
-	"os/signal"     // 系統信號接收（SIGTERM、SIGINT）
-	"runtime"       // 取得系統資訊（goroutine 數量）
-	"strconv"       // 字串轉整數
-	"syscall"       // 系統呼叫常數（SIGTERM）
-	"time"          // 時間處理
+	"context"   // 用於 Graceful Shutdown 的超時控制
+	"errors"    // 標準錯誤處理
+	"fmt"       // 格式化輸出
+	"log"       // 日誌輸出（初始化前用）
+	"net/http"  // HTTP 伺服器 + 狀態碼
+	"os"        // 環境變數 + 系統信號
+	"os/signal" // 系統信號接收（SIGTERM、SIGINT）
+	"runtime"   // 取得系統資訊（goroutine 數量）
+	"strconv"   // 字串轉整數
+	"syscall"   // 系統呼叫常數（SIGTERM）
+	"time"      // 時間處理
 
-	"github.com/gin-gonic/gin"           // HTTP 框架
-	"github.com/glebarez/sqlite"         // 純 Go SQLite 驅動
-	"github.com/golang-jwt/jwt/v5"       // JWT 套件
-	"go.uber.org/zap"                    // 結構化日誌
-	"gorm.io/gorm"                       // ORM 框架
-	"gorm.io/gorm/logger"                // GORM 日誌設定
+	"github.com/gin-gonic/gin"     // HTTP 框架
+	"github.com/glebarez/sqlite"   // 純 Go SQLite 驅動
+	"github.com/golang-jwt/jwt/v5" // JWT 套件
+	"go.uber.org/zap"              // 結構化日誌
+	"gorm.io/gorm"                 // ORM 框架
+	"gorm.io/gorm/logger"          // GORM 日誌設定
 )
 
 // ==========================================================================
@@ -114,32 +114,32 @@ type UpdateArticleInput struct {
 
 // 領域錯誤定義（Usecase 回傳這些，Handler 根據這些決定 HTTP 狀態碼）
 var (
-	ErrArticleNotFound    = errors.New("文章不存在")       // 404
-	ErrArticleForbidden   = errors.New("沒有權限操作此文章") // 403
-	ErrInvalidInput       = errors.New("輸入資料不合法")    // 400
-	ErrTitleRequired      = errors.New("標題不能為空")      // 400
-	ErrContentRequired    = errors.New("內容不能為空")      // 400
+	ErrArticleNotFound  = errors.New("文章不存在")     // 404
+	ErrArticleForbidden = errors.New("沒有權限操作此文章") // 403
+	ErrInvalidInput     = errors.New("輸入資料不合法")   // 400
+	ErrTitleRequired    = errors.New("標題不能為空")    // 400
+	ErrContentRequired  = errors.New("內容不能為空")    // 400
 )
 
 // ArticleRepository 文章資料存取介面（定義在 Domain 層！）
 // Repository 的「契約」：Usecase 透過這個介面存取資料，不管底層是什麼
 type ArticleRepository interface {
-	FindByID(id uint) (*Article, error)                        // 根據 ID 查詢
-	FindByAuthor(authorID uint) ([]*Article, error)            // 查詢作者的所有文章
+	FindByID(id uint) (*Article, error)                          // 根據 ID 查詢
+	FindByAuthor(authorID uint) ([]*Article, error)              // 查詢作者的所有文章
 	FindPublished(page, pageSize int) ([]*Article, int64, error) // 查詢已發布的文章（分頁）
-	Create(input CreateArticleInput) (*Article, error)         // 建立文章
-	Update(id uint, input UpdateArticleInput) (*Article, error) // 更新文章
-	Delete(id uint) error                                      // 刪除文章
+	Create(input CreateArticleInput) (*Article, error)           // 建立文章
+	Update(id uint, input UpdateArticleInput) (*Article, error)  // 更新文章
+	Delete(id uint) error                                        // 刪除文章
 }
 
 // ArticleUsecase 文章業務邏輯介面
 // Handler 透過這個介面呼叫業務邏輯，不管背後的實作
 type ArticleUsecase interface {
-	GetArticle(id uint) (*Article, error)                               // 取得單篇文章
-	ListPublished(page, pageSize int) ([]*Article, int64, error)        // 取得已發布文章列表
-	CreateArticle(authorID uint, input CreateArticleInput) (*Article, error) // 建立文章
+	GetArticle(id uint) (*Article, error)                                        // 取得單篇文章
+	ListPublished(page, pageSize int) ([]*Article, int64, error)                 // 取得已發布文章列表
+	CreateArticle(authorID uint, input CreateArticleInput) (*Article, error)     // 建立文章
 	UpdateArticle(id, authorID uint, input UpdateArticleInput) (*Article, error) // 更新文章
-	DeleteArticle(id, authorID uint) error                              // 刪除文章
+	DeleteArticle(id, authorID uint) error                                       // 刪除文章
 }
 
 // ==========================================================================
@@ -159,14 +159,14 @@ type ArticleUsecase interface {
 // ArticleModel GORM 用的資料庫模型（跟 Domain 的 Article 分開，避免污染）
 // 為什麼要分開？因為 GORM tag 是基礎設施細節，不應該出現在 Domain 層
 type ArticleModel struct {
-	ID        uint           `gorm:"primaryKey"`              // 主鍵
-	Title     string         `gorm:"size:200;not null;index"` // 標題（加索引）
-	Content   string         `gorm:"type:text"`               // 內容
-	AuthorID  uint           `gorm:"not null;index"`          // 作者 ID（加索引）
+	ID        uint           `gorm:"primaryKey"`                    // 主鍵
+	Title     string         `gorm:"size:200;not null;index"`       // 標題（加索引）
+	Content   string         `gorm:"type:text"`                     // 內容
+	AuthorID  uint           `gorm:"not null;index"`                // 作者 ID（加索引）
 	Status    string         `gorm:"size:20;default:'draft';index"` // 狀態（加索引）
-	CreatedAt time.Time      `gorm:"index"`                   // 建立時間
-	UpdatedAt time.Time                                       // 更新時間
-	DeletedAt gorm.DeletedAt `gorm:"index"`                   // 軟刪除（GORM 內建）
+	CreatedAt time.Time      `gorm:"index"`                         // 建立時間
+	UpdatedAt time.Time      // 更新時間
+	DeletedAt gorm.DeletedAt `gorm:"index"` // 軟刪除（GORM 內建）
 }
 
 // TableName 讓 GORM 知道這個模型對應的表名
@@ -198,10 +198,10 @@ func NewGormArticleRepository(db *gorm.DB, logger *zap.Logger) ArticleRepository
 
 // FindByID 根據 ID 查詢文章
 func (r *GormArticleRepository) FindByID(id uint) (*Article, error) {
-	var model ArticleModel                                // 建立空的 Model
+	var model ArticleModel                               // 建立空的 Model
 	result := r.db.First(&model, id)                     // 查詢（自動加 WHERE id = ?）
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) { // 如果找不到
-		return nil, ErrArticleNotFound                   // 回傳領域錯誤
+		return nil, ErrArticleNotFound // 回傳領域錯誤
 	}
 	if result.Error != nil { // 其他 DB 錯誤
 		r.logger.Error("查詢文章失敗", zap.Uint("id", id), zap.Error(result.Error))
@@ -212,15 +212,15 @@ func (r *GormArticleRepository) FindByID(id uint) (*Article, error) {
 
 // FindByAuthor 查詢作者的所有文章
 func (r *GormArticleRepository) FindByAuthor(authorID uint) ([]*Article, error) {
-	var models []ArticleModel                           // 建立空的 Model slice
-	result := r.db.Where("author_id = ?", authorID).   // 條件：作者 ID
-		Order("created_at desc").                        // 最新的排前面
-		Find(&models)                                    // 執行查詢
-	if result.Error != nil {                             // 如果查詢失敗
-		return nil, result.Error                         // 回傳錯誤
+	var models []ArticleModel                        // 建立空的 Model slice
+	result := r.db.Where("author_id = ?", authorID). // 條件：作者 ID
+								Order("created_at desc"). // 最新的排前面
+								Find(&models)             // 執行查詢
+	if result.Error != nil { // 如果查詢失敗
+		return nil, result.Error // 回傳錯誤
 	}
-	articles := make([]*Article, len(models))            // 建立結果 slice
-	for i, m := range models {                           // 遍歷並轉換
+	articles := make([]*Article, len(models)) // 建立結果 slice
+	for i, m := range models {                // 遍歷並轉換
 		articles[i] = m.toArticle()
 	}
 	return articles, nil // 回傳結果
@@ -233,13 +233,13 @@ func (r *GormArticleRepository) FindPublished(page, pageSize int) ([]*Article, i
 
 	query := r.db.Where("status = ?", "published") // 基礎條件
 
-	query.Model(&ArticleModel{}).Count(&total)      // 先計算總數（不限分頁）
+	query.Model(&ArticleModel{}).Count(&total) // 先計算總數（不限分頁）
 
 	result := query.
-		Order("created_at desc").                   // 最新的排前面
-		Offset((page - 1) * pageSize).              // 跳過幾筆
-		Limit(pageSize).                             // 每頁幾筆
-		Find(&models)                               // 執行查詢
+		Order("created_at desc").      // 最新的排前面
+		Offset((page - 1) * pageSize). // 跳過幾筆
+		Limit(pageSize).               // 每頁幾筆
+		Find(&models)                  // 執行查詢
 
 	if result.Error != nil { // 如果查詢失敗
 		return nil, 0, result.Error // 回傳錯誤
@@ -254,25 +254,25 @@ func (r *GormArticleRepository) FindPublished(page, pageSize int) ([]*Article, i
 
 // Create 建立文章
 func (r *GormArticleRepository) Create(input CreateArticleInput) (*Article, error) {
-	model := ArticleModel{       // 建立 Model
-		Title:    input.Title,   // 設定標題
-		Content:  input.Content, // 設定內容
+	model := ArticleModel{ // 建立 Model
+		Title:    input.Title,    // 設定標題
+		Content:  input.Content,  // 設定內容
 		AuthorID: input.AuthorID, // 設定作者
-		Status:   "draft",       // 預設草稿
+		Status:   "draft",        // 預設草稿
 	}
 	result := r.db.Create(&model) // 執行 INSERT
-	if result.Error != nil {       // 如果失敗
-		return nil, result.Error   // 回傳錯誤
+	if result.Error != nil {      // 如果失敗
+		return nil, result.Error // 回傳錯誤
 	}
 	return model.toArticle(), nil // 回傳新建的文章
 }
 
 // Update 更新文章
 func (r *GormArticleRepository) Update(id uint, input UpdateArticleInput) (*Article, error) {
-	var model ArticleModel                                // 建立空的 Model
+	var model ArticleModel                               // 建立空的 Model
 	if err := r.db.First(&model, id).Error; err != nil { // 先查詢
-		if errors.Is(err, gorm.ErrRecordNotFound) {      // 找不到
-			return nil, ErrArticleNotFound               // 回傳領域錯誤
+		if errors.Is(err, gorm.ErrRecordNotFound) { // 找不到
+			return nil, ErrArticleNotFound // 回傳領域錯誤
 		}
 		return nil, err // 其他錯誤
 	}
@@ -300,7 +300,7 @@ func (r *GormArticleRepository) Update(id uint, input UpdateArticleInput) (*Arti
 func (r *GormArticleRepository) Delete(id uint) error {
 	result := r.db.Delete(&ArticleModel{}, id) // 軟刪除（設定 deleted_at）
 	if result.RowsAffected == 0 {              // 沒有刪除任何東西
-		return ErrArticleNotFound              // 回傳領域錯誤
+		return ErrArticleNotFound // 回傳領域錯誤
 	}
 	return result.Error // 回傳錯誤（nil 代表成功）
 }
@@ -333,16 +333,16 @@ func NewArticleUsecase(repo ArticleRepository, logger *zap.Logger) ArticleUsecas
 // GetArticle 取得單篇文章（業務規則：任何人都可以看已發布的文章）
 func (u *articleUsecase) GetArticle(id uint) (*Article, error) {
 	u.logger.Info("取得文章", zap.Uint("id", id)) // 記錄日誌
-	return u.repo.FindByID(id)                   // 委託給 Repository
+	return u.repo.FindByID(id)                // 委託給 Repository
 }
 
 // ListPublished 取得已發布文章列表
 func (u *articleUsecase) ListPublished(page, pageSize int) ([]*Article, int64, error) {
-	if page < 1 {     // 頁數不能小於 1
-		page = 1       // 自動修正
+	if page < 1 { // 頁數不能小於 1
+		page = 1 // 自動修正
 	}
 	if pageSize < 1 || pageSize > 100 { // 每頁大小限制在 1-100
-		pageSize = 10  // 預設 10
+		pageSize = 10 // 預設 10
 	}
 	return u.repo.FindPublished(page, pageSize) // 委託給 Repository
 }
@@ -350,7 +350,7 @@ func (u *articleUsecase) ListPublished(page, pageSize int) ([]*Article, int64, e
 // CreateArticle 建立文章（業務規則：標題和內容不能為空）
 func (u *articleUsecase) CreateArticle(authorID uint, input CreateArticleInput) (*Article, error) {
 	// 業務驗證（這不是 HTTP 驗證，是業務規則）
-	if input.Title == "" {   // 標題不能為空
+	if input.Title == "" { // 標題不能為空
 		return nil, ErrTitleRequired // 回傳業務錯誤
 	}
 	if input.Content == "" { // 內容不能為空
@@ -360,15 +360,15 @@ func (u *articleUsecase) CreateArticle(authorID uint, input CreateArticleInput) 
 	input.AuthorID = authorID // 確保 AuthorID 是登入的使用者
 
 	article, err := u.repo.Create(input) // 呼叫 Repository 建立
-	if err != nil {                       // 如果失敗
-		u.logger.Error("建立文章失敗",     // 記錄錯誤日誌
+	if err != nil {                      // 如果失敗
+		u.logger.Error("建立文章失敗", // 記錄錯誤日誌
 			zap.Uint("author_id", authorID),
 			zap.Error(err),
 		)
 		return nil, err // 回傳錯誤
 	}
 
-	u.logger.Info("文章建立成功",          // 記錄成功日誌
+	u.logger.Info("文章建立成功", // 記錄成功日誌
 		zap.Uint("article_id", article.ID),
 		zap.Uint("author_id", authorID),
 	)
@@ -378,8 +378,8 @@ func (u *articleUsecase) CreateArticle(authorID uint, input CreateArticleInput) 
 // UpdateArticle 更新文章（業務規則：只有作者才能更新自己的文章）
 func (u *articleUsecase) UpdateArticle(id, authorID uint, input UpdateArticleInput) (*Article, error) {
 	existing, err := u.repo.FindByID(id) // 先查詢文章是否存在
-	if err != nil {                       // 如果查詢失敗
-		return nil, err                  // 回傳錯誤（可能是 ErrArticleNotFound）
+	if err != nil {                      // 如果查詢失敗
+		return nil, err // 回傳錯誤（可能是 ErrArticleNotFound）
 	}
 
 	// 業務規則：只有作者才能更新
@@ -393,7 +393,7 @@ func (u *articleUsecase) UpdateArticle(id, authorID uint, input UpdateArticleInp
 // DeleteArticle 刪除文章（業務規則：只有作者才能刪除自己的文章）
 func (u *articleUsecase) DeleteArticle(id, authorID uint) error {
 	existing, err := u.repo.FindByID(id) // 先查詢文章是否存在
-	if err != nil {                       // 如果查詢失敗
+	if err != nil {                      // 如果查詢失敗
 		return err // 回傳錯誤
 	}
 
@@ -433,15 +433,15 @@ func NewArticleHandler(usecase ArticleUsecase, logger *zap.Logger) *ArticleHandl
 // RegisterRoutes 把路由註冊到 Gin Router
 func (h *ArticleHandler) RegisterRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFunc) {
 	// 公開路由（不需要 JWT）
-	router.GET("/articles", h.ListArticles)       // 取得文章列表
-	router.GET("/articles/:id", h.GetArticle)     // 取得單篇文章
+	router.GET("/articles", h.ListArticles)   // 取得文章列表
+	router.GET("/articles/:id", h.GetArticle) // 取得單篇文章
 
 	// 需要認證的路由（需要 JWT）
-	auth := router.Group("/")            // 建立子路由組
-	auth.Use(authMiddleware)             // 套用 JWT 中介層
-	auth.POST("/articles", h.CreateArticle)           // 建立文章
-	auth.PUT("/articles/:id", h.UpdateArticle)         // 更新文章
-	auth.DELETE("/articles/:id", h.DeleteArticle)      // 刪除文章
+	auth := router.Group("/")                     // 建立子路由組
+	auth.Use(authMiddleware)                      // 套用 JWT 中介層
+	auth.POST("/articles", h.CreateArticle)       // 建立文章
+	auth.PUT("/articles/:id", h.UpdateArticle)    // 更新文章
+	auth.DELETE("/articles/:id", h.DeleteArticle) // 刪除文章
 }
 
 // articleResponse 文章的 JSON 回應格式
@@ -474,15 +474,15 @@ type errorResponse struct {
 // handleError 把 Domain 錯誤轉換成對應的 HTTP 狀態碼
 func handleError(c *gin.Context, err error) {
 	switch {
-	case errors.Is(err, ErrArticleNotFound):   // 找不到 → 404
+	case errors.Is(err, ErrArticleNotFound): // 找不到 → 404
 		c.JSON(http.StatusNotFound, errorResponse{Error: err.Error()})
-	case errors.Is(err, ErrArticleForbidden):  // 沒有權限 → 403
+	case errors.Is(err, ErrArticleForbidden): // 沒有權限 → 403
 		c.JSON(http.StatusForbidden, errorResponse{Error: err.Error()})
-	case errors.Is(err, ErrTitleRequired),     // 輸入錯誤 → 400
+	case errors.Is(err, ErrTitleRequired), // 輸入錯誤 → 400
 		errors.Is(err, ErrContentRequired),
 		errors.Is(err, ErrInvalidInput):
 		c.JSON(http.StatusBadRequest, errorResponse{Error: err.Error()})
-	default:                                   // 其他錯誤 → 500
+	default: // 其他錯誤 → 500
 		c.JSON(http.StatusInternalServerError, errorResponse{Error: "伺服器內部錯誤"})
 	}
 }
@@ -493,8 +493,8 @@ func (h *ArticleHandler) ListArticles(c *gin.Context) {
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10")) // 取得每頁大小
 
 	articles, total, err := h.usecase.ListPublished(page, pageSize) // 呼叫 Usecase
-	if err != nil {                                                   // 如果失敗
-		handleError(c, err)                                          // 轉換錯誤
+	if err != nil {                                                 // 如果失敗
+		handleError(c, err) // 轉換錯誤
 		return
 	}
 
@@ -504,24 +504,24 @@ func (h *ArticleHandler) ListArticles(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{ // 回傳 JSON
-		"data":      responses,    // 文章列表
-		"total":     total,        // 總數
-		"page":      page,         // 當前頁碼
-		"page_size": pageSize,     // 每頁大小
+		"data":      responses, // 文章列表
+		"total":     total,     // 總數
+		"page":      page,      // 當前頁碼
+		"page_size": pageSize,  // 每頁大小
 	})
 }
 
 // GetArticle GET /articles/:id
 func (h *ArticleHandler) GetArticle(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64) // 解析路徑參數
-	if err != nil {                                       // 如果 id 不是數字
+	if err != nil {                                     // 如果 id 不是數字
 		c.JSON(http.StatusBadRequest, errorResponse{Error: "無效的文章 ID"})
 		return
 	}
 
 	article, err := h.usecase.GetArticle(uint(id)) // 呼叫 Usecase
-	if err != nil {                                  // 如果失敗
-		handleError(c, err)                         // 轉換錯誤
+	if err != nil {                                // 如果失敗
+		handleError(c, err) // 轉換錯誤
 		return
 	}
 
@@ -536,7 +536,7 @@ type createArticleRequest struct {
 
 // CreateArticle POST /articles（需要 JWT）
 func (h *ArticleHandler) CreateArticle(c *gin.Context) {
-	var req createArticleRequest                  // 解析請求 body
+	var req createArticleRequest                   // 解析請求 body
 	if err := c.ShouldBindJSON(&req); err != nil { // 如果格式不對
 		c.JSON(http.StatusBadRequest, errorResponse{Error: "請提供 title 和 content"})
 		return
@@ -571,13 +571,13 @@ func (h *ArticleHandler) UpdateArticle(c *gin.Context) {
 		return
 	}
 
-	var req updateArticleRequest                          // 解析請求 body
+	var req updateArticleRequest // 解析請求 body
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse{Error: "請求格式錯誤"})
 		return
 	}
 
-	authorID := c.GetUint("user_id")                    // 從 JWT 取得使用者 ID
+	authorID := c.GetUint("user_id") // 從 JWT 取得使用者 ID
 
 	article, err := h.usecase.UpdateArticle(uint(id), authorID, UpdateArticleInput{
 		Title:   req.Title,
@@ -600,7 +600,7 @@ func (h *ArticleHandler) DeleteArticle(c *gin.Context) {
 		return
 	}
 
-	authorID := c.GetUint("user_id")           // 從 JWT 取得使用者 ID
+	authorID := c.GetUint("user_id") // 從 JWT 取得使用者 ID
 
 	if err := h.usecase.DeleteArticle(uint(id), authorID); err != nil {
 		handleError(c, err)
@@ -631,9 +631,9 @@ var jwtSecret = []byte(func() string {
 
 // Claims JWT Payload 結構
 type Claims struct {
-	UserID   uint   `json:"user_id"`  // 使用者 ID
-	Username string `json:"username"` // 使用者名稱
-	jwt.RegisteredClaims               // 標準欄位（exp、iat 等）
+	UserID               uint   `json:"user_id"`  // 使用者 ID
+	Username             string `json:"username"` // 使用者名稱
+	jwt.RegisteredClaims        // 標準欄位（exp、iat 等）
 }
 
 // GenerateToken 產生 JWT Token（測試和登入 API 用）
@@ -647,14 +647,14 @@ func GenerateToken(userID uint, username string) (string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims) // 建立 token
-	return token.SignedString(jwtSecret)                        // 簽名並回傳
+	return token.SignedString(jwtSecret)                       // 簽名並回傳
 }
 
 // JWTMiddleware JWT 認證中介層
 func JWTMiddleware(logger *zap.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization") // 取得 Authorization header
-		if authHeader == "" {                       // 如果沒有提供
+		if authHeader == "" {                      // 如果沒有提供
 			c.JSON(http.StatusUnauthorized, errorResponse{Error: "缺少 Authorization header"})
 			c.Abort() // 中止後續處理
 			return
@@ -669,7 +669,7 @@ func JWTMiddleware(logger *zap.Logger) gin.HandlerFunc {
 
 		tokenStr := authHeader[7:] // 取出 token 部分（去掉 "Bearer "）
 
-		claims := &Claims{}   // 準備接收 Claims
+		claims := &Claims{} // 準備接收 Claims
 		token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (any, error) {
 			return jwtSecret, nil // 回傳密鑰（用於驗證簽名）
 		})
@@ -682,9 +682,9 @@ func JWTMiddleware(logger *zap.Logger) gin.HandlerFunc {
 		}
 
 		// 把 user_id 存入 Gin context，Handler 可以用 c.GetUint("user_id") 取得
-		c.Set("user_id", claims.UserID)      // 使用者 ID
-		c.Set("username", claims.Username)   // 使用者名稱
-		c.Next()                             // 繼續下一個 handler
+		c.Set("user_id", claims.UserID)    // 使用者 ID
+		c.Set("username", claims.Username) // 使用者名稱
+		c.Next()                           // 繼續下一個 handler
 	}
 }
 
@@ -696,14 +696,14 @@ func LoggingMiddleware(logger *zap.Logger) gin.HandlerFunc {
 		c.Next() // 先執行後續 handler（洋蔥模型）
 
 		// handler 執行完成後記錄日誌
-		duration := time.Since(start)                    // 計算耗時
-		status := c.Writer.Status()                      // 取得狀態碼
-		logger.Info("HTTP 請求",                          // 記錄請求日誌
-			zap.String("method", c.Request.Method),     // HTTP 方法
-			zap.String("path", c.Request.URL.Path),     // 請求路徑
-			zap.Int("status", status),                  // 狀態碼
-			zap.Duration("duration", duration),          // 耗時
-			zap.String("ip", c.ClientIP()),             // 客戶端 IP
+		duration := time.Since(start) // 計算耗時
+		status := c.Writer.Status()   // 取得狀態碼
+		logger.Info("HTTP 請求",        // 記錄請求日誌
+			zap.String("method", c.Request.Method), // HTTP 方法
+			zap.String("path", c.Request.URL.Path), // 請求路徑
+			zap.Int("status", status),              // 狀態碼
+			zap.Duration("duration", duration),     // 耗時
+			zap.String("ip", c.ClientIP()),         // 客戶端 IP
 		)
 	}
 }
@@ -762,9 +762,9 @@ func main() { // 程式進入點
 	//      ↓
 	//   Router
 
-	articleRepo    := NewGormArticleRepository(db, zapLogger)       // Repository
-	articleUsecase := NewArticleUsecase(articleRepo, zapLogger)     // Usecase
-	articleHandler := NewArticleHandler(articleUsecase, zapLogger)  // Handler
+	articleRepo := NewGormArticleRepository(db, zapLogger)         // Repository
+	articleUsecase := NewArticleUsecase(articleRepo, zapLogger)    // Usecase
+	articleHandler := NewArticleHandler(articleUsecase, zapLogger) // Handler
 
 	zapLogger.Info("依賴注入完成",
 		zap.String("repository", "GormArticleRepository"),
@@ -781,12 +781,12 @@ func main() { // 程式進入點
 
 	// 套用中介層
 	router.Use(LoggingMiddleware(zapLogger)) // 請求日誌
-	router.Use(gin.Recovery())              // Panic 恢復
+	router.Use(gin.Recovery())               // Panic 恢復
 
 	// ──── Health Check 路由（不加版本號，K8s/Docker 直接探測）────
 	// 這些路由不應該有 /api/v1 前綴，因為 K8s 會直接呼叫 /healthz
-	router.GET("/healthz", healthzHandler)       // Liveness：我還活著嗎？
-	router.GET("/readyz", readyzHandler(db))     // Readiness：我準備好了嗎？
+	router.GET("/healthz", healthzHandler)   // Liveness：我還活著嗎？
+	router.GET("/readyz", readyzHandler(db)) // Readiness：我準備好了嗎？
 
 	// ──── API 版本控制 ────
 	//
@@ -811,7 +811,7 @@ func main() { // 程式進入點
 	// 實際上 v2 可以有不同的 Handler，這裡只示範版本控制的結構
 	apiV2 := router.Group("/api/v2")
 	apiV2.Use(func(c *gin.Context) {
-		c.Header("X-API-Version", "2")  // 在所有 v2 回應加上版本 header
+		c.Header("X-API-Version", "2") // 在所有 v2 回應加上版本 header
 		c.Next()
 	})
 	// v2 的文章列表（示範：回應格式略有不同，加了 api_version 欄位）
@@ -886,7 +886,7 @@ func main() { // 程式進入點
 	// 等待系統信號（SIGINT = Ctrl+C，SIGTERM = Docker/K8s 發的關閉信號）
 	quit := make(chan os.Signal, 1)                      // 建立信號接收 channel
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM) // 訂閱 SIGINT 和 SIGTERM
-	sig := <-quit                                         // 阻塞等待信號
+	sig := <-quit                                        // 阻塞等待信號
 	zapLogger.Info("收到關閉信號", zap.String("signal", sig.String()))
 
 	// 開始 Graceful Shutdown
@@ -929,8 +929,8 @@ var appReady = false // 預設未就緒，初始化完成後設為 true
 // 只要程式在跑就回 200
 func healthzHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"status":  "ok",                          // 存活狀態
-		"time":    time.Now().Format(time.RFC3339), // 目前時間
+		"status": "ok",                            // 存活狀態
+		"time":   time.Now().Format(time.RFC3339), // 目前時間
 	})
 }
 
@@ -948,7 +948,7 @@ func readyzHandler(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		// 檢查資料庫連線（ping DB）
-		sqlDB, err := db.DB()           // 取得底層的 *sql.DB
+		sqlDB, err := db.DB()                  // 取得底層的 *sql.DB
 		if err != nil || sqlDB.Ping() != nil { // 如果取得失敗或 Ping 失敗
 			c.JSON(http.StatusServiceUnavailable, gin.H{
 				"status": "not ready",
@@ -959,9 +959,9 @@ func readyzHandler(db *gorm.DB) gin.HandlerFunc {
 
 		// 所有依賴都正常
 		c.JSON(http.StatusOK, gin.H{
-			"status":    "ready",                       // 就緒狀態
-			"goroutines": runtime.NumGoroutine(),       // 目前 goroutine 數量
-			"time":      time.Now().Format(time.RFC3339),
+			"status":     "ready",                // 就緒狀態
+			"goroutines": runtime.NumGoroutine(), // 目前 goroutine 數量
+			"time":       time.Now().Format(time.RFC3339),
 		})
 	}
 }

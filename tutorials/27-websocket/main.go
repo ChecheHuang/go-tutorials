@@ -72,11 +72,11 @@ import (
 
 // Message 聊天訊息格式（傳輸用的結構）
 type Message struct {
-	Type      string    `json:"type"`       // 訊息類型：chat、join、leave、error
-	Username  string    `json:"username"`   // 發送者名稱
-	Content   string    `json:"content"`    // 訊息內容
-	Timestamp time.Time `json:"timestamp"`  // 發送時間
-	RoomID    string    `json:"room_id"`    // 聊天室 ID（支援多個聊天室）
+	Type      string    `json:"type"`      // 訊息類型：chat、join、leave、error
+	Username  string    `json:"username"`  // 發送者名稱
+	Content   string    `json:"content"`   // 訊息內容
+	Timestamp time.Time `json:"timestamp"` // 發送時間
+	RoomID    string    `json:"room_id"`   // 聊天室 ID（支援多個聊天室）
 }
 
 // ==========================================================================
@@ -85,11 +85,11 @@ type Message struct {
 
 // Client 代表一個連線的客戶端
 type Client struct {
-	hub      *Hub               // 所屬的 Hub（廣播中心）
-	conn     *websocket.Conn    // WebSocket 連線物件
-	send     chan []byte         // 發送緩衝 channel：要發給這個客戶端的訊息
-	username string             // 使用者名稱
-	roomID   string             // 所在聊天室
+	hub      *Hub            // 所屬的 Hub（廣播中心）
+	conn     *websocket.Conn // WebSocket 連線物件
+	send     chan []byte     // 發送緩衝 channel：要發給這個客戶端的訊息
+	username string          // 使用者名稱
+	roomID   string          // 所在聊天室
 }
 
 // readPump 負責從 WebSocket 讀取訊息（每個連線一個 goroutine）
@@ -97,9 +97,9 @@ type Client struct {
 // 這個函式會一直阻塞，持續讀取客戶端發來的訊息
 // 當連線斷開時，會清理資源並通知 Hub
 func (c *Client) readPump() { // 從 WebSocket 讀取訊息
-	defer func() {                          // 函式結束時執行清理
-		c.hub.unregister <- c               // 通知 Hub：這個客戶端斷線了
-		c.conn.Close()                      // 關閉 WebSocket 連線
+	defer func() { // 函式結束時執行清理
+		c.hub.unregister <- c // 通知 Hub：這個客戶端斷線了
+		c.conn.Close()        // 關閉 WebSocket 連線
 	}()
 
 	// 設定讀取大小上限（防止惡意客戶端傳送超大訊息）
@@ -114,7 +114,7 @@ func (c *Client) readPump() { // 從 WebSocket 讀取訊息
 
 	for { // 無限迴圈：持續讀取訊息
 		_, rawMsg, err := c.conn.ReadMessage() // 讀取下一條訊息（阻塞直到有訊息）
-		if err != nil {                         // 如果讀取失敗（連線斷開）
+		if err != nil {                        // 如果讀取失敗（連線斷開）
 			if websocket.IsUnexpectedCloseError(err, // 非正常關閉才記錄錯誤
 				websocket.CloseGoingAway,
 				websocket.CloseAbnormalClosure) {
@@ -124,20 +124,20 @@ func (c *Client) readPump() { // 從 WebSocket 讀取訊息
 		}
 
 		// 解析 JSON 訊息
-		var msg Message                         // 儲存解析後的訊息
+		var msg Message                                      // 儲存解析後的訊息
 		if err := json.Unmarshal(rawMsg, &msg); err != nil { // 解析 JSON
 			log.Printf("JSON 解析失敗 [%s]: %v", c.username, err) // 印出錯誤
-			continue                            // 繼續讀下一條
+			continue                                          // 繼續讀下一條
 		}
 
 		// 補充訊息元資料（服務端添加，客戶端無法偽造）
-		msg.Username = c.username               // 使用者名稱由伺服器設定
-		msg.Timestamp = time.Now()              // 時間戳由伺服器設定
-		msg.RoomID = c.roomID                   // 聊天室 ID 由伺服器設定
+		msg.Username = c.username  // 使用者名稱由伺服器設定
+		msg.Timestamp = time.Now() // 時間戳由伺服器設定
+		msg.RoomID = c.roomID      // 聊天室 ID 由伺服器設定
 
 		// 把訊息轉回 JSON，送到 Hub 廣播
 		if jsonData, err := json.Marshal(msg); err == nil { // 轉回 JSON
-			c.hub.broadcast <- jsonData         // 送到 Hub 的廣播 channel
+			c.hub.broadcast <- jsonData // 送到 Hub 的廣播 channel
 		}
 	}
 }
@@ -148,35 +148,35 @@ func (c *Client) readPump() { // 從 WebSocket 讀取訊息
 // 同時負責發送 Ping（心跳），確認連線還活著
 func (c *Client) writePump() { // 把訊息寫入 WebSocket
 	ticker := time.NewTicker(30 * time.Second) // 每 30 秒發一次 Ping（心跳）
-	defer func() {                              // 函式結束時清理
-		ticker.Stop()   // 停止心跳計時器
-		c.conn.Close()  // 關閉連線
+	defer func() {                             // 函式結束時清理
+		ticker.Stop()  // 停止心跳計時器
+		c.conn.Close() // 關閉連線
 	}()
 
 	for { // 無限迴圈：持續等待要發送的訊息
 		select { // 同時監聽多個 channel
 		case message, ok := <-c.send: // 有訊息要發送
 			c.conn.SetWriteDeadline(time.Now().Add(10 * time.Second)) // 10 秒寫入超時
-			if !ok {                          // send channel 已關閉（Hub 要求斷線）
+			if !ok {                                                  // send channel 已關閉（Hub 要求斷線）
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{}) // 發送關閉訊號
-				return                        // 退出
+				return                                                // 退出
 			}
 
 			w, err := c.conn.NextWriter(websocket.TextMessage) // 取得寫入器
-			if err != nil {                   // 如果無法寫入
-				return                        // 退出（readPump 會做清理）
+			if err != nil {                                    // 如果無法寫入
+				return // 退出（readPump 會做清理）
 			}
-			w.Write(message)                  // 寫入訊息
+			w.Write(message) // 寫入訊息
 
 			// 把 send channel 裡積累的訊息一次全部寫入（減少系統呼叫次數）
-			n := len(c.send)                  // 還有幾條待發訊息
-			for i := 0; i < n; i++ {          // 逐一取出
-				w.Write([]byte{'\n'})         // 訊息之間加換行
-				w.Write(<-c.send)             // 寫入下一條
+			n := len(c.send)         // 還有幾條待發訊息
+			for i := 0; i < n; i++ { // 逐一取出
+				w.Write([]byte{'\n'}) // 訊息之間加換行
+				w.Write(<-c.send)     // 寫入下一條
 			}
 
 			if err := w.Close(); err != nil { // 關閉寫入器（確保訊息被送出）
-				return                        // 退出
+				return // 退出
 			}
 
 		case <-ticker.C: // 每 30 秒發一次 Ping（心跳機制）
@@ -210,9 +210,9 @@ func (c *Client) writePump() { // 把訊息寫入 WebSocket
 // Hub 管理所有 WebSocket 連線的廣播中心
 type Hub struct {
 	clients    map[*Client]bool // 所有連線中的客戶端（用 map 方便 O(1) 刪除）
-	broadcast  chan []byte       // 廣播 channel：收到訊息後發給所有人
-	register   chan *Client      // 註冊 channel：新客戶端連線
-	unregister chan *Client      // 登出 channel：客戶端斷線
+	broadcast  chan []byte      // 廣播 channel：收到訊息後發給所有人
+	register   chan *Client     // 註冊 channel：新客戶端連線
+	unregister chan *Client     // 登出 channel：客戶端斷線
 	mu         sync.RWMutex     // 保護 clients 的讀寫（在 Hub 外讀取時用）
 }
 
@@ -229,22 +229,23 @@ func newHub() *Hub { // 建立 Hub
 // run 啟動 Hub（在獨立的 goroutine 中執行）
 //
 // 這個函式是 Hub 的核心：
-//   用 select 同時監聽 register、unregister、broadcast 三個 channel
-//   一次只做一件事（單執行緒），所以不需要 Mutex
+//
+//	用 select 同時監聽 register、unregister、broadcast 三個 channel
+//	一次只做一件事（單執行緒），所以不需要 Mutex
 func (h *Hub) run() { // 啟動 Hub
 	for { // 無限迴圈：持續處理事件
 		select { // 同時監聽三個 channel
 
 		case client := <-h.register: // 有新客戶端連線
-			h.clients[client] = true  // 加入客戶端 map
+			h.clients[client] = true // 加入客戶端 map
 			log.Printf("✅ 新客戶端連線: %s（目前 %d 人）", client.username, len(h.clients))
 
 			// 廣播「有人加入」的通知
 			joinMsg, _ := json.Marshal(Message{
 				Type:      "join",                                    // 訊息類型
-				Username:  "系統",                                     // 發送者
+				Username:  "系統",                                      // 發送者
 				Content:   fmt.Sprintf("%s 加入了聊天室", client.username), // 內容
-				Timestamp: time.Now(),                                 // 時間
+				Timestamp: time.Now(),                                // 時間
 			})
 			h.broadcastToAll(joinMsg) // 廣播給所有人
 
@@ -318,28 +319,28 @@ var upgrader = websocket.Upgrader{
 func wsHandler(hub *Hub, w http.ResponseWriter, r *http.Request) { // WebSocket 處理器
 	// 從 URL 查詢參數取得使用者名稱和聊天室
 	username := r.URL.Query().Get("username") // 例：?username=Alice
-	if username == "" {                        // 如果沒有提供名稱
+	if username == "" {                       // 如果沒有提供名稱
 		username = fmt.Sprintf("匿名用戶%d", time.Now().UnixMilli()%1000) // 產生隨機名稱
 	}
-	roomID := r.URL.Query().Get("room")   // 例：?room=general
-	if roomID == "" {                      // 如果沒有指定聊天室
-		roomID = "general"                 // 預設聊天室
+	roomID := r.URL.Query().Get("room") // 例：?room=general
+	if roomID == "" {                   // 如果沒有指定聊天室
+		roomID = "general" // 預設聊天室
 	}
 
 	// 把 HTTP 連線升級成 WebSocket 連線
 	conn, err := upgrader.Upgrade(w, r, nil) // 升級（nil = 不加額外 header）
-	if err != nil {                           // 如果升級失敗
+	if err != nil {                          // 如果升級失敗
 		log.Printf("WebSocket 升級失敗: %v", err) // 印出錯誤
-		return                                   // 提前返回
+		return                                // 提前返回
 	}
 
 	// 建立 Client 物件
 	client := &Client{
-		hub:      hub,                          // 關聯到 Hub
-		conn:     conn,                         // WebSocket 連線
-		send:     make(chan []byte, 256),        // 發送 channel（有緩衝）
-		username: username,                     // 使用者名稱
-		roomID:   roomID,                       // 聊天室
+		hub:      hub,                    // 關聯到 Hub
+		conn:     conn,                   // WebSocket 連線
+		send:     make(chan []byte, 256), // 發送 channel（有緩衝）
+		username: username,               // 使用者名稱
+		roomID:   roomID,                 // 聊天室
 	}
 
 	// 把新客戶端註冊到 Hub
@@ -357,7 +358,7 @@ func wsHandler(hub *Hub, w http.ResponseWriter, r *http.Request) { // WebSocket 
 func statusHandler(hub *Hub, w http.ResponseWriter, r *http.Request) { // 狀態 API
 	w.Header().Set("Content-Type", "application/json") // 設定回應格式
 	fmt.Fprintf(w, `{"status":"ok","clients":%d,"time":"%s"}`,
-		hub.ClientCount(),              // 目前連線人數
+		hub.ClientCount(),               // 目前連線人數
 		time.Now().Format(time.RFC3339), // 目前時間
 	)
 }
@@ -365,7 +366,7 @@ func statusHandler(hub *Hub, w http.ResponseWriter, r *http.Request) { // 狀態
 // homeHandler 回傳 HTML 聊天室頁面（內嵌在 Go 程式中）
 func homeHandler(w http.ResponseWriter, r *http.Request) { // 首頁 HTML
 	w.Header().Set("Content-Type", "text/html; charset=utf-8") // 設定 HTML 格式
-	fmt.Fprint(w, chatHTML)                                     // 輸出 HTML 頁面
+	fmt.Fprint(w, chatHTML)                                    // 輸出 HTML 頁面
 }
 
 // ==========================================================================
@@ -519,7 +520,7 @@ const chatHTML = `<!DOCTYPE html>
 
 func main() { // 程式進入點
 	fmt.Println("==========================================") // 分隔線
-	fmt.Println(" 第二十三課：WebSocket 即時通訊")          // 標題
+	fmt.Println(" 第二十三課：WebSocket 即時通訊")                      // 標題
 	fmt.Println("==========================================") // 分隔線
 
 	// 建立 Hub（廣播中心）
@@ -541,7 +542,7 @@ func main() { // 程式進入點
 	})
 
 	// 啟動 HTTP 伺服器
-	addr := ":8080"                        // 監聽 8080 埠
+	addr := ":8080"                                  // 監聽 8080 埠
 	fmt.Printf("🚀 伺服器啟動：http://localhost%s\n", addr) // 印出啟動訊息
 	fmt.Println()
 	fmt.Println("使用方式：")

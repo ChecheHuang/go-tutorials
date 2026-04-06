@@ -44,9 +44,9 @@ import (
 
 // ExternalService 模擬不穩定的外部服務（例如第三方 API）
 type ExternalService struct {
-	failRate   float64 // 失敗率（0.0 ~ 1.0）
-	latency    time.Duration
-	callCount  int
+	failRate  float64 // 失敗率（0.0 ~ 1.0）
+	latency   time.Duration
+	callCount int
 }
 
 var ErrServiceUnavailable = errors.New("服務不可用")
@@ -72,7 +72,7 @@ func newCircuitBreaker(name string) *gobreaker.CircuitBreaker[string] {
 		Name: name, // 熔斷器名稱（用於日誌和監控）
 
 		// 觸發 Open 的條件（Closed 狀態下）
-		MaxRequests: 3, // Half-Open 時允許通過的最大請求數
+		MaxRequests: 3,                // Half-Open 時允許通過的最大請求數
 		Interval:    10 * time.Second, // 統計週期（這段時間內的失敗率）
 		Timeout:     5 * time.Second,  // Open → Half-Open 的等待時間
 

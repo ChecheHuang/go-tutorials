@@ -89,8 +89,8 @@ func main() {
 	// --- 形式 2：類似 while（只有條件）---
 	// 「只要 count < 5，就繼續」
 	fmt.Print("while 風格: ")
-	count := 0        // 初始化放在外面
-	for count < 5 {   // 只寫條件
+	count := 0      // 初始化放在外面
+	for count < 5 { // 只寫條件
 		fmt.Print(count, " ") // 印出：0 1 2 3 4
 		count++               // 自己手動加 1
 	}
@@ -102,8 +102,8 @@ func main() {
 	fmt.Print("無限迴圈 + break: ")
 	n := 0
 	for { // 無限迴圈開始
-		if n >= 5 {   // 當 n >= 5 時⋯
-			break     // ← break = 「立刻跳出整個迴圈」
+		if n >= 5 { // 當 n >= 5 時⋯
+			break // ← break = 「立刻跳出整個迴圈」
 		}
 		fmt.Print(n, " ") // 印出：0 1 2 3 4
 		n++
@@ -113,8 +113,8 @@ func main() {
 	// --- continue：跳過這一次，直接進入下一次 ---
 	fmt.Print("跳過偶數（只印奇數）: ")
 	for i := 0; i < 10; i++ {
-		if i%2 == 0 {  // 如果 i 是偶數（除以 2 餘數為 0）
-			continue   // ← continue = 「跳過下面的程式碼，直接進入下一次迴圈」
+		if i%2 == 0 { // 如果 i 是偶數（除以 2 餘數為 0）
+			continue // ← continue = 「跳過下面的程式碼，直接進入下一次迴圈」
 		}
 		fmt.Print(i, " ") // 只有奇數會執行到這裡：1 3 5 7 9
 	}

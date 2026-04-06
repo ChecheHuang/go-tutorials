@@ -33,14 +33,14 @@
 package main // 宣告這是 main 套件
 
 import (
-	"fmt"    // 格式化輸出
-	"log"    // 日誌輸出
-	"time"   // 時間
+	"fmt"  // 格式化輸出
+	"log"  // 日誌輸出
+	"time" // 時間
 
-	"github.com/glebarez/sqlite"  // SQLite 驅動
-	"go.uber.org/zap"             // 結構化日誌
-	"gorm.io/gorm"                // ORM
-	"gorm.io/gorm/logger"         // GORM 日誌
+	"github.com/glebarez/sqlite" // SQLite 驅動
+	"go.uber.org/zap"            // 結構化日誌
+	"gorm.io/gorm"               // ORM
+	"gorm.io/gorm/logger"        // GORM 日誌
 )
 
 // ==========================================================================

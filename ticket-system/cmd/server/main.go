@@ -1,11 +1,12 @@
 // 搶票系統 — 高併發教學專案
 //
 // 展示技術：Goroutine、WebSocket、gRPC、Wire DI、Generics、
-//           Message Queue、Circuit Breaker、OpenTelemetry、CQRS
+//
+//	Message Queue、Circuit Breaker、OpenTelemetry、CQRS
 //
 // 啟動方式：
-//   1. 先啟動 Redis：docker run -p 6379:6379 redis:7-alpine
-//   2. cd ticket-system && go run ./cmd/server/
+//  1. 先啟動 Redis：docker run -p 6379:6379 redis:7-alpine
+//  2. cd ticket-system && go run ./cmd/server/
 package main
 
 import (

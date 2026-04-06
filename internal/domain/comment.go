@@ -10,9 +10,9 @@ import (
 type Comment struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
 	Content   string         `json:"content" gorm:"type:text;not null"`
-	ArticleID uint           `json:"article_id" gorm:"index;not null"`  // 所屬文章 ID（外鍵）
-	UserID    uint           `json:"user_id" gorm:"index;not null"`     // 留言者 ID（外鍵）
-	User      User           `json:"user" gorm:"foreignKey:UserID"`     // 關聯的使用者資料
+	ArticleID uint           `json:"article_id" gorm:"index;not null"` // 所屬文章 ID（外鍵）
+	UserID    uint           `json:"user_id" gorm:"index;not null"`    // 留言者 ID（外鍵）
+	User      User           `json:"user" gorm:"foreignKey:UserID"`    // 關聯的使用者資料
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at,omitempty" gorm:"index"` // 軟刪除

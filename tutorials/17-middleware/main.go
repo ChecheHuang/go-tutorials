@@ -21,11 +21,11 @@
 
 package main // 宣告這是 main 套件（可執行程式）
 
-import (          // 匯入需要的套件
-	"fmt"         // 標準庫：格式化輸出
-	"log"         // 標準庫：日誌記錄（帶時間戳）
-	"net/http"    // 標準庫：HTTP 狀態碼常數
-	"time"        // 標準庫：時間相關功能
+import ( // 匯入需要的套件
+	"fmt"      // 標準庫：格式化輸出
+	"log"      // 標準庫：日誌記錄（帶時間戳）
+	"net/http" // 標準庫：HTTP 狀態碼常數
+	"time"     // 標準庫：時間相關功能
 
 	"github.com/gin-gonic/gin" // 第三方套件：Gin Web 框架
 	// gin.HandlerFunc 型別就是 func(*gin.Context)
@@ -65,9 +65,9 @@ func LoggerMiddleware() gin.HandlerFunc { // 函式回傳型別是 gin.HandlerFu
 
 		// ===== c.Next() 之前：請求「進來」時執行 =====
 
-		start := time.Now()             // 記錄請求開始時間（用來計算耗時）
-		method := c.Request.Method      // 取得 HTTP 方法（GET、POST、PUT 等）
-		path := c.Request.URL.Path      // 取得請求路徑（如 /api/profile）
+		start := time.Now()        // 記錄請求開始時間（用來計算耗時）
+		method := c.Request.Method // 取得 HTTP 方法（GET、POST、PUT 等）
+		path := c.Request.URL.Path // 取得請求路徑（如 /api/profile）
 
 		log.Printf("[開始] %s %s", method, path) // 印出請求開始的日誌
 
@@ -182,7 +182,7 @@ func RecoveryMiddleware() gin.HandlerFunc { // 回傳 gin.HandlerFunc
 		// 包括正常離開和 panic 離開都會執行
 		defer func() { // 延遲執行的匿名函式
 			if err := recover(); err != nil { // recover() 接住 panic，如果有 panic 就回傳它的值
-				log.Printf("[PANIC] %v", err)             // 把 panic 的內容印到日誌
+				log.Printf("[PANIC] %v", err)                 // 把 panic 的內容印到日誌
 				c.JSON(http.StatusInternalServerError, gin.H{ // 回傳 500 Internal Server Error
 					"error": "伺服器內部錯誤", // 對外只說「內部錯誤」，不洩漏細節
 				})
@@ -266,16 +266,16 @@ func main() { // 程式進入點
 	// r.Group 建立路由群組，群組內的路由都有相同的前綴
 	// 群組中介層只對「這個群組」的路由生效
 
-	api := r.Group("/api")       // 建立 /api 路由群組
-	api.Use(AuthMiddleware())    // 只對 /api 群組的路由做身份驗證
-	{                            // 大括號只是視覺分組，不是語法要求
+	api := r.Group("/api")    // 建立 /api 路由群組
+	api.Use(AuthMiddleware()) // 只對 /api 群組的路由做身份驗證
+	{                         // 大括號只是視覺分組，不是語法要求
 		api.GET("/profile", func(c *gin.Context) { // 定義 GET /api/profile
 			// c.Get 從 Context 取出先前 c.Set 存入的值
 			// AuthMiddleware 在驗證通過後把 "user" 存入 Context
-			user, _ := c.Get("user") // 取出使用者資訊（_ 忽略第二個回傳值 exists）
+			user, _ := c.Get("user")     // 取出使用者資訊（_ 忽略第二個回傳值 exists）
 			c.JSON(http.StatusOK, gin.H{ // 回傳 200 OK
-				"message": "這是受保護的路由",  // 說明這是受保護的
-				"user":    user,             // 把使用者資訊一起回傳
+				"message": "這是受保護的路由", // 說明這是受保護的
+				"user":    user,       // 把使用者資訊一起回傳
 			})
 		})
 
@@ -290,8 +290,8 @@ func main() { // 程式進入點
 	// 帶限流的路由群組：限制請求次數
 	// ========================================
 
-	limited := r.Group("/limited")   // 建立 /limited 路由群組
-	limited.Use(RateLimiter(3))      // 這個群組最多只允許 3 次請求
+	limited := r.Group("/limited") // 建立 /limited 路由群組
+	limited.Use(RateLimiter(3))    // 這個群組最多只允許 3 次請求
 	{
 		limited.GET("/resource", func(c *gin.Context) { // 定義 GET /limited/resource
 			c.JSON(http.StatusOK, gin.H{"message": "限流資源"}) // 在限流內的回應
@@ -311,15 +311,15 @@ func main() { // 程式進入點
 	// ========================================
 
 	fmt.Println("伺服器啟動於 http://localhost:9090") // 印出伺服器位址
-	fmt.Println()                                     // 空行
-	fmt.Println("測試指令：")                          // 印出測試說明
+	fmt.Println()                               // 空行
+	fmt.Println("測試指令：")                        // 印出測試說明
 
 	// 以下是 curl 指令，可以在終端機測試各個路由
-	fmt.Println("  公開路由: curl http://localhost:9090/")                                              // 不需要 Key
-	fmt.Println("  無 Key:   curl http://localhost:9090/api/profile")                                  // 回傳 401
-	fmt.Println("  有 Key:   curl -H 'X-API-Key: my-secret-key' http://localhost:9090/api/profile")   // 回傳 200
-	fmt.Println("  Panic:    curl http://localhost:9090/panic")                                        // 測試 Recovery
-	fmt.Println("  限流:     重複執行 curl http://localhost:9090/limited/resource 超過 3 次")           // 測試 RateLimiter
+	fmt.Println("  公開路由: curl http://localhost:9090/")                                             // 不需要 Key
+	fmt.Println("  無 Key:   curl http://localhost:9090/api/profile")                               // 回傳 401
+	fmt.Println("  有 Key:   curl -H 'X-API-Key: my-secret-key' http://localhost:9090/api/profile") // 回傳 200
+	fmt.Println("  Panic:    curl http://localhost:9090/panic")                                    // 測試 Recovery
+	fmt.Println("  限流:     重複執行 curl http://localhost:9090/limited/resource 超過 3 次")               // 測試 RateLimiter
 
 	r.Run(":9090") // 啟動伺服器，監聽 9090 埠（注意：會一直執行，直到按 Ctrl+C）
 }

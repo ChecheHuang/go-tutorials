@@ -15,7 +15,7 @@ import (
 func NewBreaker[T any](name string, maxFailures uint32, timeout time.Duration) *gobreaker.CircuitBreaker[T] {
 	settings := gobreaker.Settings{
 		Name:        name,
-		MaxRequests: 3,       // Half-Open 狀態下最多允許幾個請求通過
+		MaxRequests: 3, // Half-Open 狀態下最多允許幾個請求通過
 		Interval:    30 * time.Second,
 		Timeout:     timeout, // Open → Half-Open 的等待時間
 		ReadyToTrip: func(counts gobreaker.Counts) bool {

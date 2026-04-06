@@ -51,7 +51,7 @@ import (
 // Labels（標籤）讓你可以按維度過濾：method="GET", path="/api/posts", status="200"
 var httpRequestsTotal = prometheus.NewCounterVec(
 	prometheus.CounterOpts{
-		Name: "http_requests_total",        // Metric 名稱（慣例：小寫、底線分隔）
+		Name: "http_requests_total",    // Metric 名稱（慣例：小寫、底線分隔）
 		Help: "HTTP 請求總數，按方法、路徑、狀態碼分類", // 說明文字（在 /metrics 顯示）
 	},
 	[]string{"method", "path", "status"}, // Label 名稱
@@ -139,7 +139,7 @@ func metricsMiddleware(next http.HandlerFunc, path string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now() // 記錄開始時間
 
-		activeConnections.Inc() // Gauge +1（新連線進來）
+		activeConnections.Inc()       // Gauge +1（新連線進來）
 		defer activeConnections.Dec() // Gauge -1（請求結束，defer 確保一定執行）
 
 		// 包裝 ResponseWriter 以攔截狀態碼

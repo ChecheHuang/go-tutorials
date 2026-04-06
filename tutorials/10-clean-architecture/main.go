@@ -56,7 +56,7 @@
 // ╚══════════════════════════════════════════════════════════════════════╝
 package main // 宣告這是主程式套件，Go 程式的進入點
 
-import (            // 匯入需要的標準函式庫
+import ( // 匯入需要的標準函式庫
 	"errors"  // errors 套件：用來建立和處理錯誤
 	"fmt"     // fmt 套件：用來格式化輸出文字到終端機
 	"strings" // strings 套件：用來處理字串操作（如去空白）
@@ -89,7 +89,7 @@ import (            // 匯入需要的標準函式庫
 // Todo 是業務實體（Entity）— 描述「一個待辦事項是什麼」
 // 就像食譜中定義「紅燒肉有哪些成分」
 // 它只描述資料的結構，不關心怎麼儲存、怎麼傳輸
-type Todo struct {       // 定義一個名為 Todo 的結構體（struct）
+type Todo struct { // 定義一個名為 Todo 的結構體（struct）
 	ID        int       // ID 欄位：待辦事項的唯一識別碼，型別是整數
 	Title     string    // Title 欄位：待辦事項的標題，型別是字串
 	Completed bool      // Completed 欄位：是否已完成，型別是布林值（true/false）
@@ -104,16 +104,17 @@ type Todo struct {       // 定義一個名為 Todo 的結構體（struct）
 // 不管你用哪個牌子的冰箱，只要能做到這些事就行
 //
 // Domain 層說：「我不管你用什麼資料庫（MySQL、SQLite、記憶體...），
-//              但你必須提供以下這五個方法」
+//
+//	但你必須提供以下這五個方法」
 //
 // 這就是「依賴反轉」— 不是高層去依賴低層的具體實作，
 // 而是高層定義介面，低層來滿足這個介面
 type TodoRepository interface { // 定義 TodoRepository 介面
-	Create(todo *Todo) error            // 建立一筆待辦事項，失敗回傳 error
-	FindByID(id int) (*Todo, error)     // 根據 ID 查找，回傳指標和可能的錯誤
+	Create(todo *Todo) error                 // 建立一筆待辦事項，失敗回傳 error
+	FindByID(id int) (*Todo, error)          // 根據 ID 查找，回傳指標和可能的錯誤
 	FindByUserID(userID int) ([]Todo, error) // 根據使用者 ID 查找所有待辦事項
-	Update(todo *Todo) error            // 更新一筆待辦事項
-	Delete(id int) error                // 根據 ID 刪除一筆待辦事項
+	Update(todo *Todo) error                 // 更新一筆待辦事項
+	Delete(id int) error                     // 根據 ID 刪除一筆待辦事項
 }
 
 // ====================================================================
@@ -144,16 +145,16 @@ type TodoRepository interface { // 定義 TodoRepository 介面
 // TodoUsecase 定義業務邏輯的介面
 // 外層（Handler）會依賴這個介面，而不是具體的 struct
 type TodoUsecase interface { // 定義 Usecase 的介面
-	CreateTodo(userID int, title string) (*Todo, error)   // 建立待辦事項的業務邏輯
-	GetUserTodos(userID int) ([]Todo, error)              // 取得使用者所有待辦事項
-	CompleteTodo(id, userID int) (*Todo, error)           // 完成一個待辦事項
-	DeleteTodo(id, userID int) error                      // 刪除一個待辦事項
+	CreateTodo(userID int, title string) (*Todo, error) // 建立待辦事項的業務邏輯
+	GetUserTodos(userID int) ([]Todo, error)            // 取得使用者所有待辦事項
+	CompleteTodo(id, userID int) (*Todo, error)         // 完成一個待辦事項
+	DeleteTodo(id, userID int) error                    // 刪除一個待辦事項
 }
 
 // todoUsecase 是 TodoUsecase 介面的「具體實作」
 // 注意：名稱小寫開頭（todoUsecase），表示這是私有的，外部套件看不到
 // 外部只能透過 TodoUsecase 介面來使用它
-type todoUsecase struct {            // 定義 Usecase 的結構體
+type todoUsecase struct { // 定義 Usecase 的結構體
 	repo TodoRepository // ★ 依賴的是「介面」，不是具體實作
 	// 這就像廚師說「我需要一台冰箱」，而不是「我需要一台 LG 冰箱」
 	// 所以不管你給他什麼牌子的冰箱（什麼資料庫），廚師都能工作
@@ -196,11 +197,11 @@ func (u *todoUsecase) CreateTodo(userID int, title string) (*Todo, error) {
 	}
 
 	// 建立業務實體（準備食材）
-	todo := &Todo{            // 建立一個 Todo 指標
-		Title:     title,       // 設定標題
-		Completed: false,       // 新建的待辦事項預設為未完成
-		UserID:    userID,      // 記錄是哪個使用者建立的
-		CreatedAt: time.Now(),  // 記錄建立時間為「現在」
+	todo := &Todo{ // 建立一個 Todo 指標
+		Title:     title,      // 設定標題
+		Completed: false,      // 新建的待辦事項預設為未完成
+		UserID:    userID,     // 記錄是哪個使用者建立的
+		CreatedAt: time.Now(), // 記錄建立時間為「現在」
 	}
 
 	// 呼叫 Repository 儲存（叫冰箱幫忙存食材）
@@ -224,7 +225,7 @@ func (u *todoUsecase) GetUserTodos(userID int) ([]Todo, error) {
 func (u *todoUsecase) CompleteTodo(id, userID int) (*Todo, error) {
 	// 第一步：從 Repository 取得這個待辦事項
 	todo, err := u.repo.FindByID(id) // 根據 ID 查找
-	if err != nil {                   // 如果查找失敗（不存在）
+	if err != nil {                  // 如果查找失敗（不存在）
 		return nil, errors.New("待辦事項不存在") // 回傳友善的錯誤訊息
 	}
 
@@ -256,7 +257,7 @@ func (u *todoUsecase) CompleteTodo(id, userID int) (*Todo, error) {
 func (u *todoUsecase) DeleteTodo(id, userID int) error {
 	// 先查找待辦事項是否存在
 	todo, err := u.repo.FindByID(id) // 根據 ID 查找
-	if err != nil {                   // 如果不存在
+	if err != nil {                  // 如果不存在
 		return errors.New("待辦事項不存在") // 回傳錯誤
 	}
 
@@ -300,7 +301,7 @@ type memoryTodoRepository struct { // 定義記憶體版的 Repository 結構體
 // 回傳的是 TodoRepository「介面」型別，不是 *memoryTodoRepository
 // → 外部不需要知道具體是用記憶體實作的
 func NewMemoryTodoRepository() TodoRepository { // 回傳介面型別
-	return &memoryTodoRepository{      // 建立並回傳結構體的指標
+	return &memoryTodoRepository{ // 建立並回傳結構體的指標
 		todos:  make(map[int]*Todo), // 初始化一個空的 map
 		nextID: 1,                   // ID 從 1 開始
 	}
@@ -309,10 +310,10 @@ func NewMemoryTodoRepository() TodoRepository { // 回傳介面型別
 // Create 實作 TodoRepository 介面的 Create 方法
 // 把食材放進冰箱（把 Todo 存進 map）
 func (r *memoryTodoRepository) Create(todo *Todo) error {
-	todo.ID = r.nextID  // 給 Todo 一個唯一的 ID
-	r.nextID++          // 讓下一個 ID 加 1，確保不重複
+	todo.ID = r.nextID      // 給 Todo 一個唯一的 ID
+	r.nextID++              // 讓下一個 ID 加 1，確保不重複
 	r.todos[todo.ID] = todo // 把 Todo 存進 map 裡
-	return nil          // 回傳 nil 表示沒有錯誤
+	return nil              // 回傳 nil 表示沒有錯誤
 }
 
 // FindByID 實作 TodoRepository 介面的 FindByID 方法
@@ -328,7 +329,7 @@ func (r *memoryTodoRepository) FindByID(id int) (*Todo, error) {
 // FindByUserID 實作 TodoRepository 介面的 FindByUserID 方法
 // 從冰箱裡找出某個人的所有食材
 func (r *memoryTodoRepository) FindByUserID(userID int) ([]Todo, error) {
-	var result []Todo             // 宣告一個空的 Todo 切片來存結果
+	var result []Todo              // 宣告一個空的 Todo 切片來存結果
 	for _, todo := range r.todos { // 遍歷 map 中所有的 Todo
 		if todo.UserID == userID { // 如果這個 Todo 屬於指定的使用者
 			result = append(result, *todo) // 加入結果切片（*todo 取值，不是指標）
@@ -376,7 +377,7 @@ func (r *memoryTodoRepository) Delete(id int) error {
 
 // CLIHandler 用命令列介面模擬 HTTP Handler
 // 在真實專案中，這會是 Gin 的 HTTP Handler
-type CLIHandler struct {          // 定義 CLI Handler 結構體
+type CLIHandler struct { // 定義 CLI Handler 結構體
 	usecase TodoUsecase // ★ 依賴的是 Usecase「介面」，不是具體實作
 	// 服務生只需要知道「廚師會做菜」，不需要知道廚師是誰
 }
@@ -394,9 +395,9 @@ func (h *CLIHandler) HandleCreateTodo(userID int, title string) {
 
 	// 步驟 2：呼叫 Usecase 處理業務邏輯（把點餐交給廚師）
 	todo, err := h.usecase.CreateTodo(userID, title) // 委託給 Usecase
-	if err != nil {                                   // 如果業務邏輯回傳錯誤
+	if err != nil {                                  // 如果業務邏輯回傳錯誤
 		fmt.Printf("[錯誤] %s\n", err) // 顯示錯誤訊息（模擬回傳 HTTP 400）
-		return                         // 提早返回，不繼續執行
+		return                       // 提早返回，不繼續執行
 	}
 
 	// 步驟 3：顯示成功結果（模擬回傳 HTTP 201 Created）
@@ -408,9 +409,9 @@ func (h *CLIHandler) HandleCompleteTodo(id, userID int) {
 	fmt.Printf("\n[操作] 使用者 %d 完成 Todo #%d\n", userID, id) // 顯示操作資訊
 
 	todo, err := h.usecase.CompleteTodo(id, userID) // 委託給 Usecase 處理
-	if err != nil {                                   // 如果有錯誤
+	if err != nil {                                 // 如果有錯誤
 		fmt.Printf("[錯誤] %s\n", err) // 顯示錯誤
-		return                         // 提早返回
+		return                       // 提早返回
 	}
 
 	fmt.Printf("[成功] Todo #%d \"%s\" 已完成 ✓\n", todo.ID, todo.Title) // 顯示成功
@@ -421,9 +422,9 @@ func (h *CLIHandler) HandleDeleteTodo(id, userID int) {
 	fmt.Printf("\n[操作] 使用者 %d 刪除 Todo #%d\n", userID, id) // 顯示操作資訊
 
 	err := h.usecase.DeleteTodo(id, userID) // 委託給 Usecase 處理
-	if err != nil {                          // 如果有錯誤
+	if err != nil {                         // 如果有錯誤
 		fmt.Printf("[錯誤] %s\n", err) // 顯示錯誤
-		return                         // 提早返回
+		return                       // 提早返回
 	}
 
 	fmt.Printf("[成功] Todo #%d 已刪除\n", id) // 顯示成功
@@ -434,20 +435,20 @@ func (h *CLIHandler) HandleListTodos(userID int) {
 	fmt.Printf("\n[操作] 查看使用者 %d 的所有 Todo\n", userID) // 顯示操作資訊
 
 	todos, err := h.usecase.GetUserTodos(userID) // 委託給 Usecase 取得資料
-	if err != nil {                               // 如果有錯誤
+	if err != nil {                              // 如果有錯誤
 		fmt.Printf("[錯誤] %s\n", err) // 顯示錯誤
-		return                         // 提早返回
+		return                       // 提早返回
 	}
 
 	if len(todos) == 0 { // 如果沒有任何待辦事項
 		fmt.Println("[資訊] 沒有待辦事項") // 顯示提示訊息
-		return                           // 提早返回
+		return                     // 提早返回
 	}
 
 	for _, todo := range todos { // 遍歷所有待辦事項
-		status := "[ ]"        // 預設顯示未完成的符號
-		if todo.Completed {    // 如果已完成
-			status = "[v]"   // 改為完成的符號
+		status := "[ ]"     // 預設顯示未完成的符號
+		if todo.Completed { // 如果已完成
+			status = "[v]" // 改為完成的符號
 		}
 		// 印出每一個待辦事項的狀態、ID 和標題
 		fmt.Printf("  %s #%d: %s\n", status, todo.ID, todo.Title)
@@ -505,9 +506,9 @@ func main() { // Go 程式的進入點，程式從這裡開始執行
 	fmt.Println("\n========== 情境 1：正常的 CRUD 操作 ==========")
 
 	// 使用者 1 建立幾個 Todo（客人點了三道菜）
-	handler.HandleCreateTodo(1, "學習 Go 語言基礎")  // 建立第一個待辦事項
-	handler.HandleCreateTodo(1, "學習 Gin 框架")     // 建立第二個待辦事項
-	handler.HandleCreateTodo(1, "完成部落格 API")     // 建立第三個待辦事項
+	handler.HandleCreateTodo(1, "學習 Go 語言基礎") // 建立第一個待辦事項
+	handler.HandleCreateTodo(1, "學習 Gin 框架")  // 建立第二個待辦事項
+	handler.HandleCreateTodo(1, "完成部落格 API")  // 建立第三個待辦事項
 
 	// 查看使用者 1 的 Todo（客人問「我點了什麼？」）
 	handler.HandleListTodos(1) // 列出所有待辦事項

@@ -65,8 +65,8 @@ func initTracer() (func(context.Context) error, error) {
 		resource.Default(),
 		resource.NewWithAttributes(
 			semconv.SchemaURL,
-			semconv.ServiceName("tutorial-35-otel"),    // 服務名稱
-			semconv.ServiceVersion("1.0.0"),            // 版本
+			semconv.ServiceName("tutorial-35-otel"), // 服務名稱
+			semconv.ServiceVersion("1.0.0"),         // 版本
 			attribute.String("environment", "development"),
 		),
 	)
@@ -76,8 +76,8 @@ func initTracer() (func(context.Context) error, error) {
 
 	// TracerProvider：管理 Tracer 的建立和 Span 的處理
 	tp := sdktrace.NewTracerProvider(
-		sdktrace.WithBatcher(exporter),               // 批次發送（效能更好）
-		sdktrace.WithResource(res),                   // 設定 Resource
+		sdktrace.WithBatcher(exporter),                // 批次發送（效能更好）
+		sdktrace.WithResource(res),                    // 設定 Resource
 		sdktrace.WithSampler(sdktrace.AlwaysSample()), // 採樣率：100%（生產環境通常 1-10%）
 	)
 
@@ -122,8 +122,8 @@ func handleOrder(ctx context.Context, orderID string) error {
 
 	// 呼叫下游服務（ctx 攜帶 TraceID）
 	if err := validateOrder(ctx, orderID); err != nil {
-		span.RecordError(err)                               // 記錄錯誤
-		span.SetStatus(codes.Error, "訂單驗證失敗")         // 設定 Span 狀態
+		span.RecordError(err)                 // 記錄錯誤
+		span.SetStatus(codes.Error, "訂單驗證失敗") // 設定 Span 狀態
 		return fmt.Errorf("handleOrder: %w", err)
 	}
 

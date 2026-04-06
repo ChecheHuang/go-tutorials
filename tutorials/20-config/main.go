@@ -123,11 +123,11 @@ func LoadConfig() (*Config, error) {
 	v.SetDefault("redis.db", 0)
 
 	// ──── 讀取 config.yaml（如果存在）────
-	v.SetConfigName("config")      // 設定檔名稱（不含副檔名）
-	v.SetConfigType("yaml")        // 設定檔格式
-	v.AddConfigPath(".")           // 從當前目錄找
-	v.AddConfigPath("./config")    // 從 config/ 子目錄找
-	v.AddConfigPath("$HOME/.app")  // 從 Home 目錄找
+	v.SetConfigName("config")     // 設定檔名稱（不含副檔名）
+	v.SetConfigType("yaml")       // 設定檔格式
+	v.AddConfigPath(".")          // 從當前目錄找
+	v.AddConfigPath("./config")   // 從 config/ 子目錄找
+	v.AddConfigPath("$HOME/.app") // 從 Home 目錄找
 
 	if err := v.ReadInConfig(); err != nil { // 嘗試讀取設定檔
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok { // 如果不是「找不到檔案」的錯誤
@@ -213,17 +213,17 @@ func demonstrateSimpleConfig() { // 示範簡單版 Config
 	fmt.Println("=== 1. 輕量版 Config（只用 os.Getenv）===\n")
 
 	// 模擬設定環境變數（正式環境是在 Docker/K8s 設定的）
-	os.Setenv("APP_PORT", "9090")                      // 覆蓋埠號
+	os.Setenv("APP_PORT", "9090")                       // 覆蓋埠號
 	os.Setenv("DB_DSN", "postgres://user:pass@db/prod") // 正式環境 DB
 	os.Setenv("LOG_LEVEL", "warn")                      // 正式環境只看 WARN 以上
 
 	config := LoadConfigSimple() // 載入設定
 
 	fmt.Printf("應用程式名稱: %s\n", config.App.Name)
-	fmt.Printf("監聽埠號:     %d\n", config.App.Port)  // 應該是 9090
+	fmt.Printf("監聽埠號:     %d\n", config.App.Port) // 應該是 9090
 	fmt.Printf("環境:         %s\n", config.App.Env)
 	fmt.Printf("資料庫:       %s\n", config.Database.DSN) // 應該是 postgres://...
-	fmt.Printf("日誌層級:     %s\n", config.Log.Level)    // 應該是 warn
+	fmt.Printf("日誌層級:     %s\n", config.Log.Level)     // 應該是 warn
 	fmt.Printf("JWT 密鑰:     %s\n", config.JWT.Secret)
 
 	// 清除示範用的環境變數
@@ -236,8 +236,8 @@ func demonstrateViperConfig() { // 示範 viper 版 Config
 	fmt.Println("\n=== 2. viper Config（支援 YAML + 環境變數）===\n")
 
 	// 模擬正式環境的環境變數（通常由 Docker/K8s 設定）
-	os.Setenv("APP_APP_PORT", "443")       // viper 前綴是 APP，所以 app.port → APP_APP_PORT
-	os.Setenv("APP_LOG_LEVEL", "error")    // app.log.level → APP_LOG_LEVEL
+	os.Setenv("APP_APP_PORT", "443")    // viper 前綴是 APP，所以 app.port → APP_APP_PORT
+	os.Setenv("APP_LOG_LEVEL", "error") // app.log.level → APP_LOG_LEVEL
 
 	v := viper.New()
 	v.SetDefault("app.name", "go-tutorials")
@@ -320,10 +320,10 @@ func main() { // 程式進入點
 	fmt.Println(" 第二十六課：Config 管理")
 	fmt.Println("==========================================")
 
-	demonstrateSimpleConfig()           // 1. 輕量版 Config
-	demonstrateViperConfig()            // 2. viper 版 Config
-	demonstrateConfigInProject()        // 3. 在專案中的使用方式
-	demonstrateSecurityBestPractices()  // 4. 安全最佳實踐
+	demonstrateSimpleConfig()          // 1. 輕量版 Config
+	demonstrateViperConfig()           // 2. viper 版 Config
+	demonstrateConfigInProject()       // 3. 在專案中的使用方式
+	demonstrateSecurityBestPractices() // 4. 安全最佳實踐
 
 	fmt.Println("\n==========================================")
 	fmt.Println(" 教學完成！")

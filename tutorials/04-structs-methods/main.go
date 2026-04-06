@@ -99,8 +99,8 @@ func (u User) IsAdult() bool {
 // Summary 回傳使用者的摘要資訊
 // 值接收者適合用在「只需要讀取、不需要修改」的場景
 func (u User) Summary() string {
-	status := "停用" // 先假設帳號是停用的
-	if u.IsActive {  // 如果 IsActive 是 true
+	status := "停用"  // 先假設帳號是停用的
+	if u.IsActive { // 如果 IsActive 是 true
 		status = "啟用" // 改成「啟用」
 	}
 	// Sprintf 類似其他語言的字串格式化（template literal）
@@ -145,7 +145,7 @@ func (u *User) SetEmail(newEmail string) {
 // Activate 啟用使用者帳號
 // 需要修改 IsActive 的值，所以用指標接收者
 func (u *User) Activate() {
-	u.IsActive = true                         // 把帳號狀態改為啟用
+	u.IsActive = true                          // 把帳號狀態改為啟用
 	fmt.Printf("  ✓ 使用者 %s 已啟用\n", u.Username) // 印出確認訊息
 }
 
@@ -158,8 +158,8 @@ func (u *User) Deactivate() {
 
 // UpdateAge 更新年齡並印出變更紀錄
 func (u *User) UpdateAge(newAge int) {
-	oldAge := u.Age  // 先記住舊的年齡
-	u.Age = newAge   // 更新為新的年齡
+	oldAge := u.Age                              // 先記住舊的年齡
+	u.Age = newAge                               // 更新為新的年齡
 	fmt.Printf("  年齡：%d → %d\n", oldAge, newAge) // 印出變更紀錄
 }
 
@@ -213,10 +213,10 @@ func (a Address) FullAddress() string {
 // 注意：User 和 Address 沒有寫欄位名稱，這叫「匿名欄位」
 // 匿名欄位的魔法：Employee 可以直接使用 User 和 Address 的欄位和方法
 type Employee struct {
-	User                 // 嵌套 User（匿名欄位）——Employee「擁有」User 的所有欄位和方法
-	Address              // 嵌套 Address（匿名欄位）——Employee「擁有」Address 的所有欄位和方法
-	Department string    // 部門（Employee 自己的欄位）
-	Salary     float64   // 薪資（Employee 自己的欄位）
+	User               // 嵌套 User（匿名欄位）——Employee「擁有」User 的所有欄位和方法
+	Address            // 嵌套 Address（匿名欄位）——Employee「擁有」Address 的所有欄位和方法
+	Department string  // 部門（Employee 自己的欄位）
+	Salary     float64 // 薪資（Employee 自己的欄位）
 }
 
 // ============================================================
@@ -240,33 +240,33 @@ type Employee struct {
 // NewUser 是 User 的建構函式
 // 接收必要的參數，回傳一個初始化好的 *User（User 的指標）
 func NewUser(id int, username, email string, age int) *User {
-	return &User{                  // &User{...} 建立 User 並取得它的指標
-		ID:        id,             // 設定 ID
-		Username:  username,       // 設定帳號
-		Email:     email,          // 設定信箱
-		Age:       age,            // 設定年齡
-		IsActive:  true,           // 預設為啟用狀態
-		CreatedAt: time.Now(),     // 自動填入當前時間
+	return &User{ // &User{...} 建立 User 並取得它的指標
+		ID:        id,         // 設定 ID
+		Username:  username,   // 設定帳號
+		Email:     email,      // 設定信箱
+		Age:       age,        // 設定年齡
+		IsActive:  true,       // 預設為啟用狀態
+		CreatedAt: time.Now(), // 自動填入當前時間
 	}
 }
 
 // NewEmployee 是 Employee 的建構函式
 func NewEmployee(id int, name, email string, age int, city, country, dept string, salary float64) *Employee {
-	return &Employee{                      // 建立 Employee 並回傳指標
-		User: User{                        // 初始化嵌套的 User
-			ID:        id,                 // 設定使用者 ID
-			Username:  name,               // 設定使用者名稱
-			Email:     email,              // 設定使用者信箱
-			Age:       age,                // 設定年齡
-			IsActive:  true,               // 預設啟用
-			CreatedAt: time.Now(),         // 自動填入當前時間
+	return &Employee{ // 建立 Employee 並回傳指標
+		User: User{ // 初始化嵌套的 User
+			ID:        id,         // 設定使用者 ID
+			Username:  name,       // 設定使用者名稱
+			Email:     email,      // 設定使用者信箱
+			Age:       age,        // 設定年齡
+			IsActive:  true,       // 預設啟用
+			CreatedAt: time.Now(), // 自動填入當前時間
 		},
-		Address: Address{                  // 初始化嵌套的 Address
-			City:    city,                 // 設定城市
-			Country: country,              // 設定國家
+		Address: Address{ // 初始化嵌套的 Address
+			City:    city,    // 設定城市
+			Country: country, // 設定國家
 		},
-		Department: dept,                  // 設定部門
-		Salary:     salary,                // 設定薪資
+		Department: dept,   // 設定部門
+		Salary:     salary, // 設定薪資
 	}
 }
 
@@ -288,25 +288,25 @@ func NewEmployee(id int, name, email string, age int, city, country, dept string
 
 // Article 代表部落格文章——示範結構體標籤的用法
 type Article struct {
-	ID        int       `json:"id"`                         // JSON 輸出時欄位名叫 "id"（小寫）
-	Title     string    `json:"title" binding:"required"`   // JSON 叫 "title"，且為必填欄位
-	Content   string    `json:"content"`                    // JSON 叫 "content"
-	AuthorID  int       `json:"author_id" gorm:"index"`    // JSON 叫 "author_id"，資料庫建索引
-	Views     int       `json:"views,omitempty"`            // 如果 Views 是 0，JSON 中不顯示
-	Secret    string    `json:"-"`                          // json:"-" → 永遠不會出現在 JSON 中
-	CreatedAt time.Time `json:"created_at"`                 // JSON 叫 "created_at"
+	ID        int       `json:"id"`                       // JSON 輸出時欄位名叫 "id"（小寫）
+	Title     string    `json:"title" binding:"required"` // JSON 叫 "title"，且為必填欄位
+	Content   string    `json:"content"`                  // JSON 叫 "content"
+	AuthorID  int       `json:"author_id" gorm:"index"`   // JSON 叫 "author_id"，資料庫建索引
+	Views     int       `json:"views,omitempty"`          // 如果 Views 是 0，JSON 中不顯示
+	Secret    string    `json:"-"`                        // json:"-" → 永遠不會出現在 JSON 中
+	CreatedAt time.Time `json:"created_at"`               // JSON 叫 "created_at"
 }
 
 // NewArticle 是 Article 的建構函式
 func NewArticle(id int, title, content string, authorID int) *Article {
-	return &Article{                       // 建立 Article 並回傳指標
-		ID:        id,                     // 設定文章 ID
-		Title:     title,                  // 設定標題
-		Content:   content,                // 設定內容
-		AuthorID:  authorID,               // 設定作者 ID
-		Views:     0,                      // 瀏覽次數初始為 0
-		Secret:    "內部備註：草稿",        // 這個不會出現在 JSON 中
-		CreatedAt: time.Now(),             // 自動填入建立時間
+	return &Article{ // 建立 Article 並回傳指標
+		ID:        id,         // 設定文章 ID
+		Title:     title,      // 設定標題
+		Content:   content,    // 設定內容
+		AuthorID:  authorID,   // 設定作者 ID
+		Views:     0,          // 瀏覽次數初始為 0
+		Secret:    "內部備註：草稿",  // 這個不會出現在 JSON 中
+		CreatedAt: time.Now(), // 自動填入建立時間
 	}
 }
 
@@ -320,140 +320,140 @@ func main() { // main 是程式的進入點
 	// 示範 1：建立結構體的四種方式
 	// ========================================
 	fmt.Println("========================================") // 分隔線
-	fmt.Println("1. 建立結構體的四種方式")                    // 標題
+	fmt.Println("1. 建立結構體的四種方式")                            // 標題
 	fmt.Println("========================================") // 分隔線
 
 	// 方式一：指定欄位名稱（★ 最推薦！★）
 	// 優點：清楚、不怕欄位順序改變、可以只填部分欄位
-	user1 := User{                             // 用 := 建立並賦值
-		ID:       1,                           // 指定 ID
-		Username: "alice",                     // 指定帳號
-		Email:    "alice@blog.com",            // 指定信箱
-		Age:      25,                          // 指定年齡
-		IsActive: true,                        // 指定為啟用
-	}                                          // CreatedAt 沒寫，自動是零值（time.Time 的零值）
-	fmt.Println("方式一（指定欄位）:", user1)    // 印出 user1 的所有欄位
+	user1 := User{ // 用 := 建立並賦值
+		ID:       1,                // 指定 ID
+		Username: "alice",          // 指定帳號
+		Email:    "alice@blog.com", // 指定信箱
+		Age:      25,               // 指定年齡
+		IsActive: true,             // 指定為啟用
+	} // CreatedAt 沒寫，自動是零值（time.Time 的零值）
+	fmt.Println("方式一（指定欄位）:", user1) // 印出 user1 的所有欄位
 
 	// 方式二：按順序賦值（⚠ 不推薦！）
 	// 缺點：必須記住所有欄位的順序，新增欄位時容易出錯
 	user2 := User{2, "bob", "bob@blog.com", 30, true, time.Now()} // 按 ID, Username, Email, Age, IsActive, CreatedAt 的順序
-	fmt.Println("方式二（按順序）:  ", user2)                        // 印出 user2
+	fmt.Println("方式二（按順序）:  ", user2)                             // 印出 user2
 
 	// 方式三：先宣告再逐一賦值
 	// 適合需要根據條件決定值的場景
-	var user3 User                                 // 宣告一個 User 變數（所有欄位都是零值）
-	user3.ID = 3                                   // 設定 ID（零值是 0，現在改成 3）
-	user3.Username = "charlie"                     // 設定帳號（零值是 ""，現在改成 "charlie"）
-	user3.Email = "charlie@blog.com"               // 設定信箱
-	user3.Age = 17                                 // 設定年齡
-	user3.IsActive = false                         // 設定為停用（bool 的零值就是 false，其實不寫也一樣）
-	fmt.Println("方式三（逐一賦值）:", user3)        // 印出 user3
+	var user3 User                   // 宣告一個 User 變數（所有欄位都是零值）
+	user3.ID = 3                     // 設定 ID（零值是 0，現在改成 3）
+	user3.Username = "charlie"       // 設定帳號（零值是 ""，現在改成 "charlie"）
+	user3.Email = "charlie@blog.com" // 設定信箱
+	user3.Age = 17                   // 設定年齡
+	user3.IsActive = false           // 設定為停用（bool 的零值就是 false，其實不寫也一樣）
+	fmt.Println("方式三（逐一賦值）:", user3) // 印出 user3
 
 	// 方式四：使用建構函式（★ 正式專案中最推薦！★）
 	// 優點：封裝初始化邏輯、設定預設值、可以加驗證
 	user4 := NewUser(4, "diana", "diana@blog.com", 28) // 呼叫建構函式
-	fmt.Println("方式四（建構函式）:", user4)              // 注意：印出來是記憶體地址（因為是指標 *User）
-	fmt.Println("  解引用後的值:   ", *user4)             // 用 * 解引用，看到實際內容
+	fmt.Println("方式四（建構函式）:", user4)                   // 注意：印出來是記憶體地址（因為是指標 *User）
+	fmt.Println("  解引用後的值:   ", *user4)                // 用 * 解引用，看到實際內容
 
 	// ========================================
 	// 示範 2：呼叫方法
 	// ========================================
-	fmt.Println()                                    // 空行，讓輸出更美觀
+	fmt.Println()                                           // 空行，讓輸出更美觀
 	fmt.Println("========================================") // 分隔線
-	fmt.Println("2. 呼叫方法")                         // 標題
+	fmt.Println("2. 呼叫方法")                                  // 標題
 	fmt.Println("========================================") // 分隔線
 
 	fmt.Println("顯示名稱:", user1.DisplayName())     // 呼叫值接收者方法
-	fmt.Println("是否成年:", user1.IsAdult())          // alice 25 歲，回傳 true
-	fmt.Println("摘要:    ", user1.Summary())          // 呼叫 Summary 方法
-	fmt.Println()                                      // 空行
-	fmt.Println("charlie 是否成年:", user3.IsAdult())  // charlie 17 歲，回傳 false
+	fmt.Println("是否成年:", user1.IsAdult())         // alice 25 歲，回傳 true
+	fmt.Println("摘要:    ", user1.Summary())       // 呼叫 Summary 方法
+	fmt.Println()                                 // 空行
+	fmt.Println("charlie 是否成年:", user3.IsAdult()) // charlie 17 歲，回傳 false
 
 	// ========================================
 	// 示範 3：值接收者 vs 指標接收者——親眼見證差異
 	// ========================================
-	fmt.Println()                                    // 空行
+	fmt.Println()                                           // 空行
 	fmt.Println("========================================") // 分隔線
-	fmt.Println("3. 值接收者 vs 指標接收者")            // 標題
+	fmt.Println("3. 值接收者 vs 指標接收者")                         // 標題
 	fmt.Println("========================================") // 分隔線
 
 	// 建立一個測試用的使用者
-	testUser := User{                               // 建立測試用的 User
-		ID:       99,                               // ID = 99
-		Username: "original",                       // 帳號 = "original"
-		Email:    "original@test.com",              // 信箱 = "original@test.com"
+	testUser := User{ // 建立測試用的 User
+		ID:       99,                  // ID = 99
+		Username: "original",          // 帳號 = "original"
+		Email:    "original@test.com", // 信箱 = "original@test.com"
 	}
 
-	fmt.Println("原始值:", testUser.Username)         // 印出原始的 Username
+	fmt.Println("原始值:", testUser.Username) // 印出原始的 Username
 
 	// 嘗試用「值接收者」修改——不會成功
-	fmt.Println("\n▶ 用值接收者嘗試修改：")             // 提示說明
+	fmt.Println("\n▶ 用值接收者嘗試修改：")                    // 提示說明
 	testUser.TryChangeNameValue("modified_by_value") // 呼叫值接收者方法
-	fmt.Println("  修改後的原始值:", testUser.Username) // 原始值沒變！還是 "original"
+	fmt.Println("  修改後的原始值:", testUser.Username)     // 原始值沒變！還是 "original"
 
 	// 嘗試用「指標接收者」修改——會成功
-	fmt.Println("\n▶ 用指標接收者嘗試修改：")           // 提示說明
+	fmt.Println("\n▶ 用指標接收者嘗試修改：")                   // 提示說明
 	testUser.TryChangeNamePointer("modified_by_ptr") // 呼叫指標接收者方法
-	fmt.Println("  修改後的原始值:", testUser.Username) // 原始值變了！變成 "modified_by_ptr"
+	fmt.Println("  修改後的原始值:", testUser.Username)     // 原始值變了！變成 "modified_by_ptr"
 
 	// ========================================
 	// 示範 4：指標接收者的實際應用
 	// ========================================
-	fmt.Println()                                    // 空行
+	fmt.Println()                                           // 空行
 	fmt.Println("========================================") // 分隔線
-	fmt.Println("4. 指標接收者的實際應用")              // 標題
+	fmt.Println("4. 指標接收者的實際應用")                            // 標題
 	fmt.Println("========================================") // 分隔線
 
-	fmt.Println("修改前 Email:", user1.Email)          // 印出修改前的 Email
-	user1.SetEmail("alice.new@blog.com")              // 用指標接收者方法修改 Email
-	fmt.Println("修改後 Email:", user1.Email)          // 確認 Email 已被修改
+	fmt.Println("修改前 Email:", user1.Email) // 印出修改前的 Email
+	user1.SetEmail("alice.new@blog.com")   // 用指標接收者方法修改 Email
+	fmt.Println("修改後 Email:", user1.Email) // 確認 Email 已被修改
 
-	fmt.Println()                                     // 空行
-	user1.Deactivate()                                // 停用帳號
-	fmt.Println("帳號狀態:", user1.IsActive)            // 印出 false
-	user1.Activate()                                   // 啟用帳號
-	fmt.Println("帳號狀態:", user1.IsActive)            // 印出 true
+	fmt.Println()                        // 空行
+	user1.Deactivate()                   // 停用帳號
+	fmt.Println("帳號狀態:", user1.IsActive) // 印出 false
+	user1.Activate()                     // 啟用帳號
+	fmt.Println("帳號狀態:", user1.IsActive) // 印出 true
 
 	// ========================================
 	// 示範 5：結構體嵌套
 	// ========================================
-	fmt.Println()                                    // 空行
+	fmt.Println()                                           // 空行
 	fmt.Println("========================================") // 分隔線
-	fmt.Println("5. 結構體嵌套（Embedding）")           // 標題
+	fmt.Println("5. 結構體嵌套（Embedding）")                      // 標題
 	fmt.Println("========================================") // 分隔線
 
 	// 使用建構函式建立 Employee
-	emp := NewEmployee(                               // 呼叫 Employee 的建構函式
-		10,                                           // ID
-		"王小明",                                      // 使用者名稱
-		"xiaoming@company.com",                        // 信箱
-		30,                                            // 年齡
-		"台北",                                        // 城市
-		"台灣",                                        // 國家
-		"工程部",                                       // 部門
-		85000,                                         // 薪資
+	emp := NewEmployee( // 呼叫 Employee 的建構函式
+		10,                     // ID
+		"王小明",                  // 使用者名稱
+		"xiaoming@company.com", // 信箱
+		30,                     // 年齡
+		"台北",                   // 城市
+		"台灣",                   // 國家
+		"工程部",                  // 部門
+		85000,                  // 薪資
 	)
 
 	// 嵌套的魔法：可以直接存取 User 和 Address 的欄位！
-	fmt.Println("帳號:", emp.Username)                   // 直接存取！不用寫 emp.User.Username
-	fmt.Println("信箱:", emp.Email)                     // 直接存取 User 的 Email
-	fmt.Println("城市:", emp.City)                      // 直接存取 Address 的 City
-	fmt.Println("部門:", emp.Department)                // Employee 自己的欄位
-	fmt.Println("薪資:", emp.Salary)                    // Employee 自己的欄位
+	fmt.Println("帳號:", emp.Username)   // 直接存取！不用寫 emp.User.Username
+	fmt.Println("信箱:", emp.Email)      // 直接存取 User 的 Email
+	fmt.Println("城市:", emp.City)       // 直接存取 Address 的 City
+	fmt.Println("部門:", emp.Department) // Employee 自己的欄位
+	fmt.Println("薪資:", emp.Salary)     // Employee 自己的欄位
 
 	// 嵌套的方法也可以直接呼叫！
-	fmt.Println("顯示名稱:", emp.DisplayName())          // 直接呼叫 User 的方法！
-	fmt.Println("完整地址:", emp.FullAddress())           // 直接呼叫 Address 的方法！
+	fmt.Println("顯示名稱:", emp.DisplayName()) // 直接呼叫 User 的方法！
+	fmt.Println("完整地址:", emp.FullAddress()) // 直接呼叫 Address 的方法！
 
 	// 如果需要明確指定是哪個嵌套結構體的欄位，也可以寫完整路徑
-	fmt.Println("完整路徑:", emp.User.Email)              // 用完整路徑存取也行
+	fmt.Println("完整路徑:", emp.User.Email) // 用完整路徑存取也行
 
 	// ========================================
 	// 示範 6：結構體標籤與 JSON 序列化
 	// ========================================
-	fmt.Println()                                    // 空行
+	fmt.Println()                                           // 空行
 	fmt.Println("========================================") // 分隔線
-	fmt.Println("6. 結構體標籤與 JSON")                 // 標題
+	fmt.Println("6. 結構體標籤與 JSON")                           // 標題
 	fmt.Println("========================================") // 分隔線
 
 	// 建立一篇文章
@@ -464,29 +464,29 @@ func main() { // main 是程式的進入點
 	// 參數：要轉的值, 前綴（通常空字串）, 縮排（用兩個空格）
 	jsonData, err := json.MarshalIndent(article, "", "  ") // 轉成美化的 JSON
 	if err != nil {                                        // 如果轉換出錯
-		fmt.Println("JSON 轉換錯誤:", err)                  // 印出錯誤
-		return                                              // 提早結束程式
+		fmt.Println("JSON 轉換錯誤:", err) // 印出錯誤
+		return                         // 提早結束程式
 	}
 
-	fmt.Println("JSON 輸出：")                            // 提示
-	fmt.Println(string(jsonData))                          // 把 []byte 轉成 string 印出
+	fmt.Println("JSON 輸出：")       // 提示
+	fmt.Println(string(jsonData)) // 把 []byte 轉成 string 印出
 
 	// 注意觀察 JSON 輸出：
 	// - "id" 不是 "ID"（因為標籤寫了 json:"id"）
 	// - "Secret" 完全不會出現（因為標籤寫了 json:"-"）
 	// - "views" 不會出現（因為值是 0，且標籤有 omitempty）
 	// - "author_id" 不是 "AuthorID"（標籤的命名轉換）
-	fmt.Println("\n注意：")                               // 提示
+	fmt.Println("\n注意：")                                 // 提示
 	fmt.Println("  - Secret 欄位沒有出現在 JSON 中（json:\"-\"）") // 解說
-	fmt.Println("  - Views 為 0 所以沒出現（omitempty）")          // 解說
-	fmt.Println("  - 欄位名都是小寫蛇形命名（json tag 控制）")     // 解說
+	fmt.Println("  - Views 為 0 所以沒出現（omitempty）")        // 解說
+	fmt.Println("  - 欄位名都是小寫蛇形命名（json tag 控制）")          // 解說
 
 	// ========================================
 	// 示範 7：結構體比較
 	// ========================================
-	fmt.Println()                                    // 空行
+	fmt.Println()                                           // 空行
 	fmt.Println("========================================") // 分隔線
-	fmt.Println("7. 結構體比較")                        // 標題
+	fmt.Println("7. 結構體比較")                                 // 標題
 	fmt.Println("========================================") // 分隔線
 
 	// 如果所有欄位都是「可比較的型別」，結構體就可以用 == 比較
@@ -500,17 +500,17 @@ func main() { // main 是程式的進入點
 	// ========================================
 	// 總結
 	// ========================================
-	fmt.Println()                                    // 空行
+	fmt.Println()                                           // 空行
 	fmt.Println("========================================") // 分隔線
-	fmt.Println("總結")                                // 標題
+	fmt.Println("總結")                                       // 標題
 	fmt.Println("========================================") // 分隔線
-	fmt.Println("1. 結構體 = 把相關資料打包在一起（像身分證）")         // 重點 1
-	fmt.Println("2. 方法 = 結構體的技能（像一個人能做的事）")          // 重點 2
-	fmt.Println("3. 值接收者 → 操作副本 → 不改原始值")               // 重點 3
-	fmt.Println("4. 指標接收者 → 操作原始值 → 會改原始值")           // 重點 4
-	fmt.Println("5. 嵌套 = Go 版的組合（不是繼承！）")               // 重點 5
-	fmt.Println("6. 建構函式 = NewXxx()，設定預設值和驗證")         // 重點 6
-	fmt.Println("7. 結構體標籤 = 給其他套件的元資料（json、gorm）")  // 重點 7
-	fmt.Println()                                                  // 空行
-	fmt.Println("下一課：指標（Pointers）——理解記憶體地址的秘密！")   // 預告下一課
+	fmt.Println("1. 結構體 = 把相關資料打包在一起（像身分證）")                // 重點 1
+	fmt.Println("2. 方法 = 結構體的技能（像一個人能做的事）")                 // 重點 2
+	fmt.Println("3. 值接收者 → 操作副本 → 不改原始值")                   // 重點 3
+	fmt.Println("4. 指標接收者 → 操作原始值 → 會改原始值")                 // 重點 4
+	fmt.Println("5. 嵌套 = Go 版的組合（不是繼承！）")                   // 重點 5
+	fmt.Println("6. 建構函式 = NewXxx()，設定預設值和驗證")              // 重點 6
+	fmt.Println("7. 結構體標籤 = 給其他套件的元資料（json、gorm）")          // 重點 7
+	fmt.Println()                                           // 空行
+	fmt.Println("下一課：指標（Pointers）——理解記憶體地址的秘密！")            // 預告下一課
 }

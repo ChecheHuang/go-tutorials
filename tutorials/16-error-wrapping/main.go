@@ -25,8 +25,8 @@
 package main // 宣告這是 main 套件
 
 import (
-	"errors"  // 標準庫：errors.New、errors.Is、errors.As、errors.Unwrap
-	"fmt"     // 標準庫：fmt.Errorf（支援 %w 包裝錯誤）
+	"errors" // 標準庫：errors.New、errors.Is、errors.As、errors.Unwrap
+	"fmt"    // 標準庫：fmt.Errorf（支援 %w 包裝錯誤）
 )
 
 // ==========================================================================
@@ -42,8 +42,8 @@ import (
 //   err := fmt.Errorf("失敗: %v", originalErr)  ← 不能用 errors.Is 解包！
 
 // 模擬的底層錯誤（資料庫層）
-var ErrNotFound = errors.New("記錄不存在")        // 資料庫：找不到記錄
-var ErrDuplicate = errors.New("記錄已存在")        // 資料庫：重複插入
+var ErrNotFound = errors.New("記錄不存在")           // 資料庫：找不到記錄
+var ErrDuplicate = errors.New("記錄已存在")          // 資料庫：重複插入
 var ErrConnectionFailed = errors.New("資料庫連線失敗") // 資料庫：連線錯誤
 
 func demonstrateBasicWrapping() { // 示範基本包裝
@@ -52,8 +52,8 @@ func demonstrateBasicWrapping() { // 示範基本包裝
 	// 模擬 Repository 層：把底層錯誤包裝後回傳
 	findUser := func(id int) error {
 		// 模擬資料庫回傳 "記錄不存在"
-		dbErr := ErrNotFound                                      // 底層錯誤
-		return fmt.Errorf("findUser(id=%d): %w", id, dbErr)      // 包裝：加上上下文
+		dbErr := ErrNotFound                                // 底層錯誤
+		return fmt.Errorf("findUser(id=%d): %w", id, dbErr) // 包裝：加上上下文
 	}
 
 	// 模擬 Usecase 層：再包裝一層
@@ -178,7 +178,7 @@ func demonstrateCustomError() { // 示範自訂錯誤類型
 	if errors.As(err, &appErr) { // 如果錯誤鏈中有 *AppError
 		fmt.Printf("錯誤代碼: %s\n", appErr.Code)       // USER_NOT_FOUND
 		fmt.Printf("HTTP 狀態碼: %d\n", appErr.Status) // 404
-		fmt.Printf("使用者訊息: %s\n", appErr.Message) // 使用者不存在
+		fmt.Printf("使用者訊息: %s\n", appErr.Message)   // 使用者不存在
 	}
 
 	// 也可以用 errors.Is 判斷是否是特定的預定義錯誤
@@ -374,11 +374,11 @@ func main() { // 程式進入點
 	fmt.Println(" 第二十五課：Error Wrapping 完整示範")
 	fmt.Println("==========================================")
 
-	demonstrateBasicWrapping()  // 1. fmt.Errorf %w
-	demonstrateCustomError()    // 2. 自訂錯誤類型
-	demonstrateErrorsIsAs()     // 3. errors.Is vs errors.As
-	demonstrateErrorFlow()      // 4. Clean Architecture 錯誤流向
-	demonstrateBestPractices()  // 5. 最佳實踐
+	demonstrateBasicWrapping() // 1. fmt.Errorf %w
+	demonstrateCustomError()   // 2. 自訂錯誤類型
+	demonstrateErrorsIsAs()    // 3. errors.Is vs errors.As
+	demonstrateErrorFlow()     // 4. Clean Architecture 錯誤流向
+	demonstrateBestPractices() // 5. 最佳實踐
 
 	fmt.Println("\n==========================================")
 	fmt.Println(" 教學完成！")

@@ -10,9 +10,9 @@ import (
 
 // Response 定義統一的 API 回應結構
 type Response struct {
-	Code    int         `json:"code"`              // HTTP 狀態碼
-	Message string      `json:"message"`           // 回應訊息
-	Data    interface{} `json:"data,omitempty"`    // 回應資料（可選）
+	Code    int         `json:"code"`           // HTTP 狀態碼
+	Message string      `json:"message"`        // 回應訊息
+	Data    interface{} `json:"data,omitempty"` // 回應資料（可選）
 }
 
 // PaginatedData 定義分頁回應的資料結構

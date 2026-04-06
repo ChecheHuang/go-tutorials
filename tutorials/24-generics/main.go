@@ -23,9 +23,9 @@
 package main
 
 import (
-	"cmp"     // Go 1.21：cmp.Ordered（可排序的類型）
+	"cmp" // Go 1.21：cmp.Ordered（可排序的類型）
 	"fmt"
-	"slices"  // Go 1.21：切片泛型工具
+	"slices" // Go 1.21：切片泛型工具
 	"strings"
 )
 
@@ -143,10 +143,10 @@ type Result[T any] struct {
 	err   error
 }
 
-func Ok[T any](value T) Result[T] { return Result[T]{value: value} }
+func Ok[T any](value T) Result[T]    { return Result[T]{value: value} }
 func Err[T any](err error) Result[T] { return Result[T]{err: err} }
 
-func (r Result[T]) IsOk() bool  { return r.err == nil }
+func (r Result[T]) IsOk() bool { return r.err == nil }
 func (r Result[T]) Unwrap() T {
 	if r.err != nil {
 		panic(fmt.Sprintf("called Unwrap on Err: %v", r.err))
@@ -422,7 +422,7 @@ func main() {
 	titles := []string{"  Go 泛型  ", "  Prometheus 監控  ", "  gRPC 教學  ", "  CI/CD  "}
 	processed := Map(
 		Filter(
-			Map(titles, strings.TrimSpace), // 去除空格
+			Map(titles, strings.TrimSpace),            // 去除空格
 			func(s string) bool { return len(s) > 5 }, // 過濾短標題
 		),
 		strings.ToUpper, // 轉大寫

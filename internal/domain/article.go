@@ -11,12 +11,12 @@ type Article struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
 	Title     string         `json:"title" gorm:"size:200;not null"`
 	Content   string         `json:"content" gorm:"type:text;not null"`
-	UserID    uint           `json:"user_id" gorm:"index;not null"`                    // 作者 ID（外鍵）
-	User      User           `json:"user" gorm:"foreignKey:UserID"`                    // 關聯的使用者資料
-	Comments  []Comment      `json:"comments,omitempty" gorm:"foreignKey:ArticleID"`   // 文章的留言列表
+	UserID    uint           `json:"user_id" gorm:"index;not null"`                  // 作者 ID（外鍵）
+	User      User           `json:"user" gorm:"foreignKey:UserID"`                  // 關聯的使用者資料
+	Comments  []Comment      `json:"comments,omitempty" gorm:"foreignKey:ArticleID"` // 文章的留言列表
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `json:"deleted_at,omitempty" gorm:"index"`                // 軟刪除
+	DeletedAt gorm.DeletedAt `json:"deleted_at,omitempty" gorm:"index"` // 軟刪除
 }
 
 // CreateArticleRequest 定義建立文章的請求結構
@@ -33,10 +33,10 @@ type UpdateArticleRequest struct {
 
 // ArticleQuery 定義文章查詢參數
 type ArticleQuery struct {
-	Page     int    `form:"page" binding:"omitempty,min=1"`          // 頁碼（預設 1）
+	Page     int    `form:"page" binding:"omitempty,min=1"`              // 頁碼（預設 1）
 	PageSize int    `form:"page_size" binding:"omitempty,min=1,max=100"` // 每頁筆數（預設 10，最大 100）
-	Search   string `form:"search"`                                  // 搜尋關鍵字（搜尋標題與內容）
-	UserID   uint   `form:"user_id"`                                 // 依作者 ID 篩選
+	Search   string `form:"search"`                                      // 搜尋關鍵字（搜尋標題與內容）
+	UserID   uint   `form:"user_id"`                                     // 依作者 ID 篩選
 }
 
 // ArticleRepository 定義文章的資料存取介面

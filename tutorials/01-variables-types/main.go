@@ -46,15 +46,15 @@ func main() {
 	// Go 會自動判斷「值是什麼型別」，不需要你寫出來
 	// 注意：:= 只能在函式裡面用，不能在函式外面用
 
-	city := "台北"    // Go 看到 "台北" 是文字，自動判斷為 string
-	score := 95       // Go 看到 95 是整數，自動判斷為 int
-	pi := 3.14159     // Go 看到有小數點，自動判斷為 float64
-	passed := true    // Go 看到 true，自動判斷為 bool
+	city := "台北"   // Go 看到 "台北" 是文字，自動判斷為 string
+	score := 95    // Go 看到 95 是整數，自動判斷為 int
+	pi := 3.14159  // Go 看到有小數點，自動判斷為 float64
+	passed := true // Go 看到 true，自動判斷為 bool
 
 	fmt.Println("\n=== 2. := 短變數宣告（最常用）===")
 	fmt.Println("城市:", city)   // 印出：城市: 台北
 	fmt.Println("分數:", score)  // 印出：分數: 95
-	fmt.Println("圓周率:", pi)   // 印出：圓周率: 3.14159
+	fmt.Println("圓周率:", pi)    // 印出：圓周率: 3.14159
 	fmt.Println("通過:", passed) // 印出：通過: true
 
 	// ========================================
@@ -75,10 +75,10 @@ func main() {
 	var defaultBool bool     // 沒給值 → 自動是 false
 
 	fmt.Println("\n=== 3. 零值（Zero Value）===")
-	fmt.Println("int 零值:", defaultInt)             // 0
-	fmt.Println("float64 零值:", defaultFloat)       // 0
+	fmt.Println("int 零值:", defaultInt)               // 0
+	fmt.Println("float64 零值:", defaultFloat)         // 0
 	fmt.Printf("string 零值: \"%s\"\n", defaultString) // ""
-	fmt.Println("bool 零值:", defaultBool)           // false
+	fmt.Println("bool 零值:", defaultBool)             // false
 
 	// ========================================
 	// 4. 常數（Constants）——不能改的值
@@ -86,12 +86,12 @@ func main() {
 	// 用 const 宣告的值，一旦設定就「永遠不能修改」
 	// 適合用在不會變的設定值，像是 API 版本號、最大重試次數等
 
-	const maxRetries = 3          // 最大重試次數（不能改）
-	const appName = "Blog API"    // 應用程式名稱（不能改）
-	const version = 1.0           // 版本號（不能改）
+	const maxRetries = 3       // 最大重試次數（不能改）
+	const appName = "Blog API" // 應用程式名稱（不能改）
+	const version = 1.0        // 版本號（不能改）
 
 	fmt.Println("\n=== 4. 常數（Constants）===")
-	fmt.Println("應用名稱:", appName)    // Blog API
+	fmt.Println("應用名稱:", appName)      // Blog API
 	fmt.Println("版本:", version)        // 1
 	fmt.Println("最大重試次數:", maxRetries) // 3
 
@@ -105,17 +105,17 @@ func main() {
 
 	var (
 		firstName = "小明" // Go 自動推導為 string
-		lastName  = "王"   // Go 自動推導為 string
+		lastName  = "王"  // Go 自動推導為 string
 		email     = "xiaoming@example.com"
 	)
 
 	fmt.Println("\n=== 5. 多重賦值 ===")
 	fmt.Println("名:", firstName) // 小明
 	fmt.Println("姓:", lastName)  // 王
-	fmt.Println("信箱:", email)   // xiaoming@example.com
+	fmt.Println("信箱:", email)    // xiaoming@example.com
 
 	// 也可以一行同時宣告多個變數（用逗號分隔）
-	x, y, z := 1, 2, 3 // 同時建立三個 int 變數
+	x, y, z := 1, 2, 3                // 同時建立三個 int 變數
 	fmt.Println("x, y, z =", x, y, z) // x, y, z = 1 2 3
 
 	// ========================================
@@ -125,12 +125,12 @@ func main() {
 	// 但 Go 不會！你必須「明確告訴 Go」要轉換
 	// 這是為了避免意外的精度遺失
 
-	intValue := 42                            // 這是 int
-	floatValue := float64(intValue)           // 把 int 轉成 float64，語法：目標型別(值)
+	intValue := 42                             // 這是 int
+	floatValue := float64(intValue)            // 把 int 轉成 float64，語法：目標型別(值)
 	stringValue := fmt.Sprintf("%d", intValue) // 把 int 轉成 string（用 Sprintf 格式化）
 
 	fmt.Println("\n=== 6. 型別轉換 ===")
-	fmt.Println("int:", intValue)            // 42
+	fmt.Println("int:", intValue)          // 42
 	fmt.Println("轉為 float64:", floatValue) // 42
 	fmt.Println("轉為 string:", stringValue) // "42"
 
@@ -159,7 +159,7 @@ func main() {
 	// 在我們的部落格專案中，ID 用的是 uint（無號整數）
 	// 因為 ID 不可能是負數
 
-	var id uint = 1          // uint：無號整數，只能是 0 或正數
+	var id uint = 1            // uint：無號整數，只能是 0 或正數
 	var smallNumber int8 = 127 // int8 最大只能存 127
 
 	fmt.Println("\n=== 7. 整數家族 ===")
@@ -196,9 +196,9 @@ func main() {
 
 	// 超實用：%T 可以查看任何變數的型別
 	fmt.Println("\n--- 型別檢查 ---")
-	fmt.Printf("name 的型別是 %T\n", name)      // string
-	fmt.Printf("age 的型別是 %T\n", age)         // int
-	fmt.Printf("height 的型別是 %T\n", height)   // float64
+	fmt.Printf("name 的型別是 %T\n", name)           // string
+	fmt.Printf("age 的型別是 %T\n", age)             // int
+	fmt.Printf("height 的型別是 %T\n", height)       // float64
 	fmt.Printf("isStudent 的型別是 %T\n", isStudent) // bool
-	fmt.Printf("id 的型別是 %T\n", id)           // uint
+	fmt.Printf("id 的型別是 %T\n", id)               // uint
 }

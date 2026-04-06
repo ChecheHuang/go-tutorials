@@ -55,27 +55,27 @@ import (
 // TestWithTestify 示範 testify/assert 的用法
 func TestWithTestify(t *testing.T) { // 示範 testify
 	t.Run("assert.Equal（基本相等判斷）", func(t *testing.T) {
-		result := Add(2, 3)                    // 呼叫被測試的函式
-		assert.Equal(t, 5, result)             // 期望 result 等於 5（比 if 簡潔很多）
+		result := Add(2, 3)                            // 呼叫被測試的函式
+		assert.Equal(t, 5, result)                     // 期望 result 等於 5（比 if 簡潔很多）
 		assert.Equal(t, 5, result, "Add(2, 3) 應該等於 5") // 可以加自訂訊息
 	})
 
 	t.Run("assert.NoError（測試無錯誤）", func(t *testing.T) {
-		result, err := Divide(10, 2)  // 除法（不會有錯誤）
-		assert.NoError(t, err)         // 期望 err 是 nil
-		assert.Equal(t, 5.0, result)  // 期望結果是 5.0
+		result, err := Divide(10, 2) // 除法（不會有錯誤）
+		assert.NoError(t, err)       // 期望 err 是 nil
+		assert.Equal(t, 5.0, result) // 期望結果是 5.0
 	})
 
 	t.Run("assert.Error（測試有錯誤）", func(t *testing.T) {
-		_, err := Divide(10, 0)                  // 除以零（應該有錯誤）
-		assert.Error(t, err)                      // 期望 err 不是 nil
+		_, err := Divide(10, 0)             // 除以零（應該有錯誤）
+		assert.Error(t, err)                // 期望 err 不是 nil
 		assert.EqualError(t, err, "除數不能為零") // 期望特定的錯誤訊息
 	})
 
 	t.Run("assert.Contains（字串包含）", func(t *testing.T) {
 		user := User{Name: "Alice", Age: 25}
-		str := fmt.Sprintf("%v", user)           // 轉成字串
-		assert.Contains(t, str, "Alice")          // 字串應該包含 "Alice"
+		str := fmt.Sprintf("%v", user)   // 轉成字串
+		assert.Contains(t, str, "Alice") // 字串應該包含 "Alice"
 	})
 
 	t.Run("assert.Len（長度判斷）", func(t *testing.T) {
@@ -86,7 +86,7 @@ func TestWithTestify(t *testing.T) { // 示範 testify
 	t.Run("assert.True / assert.False", func(t *testing.T) {
 		user := User{Name: "Alice", Age: 25, Email: "alice@example.com"}
 		err := user.Validate()
-		assert.NoError(t, err)   // 應該沒有驗證錯誤
+		assert.NoError(t, err) // 應該沒有驗證錯誤
 
 		emptyUser := User{}
 		err = emptyUser.Validate()
@@ -97,7 +97,7 @@ func TestWithTestify(t *testing.T) { // 示範 testify
 		// require 和 assert 用法一樣，但失敗時立即停止這個子測試
 		// 常用在：後面的測試依賴這個結果
 		result, err := Divide(10, 2)
-		require.NoError(t, err)   // 如果有錯誤，立即停止（下面的 assert 不會執行）
+		require.NoError(t, err)      // 如果有錯誤，立即停止（下面的 assert 不會執行）
 		assert.Equal(t, 5.0, result) // 只有上面成功才執行到這裡
 	})
 }
@@ -129,16 +129,16 @@ func TestWithTestify(t *testing.T) { // 示範 testify
 type PostModel struct {
 	ID      uint   `gorm:"primaryKey"` // 主鍵
 	Title   string `gorm:"not null"`   // 標題
-	Content string                     // 內容
-	UserID  uint   `gorm:"not null"`   // 作者 ID
+	Content string // 內容
+	UserID  uint   `gorm:"not null"` // 作者 ID
 }
 
 // PostRepository 文章 Repository 介面
 type PostRepository interface {
 	Create(title, content string, userID uint) (*PostModel, error) // 建立文章
-	FindByID(id uint) (*PostModel, error)                         // 根據 ID 查詢
-	FindByUser(userID uint) ([]*PostModel, error)                 // 查詢使用者的文章
-	Delete(id uint) error                                         // 刪除文章
+	FindByID(id uint) (*PostModel, error)                          // 根據 ID 查詢
+	FindByUser(userID uint) ([]*PostModel, error)                  // 查詢使用者的文章
+	Delete(id uint) error                                          // 刪除文章
 }
 
 // GormPostRepository 用 GORM 實作 PostRepository
@@ -208,9 +208,9 @@ func TestIntegrationPostRepository(t *testing.T) {
 	t.Run("建立文章", func(t *testing.T) {
 		post, err := repo.Create("測試標題", "測試內容", 1)
 
-		require.NoError(t, err)              // 不應該有錯誤
-		assert.NotZero(t, post.ID)           // ID 應該不是 0（資料庫自動設定）
-		assert.Equal(t, "測試標題", post.Title) // 標題應該正確
+		require.NoError(t, err)               // 不應該有錯誤
+		assert.NotZero(t, post.ID)            // ID 應該不是 0（資料庫自動設定）
+		assert.Equal(t, "測試標題", post.Title)   // 標題應該正確
 		assert.Equal(t, uint(1), post.UserID) // 作者 ID 應該正確
 	})
 
@@ -222,8 +222,8 @@ func TestIntegrationPostRepository(t *testing.T) {
 		// 然後用 ID 查詢
 		found, err := repo.FindByID(created.ID)
 		require.NoError(t, err)
-		assert.Equal(t, created.ID, found.ID)       // ID 相同
-		assert.Equal(t, "查詢測試", found.Title)     // 標題相同
+		assert.Equal(t, created.ID, found.ID) // ID 相同
+		assert.Equal(t, "查詢測試", found.Title)  // 標題相同
 	})
 
 	t.Run("查詢不存在的文章", func(t *testing.T) {
@@ -238,7 +238,7 @@ func TestIntegrationPostRepository(t *testing.T) {
 		// 建立一篇屬於 userID=3 的文章（不應該出現在結果中）
 		repo.Create("文章 C", "內容 C", 3)
 
-		posts, err := repo.FindByUser(2)   // 查詢 userID=2 的文章
+		posts, err := repo.FindByUser(2) // 查詢 userID=2 的文章
 		require.NoError(t, err)
 		assert.GreaterOrEqual(t, len(posts), 2) // 應該至少有 2 篇（可能有更多）
 		for _, p := range posts {
@@ -281,7 +281,7 @@ func TestIntegrationPostRepository(t *testing.T) {
 // BenchmarkAdd 測試 Add 函式的效能
 func BenchmarkAdd(b *testing.B) { // b *testing.B 是基準測試控制器
 	for i := 0; i < b.N; i++ { // b.N 是 Go 自動決定的執行次數（確保結果穩定）
-		Add(100, 200)          // 執行被測試的函式
+		Add(100, 200) // 執行被測試的函式
 	}
 	// 輸出範例：BenchmarkAdd-8   1000000000   0.31 ns/op
 	// 意思：執行了 10 億次，每次 0.31 奈秒（非常快！）
@@ -290,17 +290,17 @@ func BenchmarkAdd(b *testing.B) { // b *testing.B 是基準測試控制器
 // BenchmarkDivide 測試 Divide 函式的效能（含錯誤處理）
 func BenchmarkDivide(b *testing.B) {
 	for i := 0; i < b.N; i++ { // 重複執行 b.N 次
-		Divide(100.0, 3.0)    // 正常的除法
+		Divide(100.0, 3.0) // 正常的除法
 	}
 }
 
 // BenchmarkUserValidate 測試 User.Validate 的效能
 func BenchmarkUserValidate(b *testing.B) {
 	user := User{Name: "Alice", Age: 25, Email: "alice@example.com"} // 建立測試用使用者
-	b.ResetTimer()                                                    // 重置計時器（不計入 user 建立的時間）
+	b.ResetTimer()                                                   // 重置計時器（不計入 user 建立的時間）
 
 	for i := 0; i < b.N; i++ { // 重複執行
-		user.Validate()         // 測試 Validate 的效能
+		user.Validate() // 測試 Validate 的效能
 	}
 }
 
@@ -331,10 +331,10 @@ type SafeCounter struct {
 // NewSafeCounter 建立 SafeCounter
 func NewSafeCounter() *SafeCounter {
 	c := &SafeCounter{ch: make(chan int)} // 建立 channel
-	go func() {                          // 啟動一個 goroutine 管理 counter 狀態
-		count := 0                       // 只有這個 goroutine 修改 count
-		for delta := range c.ch {        // 從 channel 讀取操作
-			count += delta               // 更新 count
+	go func() {                           // 啟動一個 goroutine 管理 counter 狀態
+		count := 0                // 只有這個 goroutine 修改 count
+		for delta := range c.ch { // 從 channel 讀取操作
+			count += delta // 更新 count
 		}
 	}()
 	return c

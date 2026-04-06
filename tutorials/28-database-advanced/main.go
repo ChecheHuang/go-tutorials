@@ -23,10 +23,10 @@
 package main // 宣告這是 main 套件
 
 import (
-	"errors"  // 標準錯誤處理
-	"fmt"     // 格式化輸出
-	"log"     // 日誌輸出
-	"time"    // 時間處理
+	"errors" // 標準錯誤處理
+	"fmt"    // 格式化輸出
+	"log"    // 日誌輸出
+	"time"   // 時間處理
 
 	"github.com/glebarez/sqlite" // 純 Go 的 SQLite 驅動程式
 	"gorm.io/gorm"               // GORM 核心框架
@@ -49,23 +49,23 @@ type Author struct {
 
 // Tag 標籤模型
 type Tag struct {
-	ID    uint   `gorm:"primaryKey"`           // 主鍵
-	Name  string `gorm:"size:50;uniqueIndex"`  // 標籤名稱：唯一索引
-	Posts []Post `gorm:"many2many:post_tags"`  // 多對多：一個標籤可以有很多文章
+	ID    uint   `gorm:"primaryKey"`          // 主鍵
+	Name  string `gorm:"size:50;uniqueIndex"` // 標籤名稱：唯一索引
+	Posts []Post `gorm:"many2many:post_tags"` // 多對多：一個標籤可以有很多文章
 }
 
 // Post 文章模型（示範複合索引）
 type Post struct {
-	ID        uint      `gorm:"primaryKey"`   // 主鍵
-	Title     string    `gorm:"size:200;not null"` // 標題
-	Content   string    `gorm:"type:text"`    // 內容（長文字）
-	AuthorID  uint      `gorm:"not null;index"` // 外鍵：加索引（JOIN 時會用到）
+	ID        uint      `gorm:"primaryKey"`                    // 主鍵
+	Title     string    `gorm:"size:200;not null"`             // 標題
+	Content   string    `gorm:"type:text"`                     // 內容（長文字）
+	AuthorID  uint      `gorm:"not null;index"`                // 外鍵：加索引（JOIN 時會用到）
 	Status    string    `gorm:"size:20;default:'draft';index"` // 狀態：加索引（常按狀態篩選）
-	ViewCount int       `gorm:"default:0"`    // 瀏覽數
-	Author    Author    `gorm:"foreignKey:AuthorID"` // 關聯：文章屬於某個作者
-	Tags      []Tag     `gorm:"many2many:post_tags"` // 多對多：文章有多個標籤
-	CreatedAt time.Time `gorm:"index"`        // 建立時間：加索引
-	UpdatedAt time.Time                        // 更新時間
+	ViewCount int       `gorm:"default:0"`                     // 瀏覽數
+	Author    Author    `gorm:"foreignKey:AuthorID"`           // 關聯：文章屬於某個作者
+	Tags      []Tag     `gorm:"many2many:post_tags"`           // 多對多：文章有多個標籤
+	CreatedAt time.Time `gorm:"index"`                         // 建立時間：加索引
+	UpdatedAt time.Time // 更新時間
 }
 
 // ==========================================================================
@@ -107,7 +107,7 @@ func demonstrateIndexes(db *gorm.DB) { // 示範索引
 	// `gorm:"index:idx_compound"` → 複合索引（多個欄位共用一個索引名稱）
 
 	// 建立測試資料
-	authors := []Author{           // 建立多個作者
+	authors := []Author{ // 建立多個作者
 		{Name: "Alice", Email: "alice@example.com", Country: "Taiwan"},
 		{Name: "Bob", Email: "bob@example.com", Country: "Japan"},
 		{Name: "Carol", Email: "carol@example.com", Country: "Taiwan"},
@@ -118,9 +118,9 @@ func demonstrateIndexes(db *gorm.DB) { // 示範索引
 	// Batch Insert（批量插入）：一次插入多筆，比逐筆插入快很多
 	// GORM 預設批量大小是 100，超過會自動分批
 	result := db.CreateInBatches(authors, 100) // 最多每批 100 筆
-	if result.Error != nil {                    // 如果插入失敗
+	if result.Error != nil {                   // 如果插入失敗
 		log.Printf("批量插入作者失敗: %v", result.Error) // 印出錯誤
-		return                                         // 提前返回
+		return                                   // 提前返回
 	}
 	fmt.Printf("✅ 批量插入 %d 位作者\n", result.RowsAffected) // 印出成功訊息
 
@@ -135,12 +135,12 @@ func demonstrateIndexes(db *gorm.DB) { // 示範索引
 	db.CreateInBatches(posts, 100) // 批量插入文章
 
 	// 用索引欄位查詢（快）
-	var taiwanAuthors []Author                                      // 儲存查詢結果
+	var taiwanAuthors []Author                                     // 儲存查詢結果
 	db.Where("country = ?", "Taiwan").Find(&taiwanAuthors)         // 用 country 索引查詢
 	fmt.Printf("✅ 台灣作者（用 country 索引）: %d 人\n", len(taiwanAuthors)) // 印出結果
 
 	// 用索引欄位查詢文章（快）
-	var publishedPosts []Post                                        // 儲存查詢結果
+	var publishedPosts []Post // 儲存查詢結果
 	db.Where("status = ? AND author_id = ?", "published", authors[0].ID).Find(&publishedPosts)
 	fmt.Printf("✅ Alice 的已發布文章（用 status+author_id 索引）: %d 篇\n", len(publishedPosts))
 
@@ -185,11 +185,11 @@ func demonstrateNPlusOne(db *gorm.DB) { // 示範 N+1 問題
 	// ---- 方法 A：會產生 N+1 問題的寫法（DON'T DO THIS！）----
 	fmt.Println("❌ 【N+1 問題示範】看看下面執行了幾條 SQL：")
 
-	var posts []Post                    // 儲存查詢到的文章
-	debugDB.Limit(3).Find(&posts)       // 查詢 3 篇文章（1 次 SQL）
+	var posts []Post              // 儲存查詢到的文章
+	debugDB.Limit(3).Find(&posts) // 查詢 3 篇文章（1 次 SQL）
 
-	for _, post := range posts {        // 遍歷每篇文章
-		var author Author               // 儲存作者
+	for _, post := range posts { // 遍歷每篇文章
+		var author Author                     // 儲存作者
 		debugDB.First(&author, post.AuthorID) // 每次迴圈都查一次資料庫！（N 次 SQL）
 		fmt.Printf("  文章「%s」→ 作者：%s\n", post.Title, author.Name)
 	}
@@ -198,13 +198,13 @@ func demonstrateNPlusOne(db *gorm.DB) { // 示範 N+1 問題
 	// ---- 方法 B：用 Preload 解決（DO THIS！）----
 	fmt.Println("\n✅ 【Preload 解法】只需 2 次 SQL：")
 
-	var postsWithAuthors []Post                // 儲存帶有作者資料的文章
+	var postsWithAuthors []Post                                // 儲存帶有作者資料的文章
 	debugDB.Preload("Author").Limit(3).Find(&postsWithAuthors) // Preload 自動批量查詢
 	// ↑ GORM 自動執行：
 	//   SELECT * FROM posts LIMIT 3
 	//   SELECT * FROM authors WHERE id IN (1,2,3)  ← 只有這一條！
 
-	for _, post := range postsWithAuthors {    // 遍歷文章（不需要再查資料庫）
+	for _, post := range postsWithAuthors { // 遍歷文章（不需要再查資料庫）
 		fmt.Printf("  文章「%s」→ 作者：%s（資料已在記憶體中，不需要查 DB）\n",
 			post.Title, post.Author.Name)
 	}
@@ -212,15 +212,15 @@ func demonstrateNPlusOne(db *gorm.DB) { // 示範 N+1 問題
 	// ---- Preload 進階用法 ----
 	fmt.Println("\n✅ 【Preload 進階】載入多個關聯：")
 
-	var fullPosts []Post                        // 儲存完整文章資料
+	var fullPosts []Post // 儲存完整文章資料
 	debugDB.
-		Preload("Author").                      // 預載入作者
-		Preload("Tags").                        // 預載入標籤（多對多）
-		Where("status = ?", "published").       // 只查已發布的
-		Limit(2).                               // 最多 2 篇
-		Find(&fullPosts)                        // 執行查詢
+		Preload("Author").                // 預載入作者
+		Preload("Tags").                  // 預載入標籤（多對多）
+		Where("status = ?", "published"). // 只查已發布的
+		Limit(2).                         // 最多 2 篇
+		Find(&fullPosts)                  // 執行查詢
 
-	for _, post := range fullPosts {            // 遍歷結果
+	for _, post := range fullPosts { // 遍歷結果
 		tagNames := make([]string, len(post.Tags)) // 收集標籤名稱
 		for i, tag := range post.Tags {
 			tagNames[i] = tag.Name
@@ -232,12 +232,12 @@ func demonstrateNPlusOne(db *gorm.DB) { // 示範 N+1 問題
 	// ---- Preload 條件篩選 ----
 	fmt.Println("\n✅ 【Preload 條件篩選】只載入特定關聯資料：")
 
-	var authorsWithPosts []Author               // 儲存作者（帶文章）
+	var authorsWithPosts []Author // 儲存作者（帶文章）
 	debugDB.
 		Preload("Posts", "status = ?", "published"). // 只預載入已發布的文章
-		Find(&authorsWithPosts)                 // 查詢所有作者
+		Find(&authorsWithPosts)                      // 查詢所有作者
 
-	for _, author := range authorsWithPosts {   // 遍歷作者
+	for _, author := range authorsWithPosts { // 遍歷作者
 		fmt.Printf("  %s 有 %d 篇已發布文章\n", author.Name, len(author.Posts))
 	}
 }
@@ -265,43 +265,43 @@ func demonstrateRawSQL(db *gorm.DB) { // 示範原始 SQL
 	fmt.Println("【db.Raw()：複雜查詢】")
 
 	// 用 SQL 統計每個國家的作者數量和平均文章數
-	type CountryStats struct {  // 自訂結果 struct
-		Country    string  // 國家名稱
+	type CountryStats struct { // 自訂結果 struct
+		Country     string // 國家名稱
 		AuthorCount int    // 作者數量
 	}
 
-	var stats []CountryStats                // 儲存統計結果
+	var stats []CountryStats // 儲存統計結果
 	db.Raw(`
 		SELECT country, COUNT(*) as author_count
 		FROM authors
 		GROUP BY country
 		ORDER BY author_count DESC
-	`).Scan(&stats)                         // 把查詢結果掃描到 struct slice
+	`).Scan(&stats) // 把查詢結果掃描到 struct slice
 
 	fmt.Println("各國作者統計：")
-	for _, s := range stats {               // 遍歷統計結果
+	for _, s := range stats { // 遍歷統計結果
 		fmt.Printf("  %s: %d 位作者\n", s.Country, s.AuthorCount)
 	}
 
 	// 帶參數的 Raw SQL（防止 SQL Injection，一定要用 ? 佔位符）
 	fmt.Println("\n【帶參數的 Raw SQL（? 佔位符）】")
 
-	type PostSummary struct {   // 文章摘要 struct
-		Title    string         // 文章標題
-		AuthorName string       // 作者名稱
+	type PostSummary struct { // 文章摘要 struct
+		Title      string // 文章標題
+		AuthorName string // 作者名稱
 	}
 
-	var summaries []PostSummary             // 儲存結果
+	var summaries []PostSummary // 儲存結果
 	db.Raw(`
 		SELECT posts.title, authors.name as author_name
 		FROM posts
 		JOIN authors ON posts.author_id = authors.id
 		WHERE authors.country = ?
 		ORDER BY posts.created_at DESC
-	`, "Taiwan").Scan(&summaries)           // ? 會被 "Taiwan" 替換（安全的方式）
+	`, "Taiwan").Scan(&summaries) // ? 會被 "Taiwan" 替換（安全的方式）
 
 	fmt.Println("台灣作者的文章：")
-	for _, s := range summaries {           // 遍歷結果
+	for _, s := range summaries { // 遍歷結果
 		fmt.Printf("  「%s」by %s\n", s.Title, s.AuthorName)
 	}
 
@@ -316,11 +316,11 @@ func demonstrateRawSQL(db *gorm.DB) { // 示範原始 SQL
 	// ---- 混合使用 GORM + Raw ----
 	fmt.Println("\n【混合 GORM + Raw（Where 子句）】")
 
-	var topPosts []Post                     // 儲存結果
-	db.Where("view_count > ?", 0).          // GORM 的 Where
-		Order("created_at DESC").            // GORM 的 Order
-		Limit(3).                            // GORM 的 Limit
-		Find(&topPosts)                      // GORM 的 Find
+	var topPosts []Post            // 儲存結果
+	db.Where("view_count > ?", 0). // GORM 的 Where
+					Order("created_at DESC"). // GORM 的 Order
+					Limit(3).                 // GORM 的 Limit
+					Find(&topPosts)           // GORM 的 Find
 
 	fmt.Printf("查詢到 %d 篇文章（混合寫法）\n", len(topPosts))
 
@@ -365,8 +365,8 @@ func demonstrateRawSQL(db *gorm.DB) { // 示範原始 SQL
 // MigrationRecord 模擬遷移記錄表（golang-migrate 會自動管理這個表）
 type MigrationRecord struct {
 	Version   int64     `gorm:"primaryKey"` // 遷移版本號（通常用時間戳）
-	AppliedAt time.Time                     // 套用時間
-	Name      string    `gorm:"size:200"`   // 遷移名稱
+	AppliedAt time.Time // 套用時間
+	Name      string    `gorm:"size:200"` // 遷移名稱
 }
 
 // demonstrateMigration 示範 Migration 概念
@@ -386,22 +386,22 @@ func demonstrateMigration(db *gorm.DB) { // 示範遷移管理
 	//   000003_add_view_count.up.sql
 	//   000003_add_view_count.down.sql
 
-	migrations := []MigrationRecord{         // 模擬遷移歷史
+	migrations := []MigrationRecord{ // 模擬遷移歷史
 		{Version: 1, Name: "create_authors_table", AppliedAt: time.Now().Add(-72 * time.Hour)},
 		{Version: 2, Name: "create_posts_table", AppliedAt: time.Now().Add(-48 * time.Hour)},
 		{Version: 3, Name: "add_view_count_to_posts", AppliedAt: time.Now().Add(-24 * time.Hour)},
 	}
 
-	for _, m := range migrations {          // 插入每個遷移記錄
+	for _, m := range migrations { // 插入每個遷移記錄
 		db.FirstOrCreate(&m, MigrationRecord{Version: m.Version}) // 已存在則不重複插入
 	}
 
 	// 查詢所有已套用的遷移
-	var applied []MigrationRecord           // 儲存已套用的遷移
-	db.Order("version asc").Find(&applied)  // 按版本號排序
+	var applied []MigrationRecord          // 儲存已套用的遷移
+	db.Order("version asc").Find(&applied) // 按版本號排序
 
 	fmt.Println("📋 已套用的資料庫遷移：")
-	for _, m := range applied {             // 遍歷遷移記錄
+	for _, m := range applied { // 遍歷遷移記錄
 		fmt.Printf("  v%03d %-35s 套用於 %s\n",
 			m.Version,
 			m.Name,
@@ -456,9 +456,9 @@ func demonstrateTransaction(db *gorm.DB) { // 示範交易進階
 	fmt.Println("【基本交易複習】")
 
 	// 確保 authors[0] 和 authors[1] 存在（先查出來）
-	var author1, author2 Author                    // 儲存兩個作者
-	db.First(&author1)                             // 取第一個作者
-	db.Offset(1).First(&author2)                   // 取第二個作者
+	var author1, author2 Author  // 儲存兩個作者
+	db.First(&author1)           // 取第一個作者
+	db.Offset(1).First(&author2) // 取第二個作者
 
 	err := db.Transaction(func(tx *gorm.DB) error { // 開始交易
 		// 在 tx 中的所有操作要嘛全成功，要嘛全失敗
@@ -484,18 +484,18 @@ func demonstrateTransaction(db *gorm.DB) { // 示範交易進階
 	// ---- SavePoint 示範 ----
 	fmt.Println("\n【SavePoint：中間存檔點】")
 
-	tx := db.Begin()           // 手動開始交易（不用 closure 的寫法）
-	if tx.Error != nil {       // 如果開始交易失敗
+	tx := db.Begin()     // 手動開始交易（不用 closure 的寫法）
+	if tx.Error != nil { // 如果開始交易失敗
 		log.Printf("開始交易失敗: %v", tx.Error) // 印出錯誤
-		return                                   // 提前返回
+		return                             // 提前返回
 	}
 
 	// 操作 A：建立文章（這個要保留）
 	postA := Post{Title: "SavePoint 測試：A 的文章", AuthorID: author1.ID, Status: "published"}
-	tx.Create(&postA)                       // 在交易中建立
+	tx.Create(&postA) // 在交易中建立
 	fmt.Printf("✅ 建立文章 A（ID: %d）\n", postA.ID)
 
-	tx.SavePoint("after_post_a")           // 建立 SavePoint，名稱為 "after_post_a"
+	tx.SavePoint("after_post_a") // 建立 SavePoint，名稱為 "after_post_a"
 	fmt.Println("📍 建立 SavePoint: after_post_a")
 
 	// 操作 B：模擬失敗的操作（這個要取消）
@@ -503,12 +503,12 @@ func demonstrateTransaction(db *gorm.DB) { // 示範交易進階
 	badAuthor := Author{Name: "Duplicate", Email: "alice@example.com"} // email 已存在！
 	if err := tx.Create(&badAuthor).Error; err != nil {                // 建立失敗
 		fmt.Printf("❌ 操作 B 失敗: %v\n", err)
-		tx.RollbackTo("after_post_a")                                   // 回到 SavePoint（A 保留）
+		tx.RollbackTo("after_post_a") // 回到 SavePoint（A 保留）
 		fmt.Println("⏪ Rollback 到 SavePoint after_post_a（文章 A 保留）")
 	}
 
 	// Commit：A 已保留，B 已取消
-	tx.Commit()                            // 提交交易（只有 A 被儲存）
+	tx.Commit() // 提交交易（只有 A 被儲存）
 	fmt.Println("✅ Commit 完成（文章 A 已儲存，壞資料已取消）")
 
 	// ---- 交易中的錯誤處理最佳實踐 ----
@@ -543,10 +543,10 @@ func demonstrateOptimizations(db *gorm.DB) { // 示範查詢優化
 		AuthorID uint
 	}
 
-	var titles []PostTitle                              // 儲存查詢結果
-	db.Model(&Post{}).Select("id, title, author_id").  // 只選三個欄位
-		Limit(3).                                       // 最多 3 筆
-		Scan(&titles)                                   // 掃描到自訂 struct
+	var titles []PostTitle                            // 儲存查詢結果
+	db.Model(&Post{}).Select("id, title, author_id"). // 只選三個欄位
+								Limit(3).     // 最多 3 筆
+								Scan(&titles) // 掃描到自訂 struct
 
 	fmt.Printf("✅ 只查詢 3 個欄位（比 SELECT * 更省頻寬和記憶體）：%d 筆\n", len(titles))
 	for _, t := range titles {
@@ -556,22 +556,22 @@ func demonstrateOptimizations(db *gorm.DB) { // 示範查詢優化
 	// ---- Count：先算數量 ----
 	fmt.Println("\n【Count：先確認有資料再查詳細】")
 
-	var count int64                                     // 儲存數量
+	var count int64                                                  // 儲存數量
 	db.Model(&Post{}).Where("status = ?", "published").Count(&count) // 只計數，不查詳細
 	fmt.Printf("✅ 已發布文章：%d 篇\n", count)
 
-	if count > 0 {                                      // 確認有資料才繼續查詢
+	if count > 0 { // 確認有資料才繼續查詢
 		fmt.Printf("  → 有資料，繼續查詢詳細資訊\n")
 	}
 
 	// ---- 分頁（Pagination）----
 	fmt.Println("\n【分頁查詢（生產環境必備）】")
 
-	page := 1                                           // 第幾頁（從 1 開始）
-	pageSize := 2                                       // 每頁幾筆
-	offset := (page - 1) * pageSize                     // 計算跳過幾筆
+	page := 1                       // 第幾頁（從 1 開始）
+	pageSize := 2                   // 每頁幾筆
+	offset := (page - 1) * pageSize // 計算跳過幾筆
 
-	var pagedPosts []Post                               // 儲存分頁結果
+	var pagedPosts []Post // 儲存分頁結果
 	db.Offset(offset).Limit(pageSize).Order("created_at desc").Find(&pagedPosts)
 
 	fmt.Printf("✅ 第 %d 頁（每頁 %d 筆）：查到 %d 筆\n", page, pageSize, len(pagedPosts))
@@ -590,7 +590,7 @@ func demonstrateOptimizations(db *gorm.DB) { // 示範查詢優化
 		return db.Order("created_at desc") // 最新的排前面
 	}
 
-	var scopedPosts []Post                              // 儲存結果
+	var scopedPosts []Post                                        // 儲存結果
 	db.Scopes(published, recentFirst).Limit(3).Find(&scopedPosts) // 組合多個 Scope
 
 	fmt.Printf("✅ 用 Scopes 查詢：%d 篇已發布文章（最新優先）\n", len(scopedPosts))
@@ -602,13 +602,13 @@ func demonstrateOptimizations(db *gorm.DB) { // 示範查詢優化
 	// 如果一次全查，記憶體會爆炸：var allPosts []Post; db.Find(&allPosts) ← 不要這樣！
 	// 用 FindInBatches 分批處理：每批 2 筆（示範用，實際通常 100-1000）
 
-	totalProcessed := 0                                // 記錄處理的總筆數
+	totalProcessed := 0 // 記錄處理的總筆數
 	result := db.FindInBatches(&[]Post{}, 2, func(tx *gorm.DB, batch int) error {
-		var batchPosts []Post                          // 這批的文章
-		tx.Find(&batchPosts)                           // 取這批資料
-		totalProcessed += len(batchPosts)              // 累計處理數量
+		var batchPosts []Post             // 這批的文章
+		tx.Find(&batchPosts)              // 取這批資料
+		totalProcessed += len(batchPosts) // 累計處理數量
 		fmt.Printf("  處理第 %d 批：%d 筆\n", batch, len(batchPosts))
-		return nil                                     // 繼續下一批
+		return nil // 繼續下一批
 	})
 
 	if result.Error != nil { // 如果處理失敗
@@ -631,12 +631,12 @@ func demonstrateOptimizations(db *gorm.DB) { // 示範查詢優化
 	fmt.Println("  ❌ ALL type     → 全表掃描（最慢）")
 
 	// 用 db.Raw 執行 EXPLAIN（SQLite 版本）
-	var explainResult []map[string]any           // 儲存 EXPLAIN 結果
+	var explainResult []map[string]any // 儲存 EXPLAIN 結果
 	db.Raw("EXPLAIN QUERY PLAN SELECT * FROM posts WHERE status = 'published'").
-		Scan(&explainResult)                             // 掃描結果
+		Scan(&explainResult) // 掃描結果
 
 	fmt.Println("\n  EXPLAIN QUERY PLAN 結果（status 欄位有索引）：")
-	for _, row := range explainResult {                  // 遍歷結果
+	for _, row := range explainResult { // 遍歷結果
 		fmt.Printf("  %v\n", row)
 	}
 }
@@ -691,11 +691,11 @@ var _ = errors.New // 確保 errors 套件被引用
 
 func main() { // 程式進入點
 	fmt.Println("==========================================") // 分隔線
-	fmt.Println(" 第二十二課：資料庫進階（Database Advanced）") // 標題
+	fmt.Println(" 第二十二課：資料庫進階（Database Advanced）")            // 標題
 	fmt.Println("==========================================") // 分隔線
 
-	db := initDB()    // 初始化資料庫
-	setupTags(db)     // 建立測試標籤
+	db := initDB() // 初始化資料庫
+	setupTags(db)  // 建立測試標籤
 
 	demonstrateIndexes(db)       // 示範 1：索引
 	demonstrateNPlusOne(db)      // 示範 2：N+1 問題
@@ -705,6 +705,6 @@ func main() { // 程式進入點
 	demonstrateOptimizations(db) // 示範 6：查詢優化
 
 	fmt.Println("\n==========================================") // 分隔線
-	fmt.Println(" 教學完成！")                                // 結尾
-	fmt.Println("==========================================") // 分隔線
+	fmt.Println(" 教學完成！")                                       // 結尾
+	fmt.Println("==========================================")   // 分隔線
 }

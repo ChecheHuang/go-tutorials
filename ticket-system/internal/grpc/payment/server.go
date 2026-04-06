@@ -98,6 +98,6 @@ func StartGRPCServer(lis net.Listener, svc PaymentServiceServer) *grpc.Server {
 // jsonCodec 用 JSON 編解碼（取代 protobuf，教學用途）
 type jsonCodec struct{}
 
-func (jsonCodec) Marshal(v any) ([]byte, error)   { return json.Marshal(v) }
+func (jsonCodec) Marshal(v any) ([]byte, error)      { return json.Marshal(v) }
 func (jsonCodec) Unmarshal(data []byte, v any) error { return json.Unmarshal(data, v) }
 func (jsonCodec) Name() string                       { return "json" }

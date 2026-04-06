@@ -31,7 +31,7 @@
 
 package main // 可執行程式的套件名稱
 
-import (         // 匯入需要的標準函式庫
+import ( // 匯入需要的標準函式庫
 	"errors"  // errors 套件：提供錯誤相關的工具函式
 	"fmt"     // fmt 套件：格式化輸出
 	"strconv" // strconv 套件：字串和其他型別的轉換
@@ -57,8 +57,8 @@ import (         // 匯入需要的標準函式庫
 // 用 errors.New() 建立一個「固定的」錯誤值
 // 命名慣例：以 Err 開頭（ErrNotFound, ErrUnauthorized, ErrInvalidInput...）
 // 用途：當你想讓呼叫方用 errors.Is() 來判斷「是不是這個特定的錯誤」
-var ErrNotFound = errors.New("找不到資源")       // 哨兵錯誤：資源不存在
-var ErrInvalidID = errors.New("無效的 ID")       // 哨兵錯誤：ID 不合法
+var ErrNotFound = errors.New("找不到資源")   // 哨兵錯誤：資源不存在
+var ErrInvalidID = errors.New("無效的 ID") // 哨兵錯誤：ID 不合法
 
 // --- 方式 2：fmt.Errorf() — 帶有動態訊息的錯誤 ---
 // 當錯誤訊息需要包含變數（例如 ID、名稱）時使用
@@ -218,26 +218,26 @@ func main() { // 程式的入口點
 	// ========================================
 	// 1. 基本錯誤處理模式
 	// ========================================
-	fmt.Println("=== 1. 基本錯誤處理模式 ===") // 印出區塊標題
+	fmt.Println("=== 1. 基本錯誤處理模式 ===")            // 印出區塊標題
 	fmt.Println("Go 的核心模式：呼叫函式 → 檢查 err → 處理或繼續") // 說明
 
 	// 成功的情況
 	user, err := findUser(1) // 呼叫 findUser，取得兩個回傳值
 	if err != nil {          // 永遠先檢查 err 是否為 nil
 		fmt.Println("  錯誤:", err) // 有錯誤就處理
-	} else {                       // 沒錯誤就使用結果
+	} else { // 沒錯誤就使用結果
 		fmt.Println("  找到使用者:", user.Name) // 印出使用者名稱
 	}
 
 	// 失敗的情況 1：無效 ID
-	_, err = findUser(-1)    // 用 _ 忽略不需要的回傳值（因為出錯時 user 是 nil）
-	if err != nil {          // 檢查錯誤
+	_, err = findUser(-1) // 用 _ 忽略不需要的回傳值（因為出錯時 user 是 nil）
+	if err != nil {       // 檢查錯誤
 		fmt.Println("  錯誤:", err) // 印出：無效的 ID
 	}
 
 	// 失敗的情況 2：找不到
-	_, err = findUser(999)   // ID 超出範圍
-	if err != nil {          // 檢查錯誤
+	_, err = findUser(999) // ID 超出範圍
+	if err != nil {        // 檢查錯誤
 		fmt.Println("  錯誤:", err) // 印出：找不到資源
 	}
 
@@ -246,18 +246,18 @@ func main() { // 程式的入口點
 	// ========================================
 	fmt.Println("\n=== 2. errors.Is（比較錯誤值）===") // 印出區塊標題
 
-	_, err = findUser(999) // 這會回傳 ErrNotFound
+	_, err = findUser(999)           // 這會回傳 ErrNotFound
 	if errors.Is(err, ErrNotFound) { // errors.Is 檢查 err 是否為（或包裝了）ErrNotFound
 		fmt.Println("  確認是 NotFound 錯誤 → 可以回傳 HTTP 404") // 根據錯誤類型做不同處理
 	}
 
-	_, err = findUser(-1) // 這會回傳 ErrInvalidID
+	_, err = findUser(-1)             // 這會回傳 ErrInvalidID
 	if errors.Is(err, ErrInvalidID) { // 檢查是否為 ErrInvalidID
 		fmt.Println("  確認是 InvalidID 錯誤 → 可以回傳 HTTP 400") // 做對應的處理
 	}
 
 	// errors.Is 的超能力：即使錯誤被包裝過，也能找到原始錯誤！
-	_, err = getUserProfile(999) // 這會回傳「包裝過的」ErrNotFound
+	_, err = getUserProfile(999)     // 這會回傳「包裝過的」ErrNotFound
 	if errors.Is(err, ErrNotFound) { // 即使被包裝了，errors.Is 也能穿透找到 ErrNotFound
 		fmt.Println("  包裝過的錯誤，errors.Is 也能找到原始的 ErrNotFound！") // 成功！
 	}
@@ -273,8 +273,8 @@ func main() { // 程式的入口點
 
 		// errors.As：從錯誤鏈中取出特定「型別」的錯誤
 		// errors.Is 比較「值」，errors.As 比較「型別」
-		var valErr *ValidationError                // 先宣告目標型別的變數
-		if errors.As(err, &valErr) {               // 嘗試從 err 中取出 *ValidationError
+		var valErr *ValidationError  // 先宣告目標型別的變數
+		if errors.As(err, &valErr) { // 嘗試從 err 中取出 *ValidationError
 			fmt.Println("  出錯欄位:", valErr.Field)   // 取出額外資訊：哪個欄位
 			fmt.Println("  錯誤訊息:", valErr.Message) // 取出額外資訊：具體訊息
 		}
@@ -283,8 +283,8 @@ func main() { // 程式的入口點
 	// 再試一個
 	err = validateEmail("") // 驗證空的 email
 	if err != nil {         // 有錯誤
-		var valErr *ValidationError            // 宣告目標型別變數
-		if errors.As(err, &valErr) {           // 從 err 中取出 *ValidationError
+		var valErr *ValidationError  // 宣告目標型別變數
+		if errors.As(err, &valErr) { // 從 err 中取出 *ValidationError
 			fmt.Println("  出錯欄位:", valErr.Field, "→", valErr.Message) // 印出詳細資訊
 		}
 	}
@@ -299,28 +299,28 @@ func main() { // 程式的入口點
 		fmt.Println("  外層錯誤:", err) // 印出包裝後的完整錯誤訊息
 
 		// errors.Unwrap：剝開一層包裝，取得被包裝的原始錯誤
-		inner := errors.Unwrap(err)    // 取得內層錯誤
+		inner := errors.Unwrap(err)   // 取得內層錯誤
 		fmt.Println("  內層錯誤:", inner) // 印出原始的「資料庫連線失敗」
 	}
 
 	// 示範 errors.Is 穿透包裝的能力
 	fmt.Println("\n  errors.Is 穿透包裝:") // 小標題
-	_, err = getUserProfile(999)           // 會回傳包裝過的 ErrNotFound
-	if err != nil {                        // 有錯誤
-		fmt.Println("  完整錯誤:", err)                                       // 印出包裝後的錯誤
+	_, err = getUserProfile(999)       // 會回傳包裝過的 ErrNotFound
+	if err != nil {                    // 有錯誤
+		fmt.Println("  完整錯誤:", err)                                                // 印出包裝後的錯誤
 		fmt.Println("  errors.Is(err, ErrNotFound):", errors.Is(err, ErrNotFound)) // true！穿透包裝
 	}
 
 	// ========================================
 	// 5. 串聯多個可能出錯的操作
 	// ========================================
-	fmt.Println("\n=== 5. 串聯錯誤處理 ===") // 印出區塊標題
+	fmt.Println("\n=== 5. 串聯錯誤處理 ===")   // 印出區塊標題
 	fmt.Println("模式：每一步都檢查 err，出錯就提早返回") // 說明
 
 	// 成功案例
 	result, err := processInput("42") // 傳入合法的數字字串
 	if err != nil {                   // 檢查錯誤
-		fmt.Println("  錯誤:", err)  // 有錯誤就印出
+		fmt.Println("  錯誤:", err) // 有錯誤就印出
 	} else {
 		fmt.Println("  結果:", result) // 成功印出結果
 	}
@@ -340,44 +340,44 @@ func main() { // 程式的入口點
 	// ========================================
 	// 6. panic 和 recover
 	// ========================================
-	fmt.Println("\n=== 6. panic 和 recover ===") // 印出區塊標題
+	fmt.Println("\n=== 6. panic 和 recover ===")     // 印出區塊標題
 	fmt.Println("panic = 嚴重錯誤（廚房著火），recover = 消防員") // 類比說明
 
-	riskyOperation()                                       // 這個函式內部會 panic，但被 recover 攔截
+	riskyOperation()                             // 這個函式內部會 panic，但被 recover 攔截
 	fmt.Println("  程式繼續執行（panic 已被 recover 攔截）") // 程式沒有崩潰！
 
 	// ========================================
 	// 7. panic vs error 決策指南
 	// ========================================
-	fmt.Println("\n=== 7. 何時用 error，何時用 panic？===") // 印出區塊標題
+	fmt.Println("\n=== 7. 何時用 error，何時用 panic？===")                     // 印出區塊標題
 	fmt.Println("  ┌──────────────┬─────────────────────────────────┐") // 表格頂部
-	fmt.Println("  │ 情境         │ 使用方式                         │") // 表頭
+	fmt.Println("  │ 情境         │ 使用方式                         │")      // 表頭
 	fmt.Println("  ├──────────────┼─────────────────────────────────┤") // 分隔線
-	fmt.Println("  │ 檔案不存在   │ error（可預期，呼叫方能處理）     │") // 可預期錯誤
-	fmt.Println("  │ 網路逾時     │ error（常見情況，需要重試邏輯）   │") // 可預期錯誤
-	fmt.Println("  │ 使用者輸入錯 │ error（驗證失敗是正常的）         │") // 可預期錯誤
-	fmt.Println("  │ 設定檔壞了   │ panic（程式根本無法啟動）         │") // 不可恢復
-	fmt.Println("  │ 邏輯 bug     │ panic（不應該發生的情況）         │") // 不可恢復
+	fmt.Println("  │ 檔案不存在   │ error（可預期，呼叫方能處理）     │")                // 可預期錯誤
+	fmt.Println("  │ 網路逾時     │ error（常見情況，需要重試邏輯）   │")                // 可預期錯誤
+	fmt.Println("  │ 使用者輸入錯 │ error（驗證失敗是正常的）         │")               // 可預期錯誤
+	fmt.Println("  │ 設定檔壞了   │ panic（程式根本無法啟動）         │")              // 不可恢復
+	fmt.Println("  │ 邏輯 bug     │ panic（不應該發生的情況）         │")           // 不可恢復
 	fmt.Println("  └──────────────┴─────────────────────────────────┘") // 表格底部
 
 	// ========================================
 	// 8. 最佳實踐總結
 	// ========================================
-	fmt.Println("\n=== 8. 最佳實踐 ===")                               // 印出區塊標題
-	fmt.Println("  1. 永遠檢查 error，不要用 _ 忽略它")                  // 規則 1
+	fmt.Println("\n=== 8. 最佳實踐 ===")                     // 印出區塊標題
+	fmt.Println("  1. 永遠檢查 error，不要用 _ 忽略它")             // 規則 1
 	fmt.Println("  2. 用 fmt.Errorf + %w 包裝錯誤，保留上下文和錯誤鏈") // 規則 2
-	fmt.Println("  3. 底層回傳錯誤，上層處理錯誤（錯誤邊界）")            // 規則 3
-	fmt.Println("  4. 只在真正不可恢復的情況下使用 panic")                // 規則 4
-	fmt.Println("  5. 用 errors.Is 比較值，errors.As 比較型別")          // 規則 5
-	fmt.Println("  6. 哨兵錯誤用 ErrXxx 命名，方便呼叫方判斷")           // 規則 6
+	fmt.Println("  3. 底層回傳錯誤，上層處理錯誤（錯誤邊界）")              // 規則 3
+	fmt.Println("  4. 只在真正不可恢復的情況下使用 panic")             // 規則 4
+	fmt.Println("  5. 用 errors.Is 比較值，errors.As 比較型別")   // 規則 5
+	fmt.Println("  6. 哨兵錯誤用 ErrXxx 命名，方便呼叫方判斷")          // 規則 6
 
 	// ========================================
 	// 結語
 	// ========================================
-	fmt.Println("\n=== 學習完成！ ===")                                                // 結束訊息
-	fmt.Println("Go 的錯誤處理看起來很囉唆（到處都是 if err != nil），")                  // 感想
-	fmt.Println("但這種「顯式處理」讓你永遠知道程式在哪裡可能出錯、出了什麼錯。")          // 優點
-	fmt.Println("下一課：套件與模組（Packages & Modules）— 如何組織和分享你的程式碼。")   // 預告
+	fmt.Println("\n=== 學習完成！ ===")                              // 結束訊息
+	fmt.Println("Go 的錯誤處理看起來很囉唆（到處都是 if err != nil），")          // 感想
+	fmt.Println("但這種「顯式處理」讓你永遠知道程式在哪裡可能出錯、出了什麼錯。")              // 優點
+	fmt.Println("下一課：套件與模組（Packages & Modules）— 如何組織和分享你的程式碼。") // 預告
 }
 
 // ========================================

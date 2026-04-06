@@ -20,9 +20,9 @@
 
 package main // 每個可執行的 Go 程式都必須是 main 套件
 
-import (                 // import 區塊：匯入需要的套件
-	"encoding/json"      // encoding/json：Go 標準庫的 JSON 編碼/解碼套件
-	"fmt"                // fmt：格式化輸出，用來印東西到終端機
+import ( // import 區塊：匯入需要的套件
+	"encoding/json" // encoding/json：Go 標準庫的 JSON 編碼/解碼套件
+	"fmt"           // fmt：格式化輸出，用來印東西到終端機
 )
 
 // =============================================================================
@@ -170,21 +170,21 @@ func main() {
 	// Marshal 的意思是「編組」，把 Go 結構體轉成 JSON 字串
 	fmt.Println("=== 示範 1：結構體 → JSON（Marshal）===") // 印出標題
 
-	user := User{                          // 建立一個 User 結構體
-		ID:       1,                        // ID 設為 1
-		Username: "alice",                  // 使用者名稱
-		Email:    "alice@example.com",      // Email
-		Password: "secret123",              // 密碼（有 json:"-"，不會出現在 JSON）
-		Age:      25,                       // 年齡
-		Nickname: "",                       // 空字串 + omitempty → 不會出現在 JSON
+	user := User{ // 建立一個 User 結構體
+		ID:       1,                   // ID 設為 1
+		Username: "alice",             // 使用者名稱
+		Email:    "alice@example.com", // Email
+		Password: "secret123",         // 密碼（有 json:"-"，不會出現在 JSON）
+		Age:      25,                  // 年齡
+		Nickname: "",                  // 空字串 + omitempty → 不會出現在 JSON
 	}
 
 	// json.Marshal(值) → 把結構體轉成 JSON 位元組切片（[]byte）
 	// 回傳兩個值：JSON 位元組和 error
-	jsonBytes, err := json.Marshal(user)   // 序列化 user 結構體
-	if err != nil {                        // 如果序列化失敗
-		fmt.Println("序列化錯誤:", err)      // 印出錯誤訊息
-		return                              // 提早返回
+	jsonBytes, err := json.Marshal(user) // 序列化 user 結構體
+	if err != nil {                      // 如果序列化失敗
+		fmt.Println("序列化錯誤:", err) // 印出錯誤訊息
+		return                     // 提早返回
 	}
 	// string(jsonBytes) 把位元組切片轉成字串，方便印出
 	fmt.Println("Marshal 結果:", string(jsonBytes)) // 印出 JSON 字串
@@ -196,12 +196,12 @@ func main() {
 	// json.MarshalIndent(值, 前綴, 縮排) → 產生格式化（好看）的 JSON
 	// 第二個參數是每行前綴（通常空字串），第三個參數是縮排字串
 	prettyJSON, err := json.MarshalIndent(user, "", "  ") // 用兩個空格縮排
-	if err != nil {                        // 如果序列化失敗
+	if err != nil {                                       // 如果序列化失敗
 		fmt.Println("格式化序列化錯誤:", err) // 印出錯誤
-		return                              // 提早返回
+		return                        // 提早返回
 	}
-	fmt.Println("MarshalIndent 結果:")     // 印出標題
-	fmt.Println(string(prettyJSON))        // 印出格式化的 JSON
+	fmt.Println("MarshalIndent 結果:") // 印出標題
+	fmt.Println(string(prettyJSON))  // 印出格式化的 JSON
 
 	fmt.Println() // 印出空行分隔
 
@@ -221,18 +221,18 @@ func main() {
 		"password": "hacker_attempt"
 	}` // 原始 JSON 字串（使用反引號包住，可以跨行）
 
-	var user2 User                                     // 宣告一個空的 User 結構體
-	err = json.Unmarshal([]byte(jsonStr), &user2)      // 把 JSON 字串解析到 user2 中
+	var user2 User                                // 宣告一個空的 User 結構體
+	err = json.Unmarshal([]byte(jsonStr), &user2) // 把 JSON 字串解析到 user2 中
 	// []byte(jsonStr) → 把字串轉成位元組切片（Unmarshal 需要 []byte）
 	// &user2 → 傳入 user2 的指標（讓 Unmarshal 能修改 user2 的值）
-	if err != nil {                                    // 如果解析失敗
-		fmt.Println("反序列化錯誤:", err)                // 印出錯誤
-		return                                          // 提早返回
+	if err != nil { // 如果解析失敗
+		fmt.Println("反序列化錯誤:", err) // 印出錯誤
+		return                      // 提早返回
 	}
 
 	// %+v 格式化列印結構體，會顯示欄位名稱
-	fmt.Printf("Unmarshal 結果: %+v\n", user2)         // 印出結構體內容
-	fmt.Println("Password 欄位:", user2.Password)       // 印出密碼欄位
+	fmt.Printf("Unmarshal 結果: %+v\n", user2)    // 印出結構體內容
+	fmt.Println("Password 欄位:", user2.Password) // 印出密碼欄位
 	// 密碼會是空字串！json:"-" 阻止了 JSON 中的 password 寫入 Password 欄位
 
 	fmt.Println() // 印出空行分隔
@@ -243,26 +243,26 @@ func main() {
 	fmt.Println("=== 示範 3：omitempty 效果對比 ===") // 印出標題
 
 	// 情境一：欄位有值 → omitempty 不起作用，正常輸出
-	userWithValues := User{                // 建立有值的使用者
-		ID:       1,                        // ID
-		Username: "test",                   // 使用者名稱
-		Age:      25,                       // 年齡有值 → 會出現在 JSON
-		Nickname: "小T",                    // 暱稱有值 → 會出現在 JSON
+	userWithValues := User{ // 建立有值的使用者
+		ID:       1,      // ID
+		Username: "test", // 使用者名稱
+		Age:      25,     // 年齡有值 → 會出現在 JSON
+		Nickname: "小T",   // 暱稱有值 → 會出現在 JSON
 	}
-	j1, _ := json.Marshal(userWithValues)  // 序列化（忽略 error）
+	j1, _ := json.Marshal(userWithValues) // 序列化（忽略 error）
 	fmt.Println("有值:", string(j1))        // 印出結果
 	// 輸出：{"id":1,"username":"test","email":"","age":25,"nickname":"小T"}
 	// 注意：email 沒有 omitempty，所以即使是空字串也會出現
 
 	// 情境二：欄位是零值 → omitempty 生效，省略這些欄位
-	userWithZeros := User{                 // 建立零值的使用者
-		ID:       2,                        // ID
-		Username: "test2",                  // 使用者名稱
+	userWithZeros := User{ // 建立零值的使用者
+		ID:       2,       // ID
+		Username: "test2", // 使用者名稱
 		// Age 沒給 → 預設是 0（零值）→ omitempty 會省略
 		// Nickname 沒給 → 預設是 ""（空字串）→ omitempty 會省略
 	}
-	j2, _ := json.Marshal(userWithZeros)   // 序列化
-	fmt.Println("零值:", string(j2))        // 印出結果
+	j2, _ := json.Marshal(userWithZeros) // 序列化
+	fmt.Println("零值:", string(j2))       // 印出結果
 	// 輸出：{"id":2,"username":"test2","email":""}
 	// age 和 nickname 因為 omitempty 被省略了
 
@@ -287,14 +287,14 @@ func main() {
 		Author  Author `json:"author"`  // 作者（巢狀結構體）→ JSON 會變成巢狀物件
 	}
 
-	post := Post{                                            // 建立文章
-		Title:   "Go 教學",                                   // 設定標題
-		Content: "學習 Go 語言...",                            // 設定內容
+	post := Post{ // 建立文章
+		Title:   "Go 教學",                                    // 設定標題
+		Content: "學習 Go 語言...",                              // 設定內容
 		Author:  Author{Name: "Alice", Email: "a@test.com"}, // 設定作者
 	}
 
 	postJSON, _ := json.MarshalIndent(post, "", "  ") // 格式化序列化
-	fmt.Println(string(postJSON))                      // 印出結果
+	fmt.Println(string(postJSON))                     // 印出結果
 	// 輸出會是巢狀的 JSON：
 	// {
 	//   "title": "Go 教學",
@@ -313,13 +313,13 @@ func main() {
 	// 切片（slice）序列化後會變成 JSON 陣列（array）
 	fmt.Println("=== 示範 5：JSON 陣列 ===") // 印出標題
 
-	users := []User{                                          // 建立 User 切片
+	users := []User{ // 建立 User 切片
 		{ID: 1, Username: "alice", Email: "a@test.com", Age: 25}, // 第一個使用者
 		{ID: 2, Username: "bob", Email: "b@test.com", Age: 30},   // 第二個使用者
 	}
 
 	usersJSON, _ := json.MarshalIndent(users, "", "  ") // 格式化序列化
-	fmt.Println(string(usersJSON))                       // 印出 JSON 陣列
+	fmt.Println(string(usersJSON))                      // 印出 JSON 陣列
 
 	fmt.Println() // 印出空行分隔
 
@@ -330,17 +330,17 @@ func main() {
 	// interface{} 表示「任意型別」（Go 1.18+ 可以寫成 any）
 	fmt.Println("=== 示範 6：動態 JSON ===") // 印出標題
 
-	response := map[string]interface{}{    // 建立一個 map（鍵是字串，值是任意型別）
-		"code":    200,                     // HTTP 狀態碼
-		"message": "success",               // 訊息
-		"data": map[string]interface{}{     // 巢狀 map（資料內容）
-			"total": 42,                    // 總數
+	response := map[string]interface{}{ // 建立一個 map（鍵是字串，值是任意型別）
+		"code":    200,       // HTTP 狀態碼
+		"message": "success", // 訊息
+		"data": map[string]interface{}{ // 巢狀 map（資料內容）
+			"total": 42,                      // 總數
 			"items": []string{"a", "b", "c"}, // 字串切片
 		},
 	}
 
 	respJSON, _ := json.MarshalIndent(response, "", "  ") // 格式化序列化
-	fmt.Println(string(respJSON))                          // 印出結果
+	fmt.Println(string(respJSON))                         // 印出結果
 	// 注意：map 的鍵順序不固定（Go 的 map 是無序的）
 
 	fmt.Println() // 印出空行分隔
@@ -352,59 +352,59 @@ func main() {
 	fmt.Println("=== 示範 7：JSON → map ===") // 印出標題
 
 	unknownJSON := `{"name": "Alice", "score": 95.5, "active": true}` // 不確定結構的 JSON
-	var result map[string]interface{}                                   // 宣告一個 map 來接收
-	err = json.Unmarshal([]byte(unknownJSON), &result)                 // 解析 JSON 到 map
-	if err != nil {                                                    // 如果解析失敗
-		fmt.Println("解析錯誤:", err)                                    // 印出錯誤
-		return                                                          // 提早返回
+	var result map[string]interface{}                                 // 宣告一個 map 來接收
+	err = json.Unmarshal([]byte(unknownJSON), &result)                // 解析 JSON 到 map
+	if err != nil {                                                   // 如果解析失敗
+		fmt.Println("解析錯誤:", err) // 印出錯誤
+		return                    // 提早返回
 	}
-	fmt.Println("name:", result["name"])       // 取得 name 的值（型別是 interface{}）
-	fmt.Println("score:", result["score"])      // 取得 score 的值（JSON 數字會變成 float64）
-	fmt.Println("active:", result["active"])    // 取得 active 的值（JSON 布林會變成 bool）
+	fmt.Println("name:", result["name"])     // 取得 name 的值（型別是 interface{}）
+	fmt.Println("score:", result["score"])   // 取得 score 的值（JSON 數字會變成 float64）
+	fmt.Println("active:", result["active"]) // 取得 active 的值（JSON 布林會變成 bool）
 
 	fmt.Println() // 印出空行分隔
 
 	// =================================================================
 	// 附錄：binding 驗證標籤速查表
 	// =================================================================
-	fmt.Println("=== binding 驗證標籤速查表 ===") // 印出標題
-	fmt.Println("required       → 必填（不可為零值）")               // 必填規則
-	fmt.Println("min=3          → 字串最短 3 字元 / 數字最小值 3")   // 最小值
-	fmt.Println("max=50         → 字串最長 50 字元 / 數字最大值 50") // 最大值
-	fmt.Println("email          → 必須是合法的 Email 格式")          // Email 驗證
-	fmt.Println("omitempty      → 空值時跳過驗證（選填欄位）")        // 選填
-	fmt.Println("oneof=a b c    → 值必須是 a、b 或 c 之一")         // 列舉值
-	fmt.Println("gt=0           → 大於 0（greater than）")          // 大於
+	fmt.Println("=== binding 驗證標籤速查表 ===")                        // 印出標題
+	fmt.Println("required       → 必填（不可為零值）")                     // 必填規則
+	fmt.Println("min=3          → 字串最短 3 字元 / 數字最小值 3")           // 最小值
+	fmt.Println("max=50         → 字串最長 50 字元 / 數字最大值 50")         // 最大值
+	fmt.Println("email          → 必須是合法的 Email 格式")               // Email 驗證
+	fmt.Println("omitempty      → 空值時跳過驗證（選填欄位）")                 // 選填
+	fmt.Println("oneof=a b c    → 值必須是 a、b 或 c 之一")               // 列舉值
+	fmt.Println("gt=0           → 大於 0（greater than）")            // 大於
 	fmt.Println("gte=0          → 大於等於 0（greater than or equal）") // 大於等於
-	fmt.Println("lt=100         → 小於 100（less than）")           // 小於
+	fmt.Println("lt=100         → 小於 100（less than）")             // 小於
 	fmt.Println("lte=100        → 小於等於 100（less than or equal）")  // 小於等於
-	fmt.Println("len=10         → 長度必須剛好是 10")                // 固定長度
-	fmt.Println("url            → 必須是合法的 URL")                 // URL 驗證
+	fmt.Println("len=10         → 長度必須剛好是 10")                    // 固定長度
+	fmt.Println("url            → 必須是合法的 URL")                    // URL 驗證
 
 	fmt.Println() // 印出空行分隔
 
 	// =================================================================
 	// 附錄：gorm 標籤速查表
 	// =================================================================
-	fmt.Println("=== gorm 標籤速查表 ===")    // 印出標題
-	fmt.Println("primaryKey     → 主鍵（每筆資料的唯一識別）")       // 主鍵
+	fmt.Println("=== gorm 標籤速查表 ===")                       // 印出標題
+	fmt.Println("primaryKey     → 主鍵（每筆資料的唯一識別）")           // 主鍵
 	fmt.Println("autoIncrement  → 自動遞增（通常和 primaryKey 搭配）") // 自動遞增
-	fmt.Println("uniqueIndex    → 唯一索引（值不可重複，如 Email）")  // 唯一索引
-	fmt.Println("index          → 一般索引（加速查詢）")             // 一般索引
-	fmt.Println("not null       → 不可為空（必須有值）")             // 非空
-	fmt.Println("size:200       → 欄位長度（VARCHAR(200)）")        // 欄位長度
+	fmt.Println("uniqueIndex    → 唯一索引（值不可重複，如 Email）")     // 唯一索引
+	fmt.Println("index          → 一般索引（加速查詢）")              // 一般索引
+	fmt.Println("not null       → 不可為空（必須有值）")              // 非空
+	fmt.Println("size:200       → 欄位長度（VARCHAR(200)）")      // 欄位長度
 	fmt.Println("type:text      → 資料庫型別（TEXT、BLOB 等）")      // 型別
-	fmt.Println("default:0      → 預設值（沒給值時自動填入）")        // 預設值
-	fmt.Println("column:user_id → 自訂欄位名稱")                    // 自訂欄位名
-	fmt.Println("foreignKey:X   → 外鍵（建立表格之間的關聯）")       // 外鍵
+	fmt.Println("default:0      → 預設值（沒給值時自動填入）")           // 預設值
+	fmt.Println("column:user_id → 自訂欄位名稱")                  // 自訂欄位名
+	fmt.Println("foreignKey:X   → 外鍵（建立表格之間的關聯）")           // 外鍵
 
 	fmt.Println() // 印出空行分隔
 
 	// =================================================================
 	// 附錄：example 標籤速查
 	// =================================================================
-	fmt.Println("=== example 標籤速查 ===")   // 印出標題
+	fmt.Println("=== example 標籤速查 ===")                   // 印出標題
 	fmt.Println("example:\"值\"  → Swagger API 文件中顯示的範例值") // 範例值
-	fmt.Println("用途：讓 API 文件更清楚，開發者一看就知道要填什麼")  // 用途說明
-	fmt.Println("注意：不會影響程式邏輯，只影響文件產生工具")          // 注意事項
+	fmt.Println("用途：讓 API 文件更清楚，開發者一看就知道要填什麼")            // 用途說明
+	fmt.Println("注意：不會影響程式邏輯，只影響文件產生工具")                  // 注意事項
 }

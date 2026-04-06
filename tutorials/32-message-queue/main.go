@@ -37,19 +37,19 @@ import (
 type MessageType string
 
 const (
-	MsgTypeOrderCreated  MessageType = "order.created"   // 訂單建立
-	MsgTypeOrderPaid     MessageType = "order.paid"       // 訂單付款
-	MsgTypeEmailSend     MessageType = "email.send"       // 寄送 Email
+	MsgTypeOrderCreated    MessageType = "order.created"    // 訂單建立
+	MsgTypeOrderPaid       MessageType = "order.paid"       // 訂單付款
+	MsgTypeEmailSend       MessageType = "email.send"       // 寄送 Email
 	MsgTypeInventoryDeduct MessageType = "inventory.deduct" // 庫存扣除
 )
 
 // Message 訊息結構
 type Message struct {
-	ID        string      // 訊息唯一 ID
-	Type      MessageType // 訊息類型
-	Payload   any         // 訊息內容
-	Timestamp time.Time   // 發送時間
-	RetryCount int        // 重試次數
+	ID         string      // 訊息唯一 ID
+	Type       MessageType // 訊息類型
+	Payload    any         // 訊息內容
+	Timestamp  time.Time   // 發送時間
+	RetryCount int         // 重試次數
 }
 
 func (m Message) String() string {
@@ -62,10 +62,10 @@ func (m Message) String() string {
 
 // Queue 基於 channel 的簡單訊息佇列
 type Queue struct {
-	name    string
-	ch      chan Message
-	mu      sync.RWMutex
-	stats   QueueStats
+	name  string
+	ch    chan Message
+	mu    sync.RWMutex
+	stats QueueStats
 }
 
 // QueueStats 佇列統計
@@ -113,9 +113,9 @@ type Handler func(msg Message) error
 
 // Consumer 訊息消費者
 type Consumer struct {
-	name    string
-	queue   *Queue
-	handler Handler
+	name     string
+	queue    *Queue
+	handler  Handler
 	maxRetry int
 }
 
@@ -177,10 +177,10 @@ func (c *Consumer) process(msg Message) {
 
 // Order 訂單
 type Order struct {
-	ID       string
-	UserID   string
-	Amount   float64
-	Items    []string
+	ID     string
+	UserID string
+	Amount float64
+	Items  []string
 }
 
 // EmailTask Email 任務
@@ -292,8 +292,8 @@ func demonstrateBasicQueue() {
 
 		// 同時發布 Email 訊息
 		_ = emailQueue.Publish(Message{
-			ID:        fmt.Sprintf("email-%d", i+1),
-			Type:      MsgTypeEmailSend,
+			ID:   fmt.Sprintf("email-%d", i+1),
+			Type: MsgTypeEmailSend,
 			Payload: EmailTask{
 				To:      fmt.Sprintf("user%d@example.com", i+1),
 				Subject: fmt.Sprintf("訂單確認：%s", order.ID),

@@ -87,7 +87,7 @@ func findUserByIDValue(id int) (User, bool) { // 回傳值和是否找到
 	}
 
 	user, exists := users[id] // 從 map 查詢
-	return user, exists        // 回傳查詢結果和是否存在
+	return user, exists       // 回傳查詢結果和是否存在
 }
 
 // ========================================
@@ -136,17 +136,17 @@ func main() { // 程式進入點
 	p := &x // & 取址運算子：取得 x 的記憶體位址（這是「房子的地址」）
 	// p 的型別是 *int（指向 int 的指標）
 
-	fmt.Println("x 的值:", x)       // 印出 42（直接看房子裡的東西）
+	fmt.Println("x 的值:", x)      // 印出 42（直接看房子裡的東西）
 	fmt.Println("x 的位址:", p)     // 印出類似 0xc0000b4008 的位址
 	fmt.Printf("p 的型別: %T\n", p) // *int（指向 int 的指標型別）
 
 	fmt.Println("*p 的值:", *p) // * 解引用：透過地址找到房子，看裡面的值（42）
 
-	*p = 100                       // 透過指標修改原始值（透過地址改了房子裡的東西）
+	*p = 100                    // 透過指標修改原始值（透過地址改了房子裡的東西）
 	fmt.Println("修改後 x 的值:", x) // 100（x 真的被改變了！）
 
 	// 再看一個例子：兩個指標指向同一個變數
-	p2 := &x                        // p2 也指向 x（兩張名片都寫著同一個地址）
+	p2 := &x                         // p2 也指向 x（兩張名片都寫著同一個地址）
 	fmt.Println("p == p2:", p == p2) // true（兩個指標指向同一個位址）
 	fmt.Println("*p2:", *p2)         // 100（透過 p2 也能看到 x 的值）
 
@@ -158,11 +158,11 @@ func main() { // 程式進入點
 	value := 10 // 宣告一個變數 value，值是 10
 
 	// Go 預設「傳值」：函式收到的是副本
-	doubleByValue(value)               // 傳入 value 的「副本」
+	doubleByValue(value)             // 傳入 value 的「副本」
 	fmt.Println("傳值後 value:", value) // 仍然是 10（副本被修改，原始值不受影響）
 
 	// 傳入指標：函式可以修改原始值
-	doubleByPointer(&value)              // & 取址：傳入 value 的「地址」
+	doubleByPointer(&value)           // & 取址：傳入 value 的「地址」
 	fmt.Println("傳指標後 value:", value) // 變成 20（透過指標修改了原始值）
 
 	// ========================================
@@ -180,9 +180,9 @@ func main() { // 程式進入點
 	fmt.Println("直接存取:", user.Name)    // 透過值直接存取
 
 	// 用函式修改結構體
-	fmt.Println("生日前年齡:", user.Age)  // 25
-	celebrateBirthday(&user)             // 傳入指標，函式能修改原始的 user
-	fmt.Println("生日後年齡:", user.Age)  // 26（被修改了！）
+	fmt.Println("生日前年齡:", user.Age) // 25
+	celebrateBirthday(&user)        // 傳入指標，函式能修改原始的 user
+	fmt.Println("生日後年齡:", user.Age) // 26（被修改了！）
 
 	// ========================================
 	// 4. new() 函式
@@ -194,14 +194,14 @@ func main() { // 程式進入點
 	//   2. 把這塊記憶體初始化為零值
 	//   3. 回傳指向這塊記憶體的指標 *T
 
-	intPtr := new(int)                  // 分配一個 int，初始化為 0，回傳 *int
+	intPtr := new(int)                   // 分配一個 int，初始化為 0，回傳 *int
 	fmt.Println("new(int) 的值:", *intPtr) // 0（int 的零值）
 
-	*intPtr = 42                         // 透過指標賦值
-	fmt.Println("賦值後:", *intPtr)       // 42
+	*intPtr = 42                 // 透過指標賦值
+	fmt.Println("賦值後:", *intPtr) // 42
 
-	userPtr2 := new(User)                 // 分配一個 User，所有欄位都是零值
-	fmt.Println("new(User):", *userPtr2)  // {0  0}（ID=0, Name="", Age=0）
+	userPtr2 := new(User)                // 分配一個 User，所有欄位都是零值
+	fmt.Println("new(User):", *userPtr2) // {0  0}（ID=0, Name="", Age=0）
 
 	// new() 等同於這種寫法：
 	// var u User       // 宣告零值的 User
@@ -212,7 +212,7 @@ func main() { // 程式進入點
 	// ========================================
 	fmt.Println("\n=== 5. nil 指標 ===") // 章節標題
 
-	var nilPtr *User // 宣告一個指標但沒有初始化，值是 nil
+	var nilPtr *User               // 宣告一個指標但沒有初始化，值是 nil
 	fmt.Println("nil 指標:", nilPtr) // <nil>（不指向任何東西）
 
 	// ⚠️ 使用指標前一定要檢查 nil！
@@ -244,7 +244,7 @@ func main() { // 程式進入點
 
 	// 方式 B：回傳 (User, bool) —— 也可以，但不如 *User 直覺
 	userVal, exists := findUserByIDValue(1) // 回傳值和布林值
-	if exists {                              // 用 bool 判斷是否存在
+	if exists {                             // 用 bool 判斷是否存在
 		fmt.Println("方式 B 找到:", userVal.Name) // Alice
 	}
 
@@ -279,9 +279,9 @@ func main() { // 程式進入點
 
 	nums := []int{1, 2, 3, 4, 5} // 建立一個切片（底層是一個長度 5 的陣列）
 
-	fmt.Println("原始切片:", nums)          // [1 2 3 4 5]
-	fmt.Println("長度 len:", len(nums))    // 5（目前有 5 個元素）
-	fmt.Println("容量 cap:", cap(nums))    // 5（底層陣列能放 5 個元素）
+	fmt.Println("原始切片:", nums)        // [1 2 3 4 5]
+	fmt.Println("長度 len:", len(nums)) // 5（目前有 5 個元素）
+	fmt.Println("容量 cap:", cap(nums)) // 5（底層陣列能放 5 個元素）
 
 	// ----------------------------------------
 	// 7b. 切片傳入函式：修改元素 ✅ 有效
@@ -302,11 +302,11 @@ func main() { // 程式進入點
 	// ----------------------------------------
 	fmt.Println("\n--- 7c. append() 的陷阱 ---") // 小節標題
 
-	original := []int{1, 2, 3}                     // 建立切片（len=3, cap=3）
-	fmt.Println("原始:", original)                  // [1 2 3]
+	original := []int{1, 2, 3}   // 建立切片（len=3, cap=3）
+	fmt.Println("原始:", original) // [1 2 3]
 
-	tryAppendToSlice(original)                     // 在函式內 append
-	fmt.Println("函式外:", original)                // [1 2 3]（沒有 999！）
+	tryAppendToSlice(original)    // 在函式內 append
+	fmt.Println("函式外:", original) // [1 2 3]（沒有 999！）
 
 	// 為什麼函式外看不到 999？
 	// 因為 append 發現容量不夠（len=3, cap=3），
@@ -315,18 +315,18 @@ func main() { // 程式進入點
 	// 但外面的切片 header 還是指向舊陣列！
 
 	// 正確的做法：用回傳值接收 append 的結果
-	result := appendToSlice(original)   // 接收回傳的新切片
+	result := appendToSlice(original) // 接收回傳的新切片
 	fmt.Println("正確做法:", result)      // [1 2 3 999]（有 999 了！）
 
 	// 再看一個例子：當容量足夠時 append 不會建立新陣列
-	withCap := make([]int, 3, 10)              // 建立切片（len=3, cap=10，有額外空間）
-	withCap[0] = 1                              // 設定第一個元素
-	withCap[1] = 2                              // 設定第二個元素
-	withCap[2] = 3                              // 設定第三個元素
+	withCap := make([]int, 3, 10)                        // 建立切片（len=3, cap=10，有額外空間）
+	withCap[0] = 1                                       // 設定第一個元素
+	withCap[1] = 2                                       // 設定第二個元素
+	withCap[2] = 3                                       // 設定第三個元素
 	fmt.Println("有額外容量:", withCap, "cap:", cap(withCap)) // [1 2 3] cap: 10
 
 	// 即使容量足夠，函式內的 append 也不會更新外面的 len
-	tryAppendToSlice(withCap) // 函式內 append 了，底層陣列確實被寫入了
+	tryAppendToSlice(withCap)      // 函式內 append 了，底層陣列確實被寫入了
 	fmt.Println("外面看不到:", withCap) // [1 2 3]（len 沒變，所以看不到新元素）
 	// 結論：append 後「一定要」用 = 接收回傳值！
 
@@ -344,9 +344,9 @@ func main() { // 程式進入點
 		"Bob":   85, // 鍵 "Bob"，值 85
 	}
 
-	fmt.Println("修改前:", scores)  // map[Alice:90 Bob:85]
-	modifyMap(scores)              // 傳入 map（內部指標被複製，指向同一個雜湊表）
-	fmt.Println("修改後:", scores)  // map[Alice:90 Bob:85 new_key:42]（新的鍵值對出現了！）
+	fmt.Println("修改前:", scores) // map[Alice:90 Bob:85]
+	modifyMap(scores)           // 傳入 map（內部指標被複製，指向同一個雜湊表）
+	fmt.Println("修改後:", scores) // map[Alice:90 Bob:85 new_key:42]（新的鍵值對出現了！）
 
 	// 總結：為什麼切片和 map 不需要 & 就能在函式內修改？
 	// 因為它們的「值」本身就包含指標：
@@ -368,11 +368,11 @@ func main() { // 程式進入點
 		X int // X 座標
 		Y int // Y 座標
 	}
-	p1 := Point{X: 1, Y: 2}  // 值語意：複製很便宜
-	p3 := p1                   // 複製一份，p3 和 p1 完全獨立
-	p3.X = 100                 // 修改 p3 不影響 p1
-	fmt.Println("p1:", p1)     // {1 2}（不受影響）
-	fmt.Println("p3:", p3)     // {100 2}（只有 p3 被改了）
+	p1 := Point{X: 1, Y: 2} // 值語意：複製很便宜
+	p3 := p1                // 複製一份，p3 和 p1 完全獨立
+	p3.X = 100              // 修改 p3 不影響 p1
+	fmt.Println("p1:", p1)  // {1 2}（不受影響）
+	fmt.Println("p3:", p3)  // {100 2}（只有 p3 被改了）
 
 	// 情況 2：只需要讀取、不需要修改
 	// 傳值可以保證函式不會意外修改你的資料
@@ -380,21 +380,21 @@ func main() { // 程式進入點
 
 	// 情況 3：基本型別（int, string, bool 等）
 	// 這些型別本身就很小，用指標反而增加複雜度
-	age := 25                                  // int 很小，不需要指標
-	name := "Alice"                            // string 在 Go 內部已經有指標機制
-	fmt.Println("年齡:", age, "名稱:", name)   // 直接用值就好
+	age := 25                            // int 很小，不需要指標
+	name := "Alice"                      // string 在 Go 內部已經有指標機制
+	fmt.Println("年齡:", age, "名稱:", name) // 直接用值就好
 
 	// ========================================
 	// 總結
 	// ========================================
 	fmt.Println("\n=== 總結 ===") // 章節標題
 
-	fmt.Println("1. & 取址、* 解引用")                          // 基本語法
-	fmt.Println("2. Go 預設傳值，需要修改時傳指標")               // 傳值 vs 傳指標
-	fmt.Println("3. 結構體指標有語法糖：ptr.Field")              // 語法糖
-	fmt.Println("4. nil 指標一定要檢查才能用")                   // 安全性
+	fmt.Println("1. & 取址、* 解引用")                        // 基本語法
+	fmt.Println("2. Go 預設傳值，需要修改時傳指標")                  // 傳值 vs 傳指標
+	fmt.Println("3. 結構體指標有語法糖：ptr.Field")               // 語法糖
+	fmt.Println("4. nil 指標一定要檢查才能用")                    // 安全性
 	fmt.Println("5. Repository 回傳 *User 可以用 nil 表示不存在") // 實際應用
-	fmt.Println("6. 切片 = {指標, 長度, 容量}，內部已有指標")     // 切片真相
-	fmt.Println("7. Map 內部也有指標，傳入函式能直接修改")         // Map 真相
-	fmt.Println("8. append() 一定要用 = 接收回傳值！")           // append 陷阱
+	fmt.Println("6. 切片 = {指標, 長度, 容量}，內部已有指標")          // 切片真相
+	fmt.Println("7. Map 內部也有指標，傳入函式能直接修改")              // Map 真相
+	fmt.Println("8. append() 一定要用 = 接收回傳值！")            // append 陷阱
 }

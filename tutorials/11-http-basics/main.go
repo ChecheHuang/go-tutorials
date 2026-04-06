@@ -74,7 +74,7 @@
 // ╚══════════════════════════════════════════════════════════════════════╝
 package main // 宣告這是主程式套件
 
-import (                // 匯入需要的標準函式庫
+import ( // 匯入需要的標準函式庫
 	"encoding/json" // encoding/json：用來將 Go 物件轉成 JSON，或將 JSON 轉成 Go 物件
 	"fmt"           // fmt：格式化輸出，用來印文字到終端機或回應中
 	"log"           // log：記錄日誌，這裡用來在伺服器啟動失敗時印出錯誤
@@ -88,7 +88,7 @@ import (                // 匯入需要的標準函式庫
 // User 使用者結構體 — 定義一個使用者有哪些欄位
 // json:"..." 是「結構體標籤」（struct tag），告訴 JSON 編碼器用什麼名稱
 // 例如 json:"id" 表示轉成 JSON 時，欄位名稱會是 "id" 而不是 "ID"
-type User struct {           // 定義 User 結構體
+type User struct { // 定義 User 結構體
 	ID   int    `json:"id"`   // 使用者 ID，JSON 中顯示為 "id"
 	Name string `json:"name"` // 使用者名稱，JSON 中顯示為 "name"
 	Age  int    `json:"age"`  // 使用者年齡，JSON 中顯示為 "age"
@@ -96,7 +96,7 @@ type User struct {           // 定義 User 結構體
 
 // 模擬的使用者資料庫（用切片代替真實資料庫）
 // 在真實專案中，這些資料會存在 SQLite 或 PostgreSQL 等資料庫裡
-var users = []User{                        // 宣告一個 User 切片並初始化
+var users = []User{ // 宣告一個 User 切片並初始化
 	{ID: 1, Name: "Alice", Age: 25}, // 第一個使用者
 	{ID: 2, Name: "Bob", Age: 30},   // 第二個使用者
 	{ID: 3, Name: "Carol", Age: 28}, // 第三個使用者
@@ -170,7 +170,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&newUser); err != nil { // 如果 JSON 解析失敗
 		// 回傳 400 Bad Request（你的信我看不懂）
 		http.Error(w, "無效的 JSON: "+err.Error(), http.StatusBadRequest) // 回傳錯誤
-		return // 提早返回，不繼續執行
+		return                                                         // 提早返回，不繼續執行
 	}
 
 	// 設定 ID 為目前使用者數量 + 1（模擬資料庫的自動遞增 ID）
@@ -228,17 +228,17 @@ func main() { // 程式進入點
 	port := ":9090" // 定義伺服器監聽的埠號（port）
 
 	// 印出啟動訊息和使用說明
-	fmt.Println("伺服器啟動於 http://localhost" + port) // 顯示伺服器地址
-	fmt.Println()                                       // 空行
-	fmt.Println("可以嘗試的請求：")                       // 提示標題
-	fmt.Println("  瀏覽器開啟: http://localhost:9090")                                    // 測試根路徑
-	fmt.Println("  瀏覽器開啟: http://localhost:9090/api/users")                          // 測試 GET 使用者
-	fmt.Println("  瀏覽器開啟: http://localhost:9090/api/search?keyword=Go&page=1")      // 測試查詢參數
-	fmt.Println()                                                                         // 空行
-	fmt.Println("  curl http://localhost:9090/api/users")                                 // 用 curl 測試 GET
+	fmt.Println("伺服器啟動於 http://localhost" + port)                                                     // 顯示伺服器地址
+	fmt.Println()                                                                                     // 空行
+	fmt.Println("可以嘗試的請求：")                                                                           // 提示標題
+	fmt.Println("  瀏覽器開啟: http://localhost:9090")                                                     // 測試根路徑
+	fmt.Println("  瀏覽器開啟: http://localhost:9090/api/users")                                           // 測試 GET 使用者
+	fmt.Println("  瀏覽器開啟: http://localhost:9090/api/search?keyword=Go&page=1")                        // 測試查詢參數
+	fmt.Println()                                                                                     // 空行
+	fmt.Println("  curl http://localhost:9090/api/users")                                             // 用 curl 測試 GET
 	fmt.Println("  curl -X POST http://localhost:9090/api/users -d '{\"name\":\"Dave\",\"age\":35}'") // 用 curl 測試 POST
-	fmt.Println()                                                                         // 空行
-	fmt.Println("按 Ctrl+C 停止伺服器")                                                    // 如何停止
+	fmt.Println()                                                                                     // 空行
+	fmt.Println("按 Ctrl+C 停止伺服器")                                                                     // 如何停止
 
 	// http.ListenAndServe 啟動 HTTP 伺服器
 	// 參數 1：port = ":9090"，表示監聽所有網路介面的 9090 埠

@@ -20,12 +20,12 @@
 package main // 必須和 main.go 同一個 package
 
 import ( // 匯入需要的套件
-	"errors"          // 標準庫：建立錯誤
-	"io"              // 標準庫：讀取回應內容
-	"net/http"        // 標準庫：HTTP 功能
+	"errors"            // 標準庫：建立錯誤
+	"io"                // 標準庫：讀取回應內容
+	"net/http"          // 標準庫：HTTP 功能
 	"net/http/httptest" // 標準庫：HTTP 測試工具（模擬請求，不需要真正啟動伺服器）
-	"strings"         // 標準庫：字串處理
-	"testing"         // 標準庫：Go 的測試框架
+	"strings"           // 標準庫：字串處理
+	"testing"           // 標準庫：Go 的測試框架
 )
 
 // ==========================================================================
@@ -58,10 +58,10 @@ func TestAddTableDriven(t *testing.T) { // 表格驅動測試函式
 		a, b     int    // 輸入：兩個整數
 		expected int    // 期望的輸出
 	}{ // 開始定義具體的測試案例
-		{"正數相加", 2, 3, 5},      // 最常見的情況
-		{"負數相加", -1, -2, -3},   // 負數
-		{"零相加", 0, 0, 0},        // 邊界條件：零
-		{"正負相加", 5, -3, 2},     // 正負混合
+		{"正數相加", 2, 3, 5},          // 最常見的情況
+		{"負數相加", -1, -2, -3},       // 負數
+		{"零相加", 0, 0, 0},           // 邊界條件：零
+		{"正負相加", 5, -3, 2},         // 正負混合
 		{"大數相加", 1000, 2000, 3000}, // 較大的數字
 	}
 
@@ -69,7 +69,7 @@ func TestAddTableDriven(t *testing.T) { // 表格驅動測試函式
 		// t.Run 建立子測試（Sub-test）
 		// 這樣每個測試案例可以獨立執行、獨立報告
 		t.Run(tt.name, func(t *testing.T) { // 子測試的名稱是 tt.name
-			result := Add(tt.a, tt.b) // 執行被測試的函式
+			result := Add(tt.a, tt.b)  // 執行被測試的函式
 			if result != tt.expected { // 如果結果不符合期望
 				t.Errorf("Add(%d, %d) = %d，期望 %d", tt.a, tt.b, result, tt.expected) // 報告錯誤
 			}
@@ -85,8 +85,8 @@ func TestAddTableDriven(t *testing.T) { // 表格驅動測試函式
 func TestDivide(t *testing.T) { // 測試除法函式
 	// t.Run 讓你在一個測試函式裡分組測試不同情況
 	t.Run("正常除法", func(t *testing.T) { // 測試正常除法
-		result, err := Divide(10, 3)  // 10 ÷ 3 ≈ 3.333...
-		if err != nil {               // 如果回傳了錯誤（不應該）
+		result, err := Divide(10, 3) // 10 ÷ 3 ≈ 3.333...
+		if err != nil {              // 如果回傳了錯誤（不應該）
 			// t.Fatalf：記錄錯誤並立即停止當前子測試（比 t.Errorf 更嚴格）
 			t.Fatalf("不應該有錯誤，但得到: %v", err) // 致命錯誤，立即停止
 		}
@@ -119,31 +119,31 @@ func TestUserValidate(t *testing.T) { // 測試使用者驗證
 		wantErr bool   // 期望是否有錯誤（true = 應該有錯誤，false = 不應該有錯誤）
 	}{ // 具體的測試案例
 		{
-			name:    "合法使用者",                                    // 正常情況
+			name:    "合法使用者",                                               // 正常情況
 			user:    User{Name: "Alice", Email: "alice@test.com", Age: 25}, // 合法的使用者
-			wantErr: false, // 不應該有錯誤
+			wantErr: false,                                                 // 不應該有錯誤
 		},
 		{
-			name:    "空名稱",                                        // 錯誤情況：名稱為空
+			name:    "空名稱",                                           // 錯誤情況：名稱為空
 			user:    User{Name: "", Email: "test@test.com", Age: 25}, // 名稱是空字串
-			wantErr: true, // 應該有錯誤
+			wantErr: true,                                            // 應該有錯誤
 		},
 		{
-			name:    "負數年齡",                                      // 錯誤情況：年齡是負數
+			name:    "負數年齡",                                            // 錯誤情況：年齡是負數
 			user:    User{Name: "Bob", Email: "bob@test.com", Age: -1}, // 年齡 -1 不合理
-			wantErr: true, // 應該有錯誤
+			wantErr: true,                                              // 應該有錯誤
 		},
 		{
-			name:    "年齡過大",                                       // 錯誤情況：年齡超過 150
+			name:    "年齡過大",                                             // 錯誤情況：年齡超過 150
 			user:    User{Name: "Old", Email: "old@test.com", Age: 200}, // 200 歲不合理
-			wantErr: true, // 應該有錯誤
+			wantErr: true,                                               // 應該有錯誤
 		},
 	}
 
 	for _, tt := range tests { // 走訪每個測試案例
 		t.Run(tt.name, func(t *testing.T) { // 建立子測試
-			err := tt.user.Validate()           // 執行驗證方法
-			if (err != nil) != tt.wantErr {     // 如果「有沒有錯誤」與期望不符
+			err := tt.user.Validate()       // 執行驗證方法
+			if (err != nil) != tt.wantErr { // 如果「有沒有錯誤」與期望不符
 				t.Errorf("Validate() error = %v，wantErr = %v", err, tt.wantErr) // 報告錯誤
 			}
 		})
@@ -163,7 +163,7 @@ func TestUserIsAdult(t *testing.T) { // 測試是否成年
 	}
 
 	for _, tt := range tests { // 走訪每個測試案例
-		user := User{Name: "Test", Age: tt.age} // 建立測試用的 User
+		user := User{Name: "Test", Age: tt.age}              // 建立測試用的 User
 		if result := user.IsAdult(); result != tt.expected { // 如果結果不符
 			t.Errorf("Age=%d, IsAdult()=%v，期望 %v", tt.age, result, tt.expected) // 報告錯誤
 		}
@@ -197,7 +197,7 @@ func newMockRepo() *mockUserRepository { // 建構函式
 // FindByID 實作 UserRepository 介面的 FindByID 方法
 func (m *mockUserRepository) FindByID(id int) (*User, error) { // Mock 的查詢方法
 	user, exists := m.users[id] // 從 map 中查詢
-	if !exists {                 // 如果不存在
+	if !exists {                // 如果不存在
 		return nil, errors.New("使用者不存在") // 回傳錯誤（模擬資料庫找不到的情況）
 	}
 	return user, nil // 回傳找到的使用者
@@ -210,7 +210,7 @@ func (m *mockUserRepository) Create(user *User) error { // Mock 的建立方法
 
 // TestUserServiceGetUser 測試 UserService.GetUser 方法（使用 Mock）
 func TestUserServiceGetUser(t *testing.T) { // 測試取得使用者
-	repo := newMockRepo()          // 建立 Mock Repository
+	repo := newMockRepo()           // 建立 Mock Repository
 	service := NewUserService(repo) // 把 Mock 注入到 Service（依賴注入！）
 
 	t.Run("存在的使用者", func(t *testing.T) { // 測試查詢存在的使用者
@@ -238,7 +238,7 @@ func TestUserServiceCreateUser(t *testing.T) { // 測試建立使用者
 
 	t.Run("正常建立", func(t *testing.T) { // 測試正常建立
 		user, err := service.CreateUser("Carol", "carol@test.com", 28) // 建立 Carol
-		if err != nil { // 如果有錯誤
+		if err != nil {                                                // 如果有錯誤
 			t.Fatalf("不應該有錯誤: %v", err) // 致命錯誤
 		}
 		if user.Name != "Carol" { // 如果名稱不對
@@ -248,7 +248,7 @@ func TestUserServiceCreateUser(t *testing.T) { // 測試建立使用者
 
 	t.Run("空名稱應失敗", func(t *testing.T) { // 測試空名稱會被驗證攔下
 		_, err := service.CreateUser("", "test@test.com", 25) // 名稱是空字串
-		if err == nil { // 如果沒有回傳錯誤（應該要有）
+		if err == nil {                                       // 如果沒有回傳錯誤（應該要有）
 			t.Fatal("空名稱應該回傳錯誤") // 致命錯誤
 		}
 	})
@@ -271,8 +271,8 @@ func TestUserServiceCreateUser(t *testing.T) { // 測試建立使用者
 // TestGetUserHandler 測試 GetUserHandler 函式
 func TestGetUserHandler(t *testing.T) { // 測試取得使用者的 HTTP Handler
 	// 建立 Handler（在真實專案中，這些依賴會在 main.go 中組裝）
-	repo := newMockRepo()           // 建立 Mock Repository
-	service := NewUserService(repo) // 建立 Service
+	repo := newMockRepo()              // 建立 Mock Repository
+	service := NewUserService(repo)    // 建立 Service
 	handler := NewUserHandler(service) // 建立 Handler
 
 	t.Run("正確的 ID 回傳使用者資料", func(t *testing.T) { // 測試 ID=1 的情況
@@ -306,7 +306,7 @@ func TestGetUserHandler(t *testing.T) { // 測試取得使用者的 HTTP Handler
 
 	t.Run("缺少 id 參數回傳 400", func(t *testing.T) { // 測試沒有 id 參數的情況
 		req := httptest.NewRequest(http.MethodGet, "/users", nil) // 沒有 ?id= 參數
-		w := httptest.NewRecorder()                                // 建立記錄器
+		w := httptest.NewRecorder()                               // 建立記錄器
 
 		handler.GetUserHandler(w, req) // 執行 Handler
 
@@ -317,7 +317,7 @@ func TestGetUserHandler(t *testing.T) { // 測試取得使用者的 HTTP Handler
 
 	t.Run("不存在的 ID 回傳 404", func(t *testing.T) { // 測試 ID=999 不存在的情況
 		req := httptest.NewRequest(http.MethodGet, "/users?id=999", nil) // ID=999
-		w := httptest.NewRecorder()                                       // 建立記錄器
+		w := httptest.NewRecorder()                                      // 建立記錄器
 
 		handler.GetUserHandler(w, req) // 執行 Handler
 
@@ -329,14 +329,14 @@ func TestGetUserHandler(t *testing.T) { // 測試取得使用者的 HTTP Handler
 
 // TestCreateUserHandler 測試 CreateUserHandler 函式
 func TestCreateUserHandler(t *testing.T) { // 測試建立使用者的 HTTP Handler
-	repo := newMockRepo()             // 建立 Mock Repository
-	service := NewUserService(repo)   // 建立 Service
+	repo := newMockRepo()              // 建立 Mock Repository
+	service := NewUserService(repo)    // 建立 Service
 	handler := NewUserHandler(service) // 建立 Handler
 
 	t.Run("POST 成功建立", func(t *testing.T) { // 測試正確的 POST 請求
 		// 模擬 POST 請求（真實情況下 Body 會有 JSON 資料）
 		req := httptest.NewRequest(http.MethodPost, "/users", nil) // POST /users
-		w := httptest.NewRecorder()                                 // 建立記錄器
+		w := httptest.NewRecorder()                                // 建立記錄器
 
 		handler.CreateUserHandler(w, req) // 執行 Handler
 
@@ -347,7 +347,7 @@ func TestCreateUserHandler(t *testing.T) { // 測試建立使用者的 HTTP Hand
 
 	t.Run("GET 方法回傳 405", func(t *testing.T) { // 測試使用錯誤的 HTTP 方法
 		req := httptest.NewRequest(http.MethodGet, "/users", nil) // 用 GET 打 POST 路由
-		w := httptest.NewRecorder()                                // 建立記錄器
+		w := httptest.NewRecorder()                               // 建立記錄器
 
 		handler.CreateUserHandler(w, req) // 執行 Handler
 

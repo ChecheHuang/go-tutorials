@@ -29,10 +29,11 @@ import (
 // greet 是一個函式，接收一個 string 參數，回傳一個 string
 //
 // 語法拆解：
-//   func    → 宣告函式的關鍵字
-//   greet   → 函式名稱
-//   (name string) → 參數列表（參數名稱 型別）
-//   string  → 回傳值的型別
+//
+//	func    → 宣告函式的關鍵字
+//	greet   → 函式名稱
+//	(name string) → 參數列表（參數名稱 型別）
+//	string  → 回傳值的型別
 func greet(name string) string {
 	return "你好，" + name + "！" // return 把值回傳給呼叫者
 }
@@ -105,11 +106,11 @@ func getMinMax(numbers []int) (min, max int) {
 // sum 可以接收任意數量的 int 參數
 // numbers 在函式內部的型別是 []int（int 的切片）
 func sum(numbers ...int) int {
-	total := 0                    // 初始化總和為 0
-	for _, n := range numbers {   // 遍歷所有傳入的數字
-		total += n                // total = total + n
+	total := 0                  // 初始化總和為 0
+	for _, n := range numbers { // 遍歷所有傳入的數字
+		total += n // total = total + n
 	}
-	return total                  // 回傳總和
+	return total // 回傳總和
 }
 
 // ========================================
@@ -130,7 +131,7 @@ func sum(numbers ...int) int {
 func apply(items []string, transform func(string) string) []string {
 	result := make([]string, len(items)) // 建立一個跟原切片一樣長的新切片
 	for i, item := range items {         // 遍歷每個元素
-		result[i] = transform(item)      // 對每個元素套用轉換函式
+		result[i] = transform(item) // 對每個元素套用轉換函式
 	}
 	return result // 回傳轉換後的新切片
 }
@@ -148,7 +149,7 @@ type HandlerFunc func(request string)
 // useHandler 接收一個 HandlerFunc 型別的參數
 func useHandler(path string, handler HandlerFunc) {
 	fmt.Printf("  收到請求：%s\n", path) // 印出路徑
-	handler(path)                        // 呼叫傳入的處理函式
+	handler(path)                   // 呼叫傳入的處理函式
 }
 
 // ========================================
@@ -195,8 +196,8 @@ func main() {
 
 	// --- 1. 呼叫基本函式 ---
 	fmt.Println("=== 1. 基本函式 ===")
-	fmt.Println(greet("小明"))          // 呼叫 greet，印出：你好，小明！
-	fmt.Println("3 + 5 =", add(3, 5))  // 呼叫 add，印出：3 + 5 = 8
+	fmt.Println(greet("小明"))               // 呼叫 greet，印出：你好，小明！
+	fmt.Println("3 + 5 =", add(3, 5))      // 呼叫 add，印出：3 + 5 = 8
 	fmt.Println("3 × 5 =", multiply(3, 5)) // 呼叫 multiply，印出：3 × 5 = 15
 
 	// --- 2. 多重回傳值 ---
@@ -224,12 +225,12 @@ func main() {
 	// --- 3. 命名回傳值 ---
 	fmt.Println("\n=== 3. 命名回傳值 ===")
 	numbers := []int{3, 1, 4, 1, 5, 9, 2, 6} // 一個數字切片
-	min, max := getMinMax(numbers)             // 接收兩個回傳值
+	min, max := getMinMax(numbers)           // 接收兩個回傳值
 	fmt.Printf("數列 %v 的最小值=%d，最大值=%d\n", numbers, min, max)
 
 	// --- 4. 可變參數 ---
 	fmt.Println("\n=== 4. 可變參數 ===")
-	fmt.Println("sum(1, 2, 3) =", sum(1, 2, 3))             // 傳 3 個參數
+	fmt.Println("sum(1, 2, 3) =", sum(1, 2, 3))                       // 傳 3 個參數
 	fmt.Println("sum(10, 20, 30, 40, 50) =", sum(10, 20, 30, 40, 50)) // 傳 5 個
 
 	// 如果你已經有一個切片，要展開傳入，加上 ... 後綴
@@ -264,13 +265,13 @@ func main() {
 
 	// --- 7. 閉包 ---
 	fmt.Println("\n=== 7. 閉包（函式 + 記憶）===")
-	counter := makeCounter()         // 取得一個計數器函式
-	fmt.Println("計數:", counter())   // 1（內部 count 變成 1）
-	fmt.Println("計數:", counter())   // 2（內部 count 變成 2）
-	fmt.Println("計數:", counter())   // 3（內部 count 變成 3）
+	counter := makeCounter()      // 取得一個計數器函式
+	fmt.Println("計數:", counter()) // 1（內部 count 變成 1）
+	fmt.Println("計數:", counter()) // 2（內部 count 變成 2）
+	fmt.Println("計數:", counter()) // 3（內部 count 變成 3）
 
 	// 每個閉包有「自己的」count，互不影響
-	counter2 := makeCounter()          // 新的計數器
+	counter2 := makeCounter()        // 新的計數器
 	fmt.Println("新計數器:", counter2()) // 1（獨立的 count，從 0 開始）
 
 	// --- 8. defer ---
