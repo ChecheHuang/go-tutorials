@@ -1,5 +1,7 @@
 package repository
 
+// 教學對應：第 10 課（Clean Architecture Repository 層）、第 14 課（GORM CRUD）、第 28 課（資料庫進階）
+
 import (
 	"blog-api/internal/domain"
 

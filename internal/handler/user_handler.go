@@ -1,5 +1,6 @@
 // Package handler 實作 HTTP 請求處理器
 // 負責解析請求、呼叫 usecase、回傳回應
+// 教學對應：第 12 課（Gin 框架）、第 18 課（JWT 認證）
 package handler
 
 import (

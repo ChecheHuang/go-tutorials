@@ -4,6 +4,24 @@
 //
 //	Message Queue、Circuit Breaker、OpenTelemetry、CQRS
 //
+// === 第 40 課新增的可靠性模式 ===
+//
+// 本專案新增了三個保障分散式系統可靠性的核心模式：
+//
+//  1. WAL (Write-Ahead Log) — internal/wal/
+//     在執行 Redis 扣庫存之前，先將操作寫入 WAL。
+//     如果 Redis 崩潰，重啟後可透過 WAL 的 Recover() 重播未完成的操作。
+//     整合位置：TicketUsecase.GrabTicket() 的庫存扣減流程
+//
+//  2. Saga 補償模式 — internal/saga/
+//     將搶票流程拆為多個步驟（扣庫存 → 建訂單 → 發送 MQ），
+//     任何一步失敗都會自動反向補償已完成的步驟。
+//     整合位置：TicketUsecase.GrabTicket() 可重構為 Saga 編排
+//
+//  3. Idempotency 冪等性 — internal/idempotency/
+//     防止 MQ 重複投遞導致同一筆訂單被處理多次（例如重複扣款）。
+//     整合位置：PaymentWorker 消費 "order.created" 訊息時先檢查冪等性
+//
 // 啟動方式：
 //  1. 先啟動 Redis：docker run -p 6379:6379 redis:7-alpine
 //  2. cd ticket-system && go run ./cmd/server/
@@ -54,6 +72,28 @@ func main() {
 
 	app.PaymentWorker.Start(ctx)
 	app.StockBroadcaster.Start(ctx)
+
+	// --- 第 40 課：可靠性模式的整合點 ---
+	//
+	// WAL 整合：在此初始化 WAL，並在啟動時呼叫 Recover() 重播未完成的操作
+	//   walLog := wal.New()
+	//   for _, entry := range walLog.Recover() {
+	//       replayOperation(entry) // 根據 entry.Operation 重新執行
+	//   }
+	//
+	// Saga 整合：在 TicketUsecase.GrabTicket() 中將流程改為 Saga 編排
+	//   s := saga.New("搶票交易")
+	//   s.AddStep("扣除庫存", deductStock, restoreStock)
+	//   s.AddStep("建立訂單", createOrder, deleteOrder)
+	//   s.AddStep("發送付款", publishPayment, cancelPayment)
+	//   result, err := s.Run(ctx)
+	//
+	// Idempotency 整合：在 PaymentWorker 中加入冪等性檢查
+	//   idempStore := idempotency.NewStore()
+	//   // Worker 收到訊息時：
+	//   if idempStore.Check(orderKey) { return } // 已處理過，跳過
+	//   processPayment(order)
+	//   idempStore.MarkWithTTL(orderKey, 5*time.Minute)
 
 	// === 5. 填入示範活動 ===
 	seedEvents(app.DB, app.TicketUsecase)

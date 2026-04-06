@@ -1,4 +1,4 @@
-// Package generic 提供泛型工具函式（第 31 課）
+// Package generic 提供泛型工具函式（第 24 課）
 package generic
 
 // Result 是 Rust 風格的泛型結果容器

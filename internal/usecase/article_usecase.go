@@ -1,5 +1,7 @@
 package usecase
 
+// 教學對應：第 10 課（Clean Architecture Usecase 層）、第 16 課（Error Wrapping）
+
 import (
 	"blog-api/internal/domain"
 	"blog-api/pkg/apperror"

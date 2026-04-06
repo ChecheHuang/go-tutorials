@@ -1,5 +1,6 @@
 // Package usecase 實作業務邏輯層
 // 這一層負責協調 domain 層的實體與 repository，處理具體的業務規則
+// 教學對應：第 10 課（Clean Architecture Usecase 層）、第 18 課（JWT 認證）
 package usecase
 
 import (

@@ -1,4 +1,4 @@
-// Package di 提供 Wire 依賴注入的 Provider 函式（第 28 課）
+// Package di 提供 Wire 依賴注入的 Provider 函式（第 31 課）
 package di
 
 import (

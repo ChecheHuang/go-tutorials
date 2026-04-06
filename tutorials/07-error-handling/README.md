@@ -20,6 +20,7 @@
 - 錯誤包裝 `%w` 與解包 `errors.Unwrap`
 - `errors.Is`（比較值）vs `errors.As`（比較型別）
 - `panic` vs `error` 的使用時機
+- **Early Return（提早返回）**：Go 最重要的寫法風格
 - 錯誤邊界：在哪裡處理，在哪裡傳遞
 
 ## 執行方式
@@ -155,6 +156,72 @@ var valErr *ValidationError
 if errors.As(err, &valErr) {     // 從錯誤鏈中取出 *ValidationError
     fmt.Println(valErr.Field)    // 可以存取額外的結構化資訊
     fmt.Println(valErr.Message)
+}
+```
+
+## Early Return（提早返回）— Go 最重要的寫法風格
+
+又稱為 **Guard Clause（衛語句）** 或 **Happy Path 模式**。這是 Go 程式碼和其他語言最大的風格差異之一。
+
+**核心想法**：先處理錯誤情況並提早 `return`，讓主要邏輯保持在最低縮排層級。
+
+```go
+// ❌ 巢狀風格（不推薦）
+func processOrder(order Order) error {
+    if order.IsValid() {
+        if order.HasStock() {
+            if order.PaymentOK() {
+                return ship(order)   // 主邏輯藏在 3 層 if 裡面
+            } else {
+                return errPayment
+            }
+        } else {
+            return errNoStock
+        }
+    } else {
+        return errInvalid
+    }
+}
+
+// ✅ Early Return（Go 慣用風格）
+func processOrder(order Order) error {
+    if !order.IsValid() {
+        return errInvalid        // Guard 1：無效就走
+    }
+    if !order.HasStock() {
+        return errNoStock        // Guard 2：沒庫存就走
+    }
+    if !order.PaymentOK() {
+        return errPayment        // Guard 3：付款失敗就走
+    }
+    return ship(order)           // Happy Path：主邏輯在最外層
+}
+```
+
+**為什麼 Go 社群如此推崇這個模式？**
+
+| | 巢狀風格 | Early Return |
+|--|---------|-------------|
+| 縮排 | 3-4 層 | 1 層 |
+| 主邏輯位置 | 藏在最深處 | 在最外層 |
+| 閱讀方式 | 需要追蹤每個 else | 錯誤處理完就到主邏輯 |
+| 擴展性 | 加條件要再加一層 if | 加條件只要加一個 guard |
+
+**在 Web 開發中的應用**（第 10-18 課每個 Handler 都用這個模式）：
+
+```go
+func getArticle(c *gin.Context) {
+    id, err := strconv.Atoi(c.Param("id"))
+    if err != nil {
+        c.JSON(400, gin.H{"error": "無效 ID"})
+        return                                   // Guard 1
+    }
+    article, err := usecase.GetByID(id)
+    if err != nil {
+        c.JSON(404, gin.H{"error": "找不到"})
+        return                                   // Guard 2
+    }
+    c.JSON(200, article)                         // Happy Path
 }
 ```
 

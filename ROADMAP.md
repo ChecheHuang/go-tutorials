@@ -206,6 +206,8 @@ graph TB
 | **部落格 API** | 1-23, 26, 28-29, 34-36, 38 | `go run ./cmd/server/` |
 | **搶票系統** | 25-27, 30-33, 37, 39-42 | `cd ticket-system && go run ./cmd/server/` |
 
+> 💡 **第一次看專案程式碼？** 請先閱讀 [GUIDE-BLOG.md](GUIDE-BLOG.md)，裡面有完整的閱讀順序和從零建構步驟指南。
+
 ```mermaid
 graph LR
     classDef blog fill:#dbeafe,stroke:#2563eb,color:#000

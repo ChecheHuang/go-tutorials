@@ -1,4 +1,4 @@
-// Package ws 提供 WebSocket Hub 管理（第 23 課）
+// Package ws 提供 WebSocket Hub 管理（第 27 課）
 package ws
 
 import (

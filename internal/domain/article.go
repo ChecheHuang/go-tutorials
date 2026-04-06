@@ -1,5 +1,7 @@
 package domain
 
+// 教學對應：第 4 課（結構體）、第 13 課（Struct Tags）、第 14 課（GORM Model）
+
 import (
 	"time"
 

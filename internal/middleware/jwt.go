@@ -1,5 +1,6 @@
 // Package middleware 提供 Gin 中介層
 // 中介層在請求到達 handler 之前執行，用於處理認證、日誌、跨域等通用邏輯
+// 教學對應：第 17 課（中介層）、第 18 課（JWT 認證）
 package middleware
 
 import (

@@ -1,4 +1,4 @@
-// Package worker 背景工作者（第 19 課 Goroutine Worker Pool）
+// Package worker 背景工作者（第 25 課 Goroutine Worker Pool）
 package worker
 
 import (

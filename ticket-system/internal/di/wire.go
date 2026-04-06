@@ -1,7 +1,7 @@
 //go:build wireinject
 // +build wireinject
 
-// Wire Injector 定義（第 28 課）
+// Wire Injector 定義（第 31 課）
 // 執行 wire ./internal/di/ 會根據此檔案自動生成 wire_gen.go
 package di
 

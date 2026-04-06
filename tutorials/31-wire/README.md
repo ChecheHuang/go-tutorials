@@ -9,52 +9,449 @@
 | 🟡 中級工程師 | 了解為什麼需要 DI 框架 |
 | 🔴 資深工程師 | **重點**：Wire 在大型 Go 專案中幾乎是標配 |
 
+## 你會學到什麼？
+
+- 為什麼編譯時 DI 比執行時反射 DI 更好
+- Wire 四大核心概念：Provider、Injector、ProviderSet、wire.Bind
+- `wire_gen.go` 自動產生的程式碼長什麼樣
+- 手動 DI vs Wire 的 Before/After 對比
+- 什麼時候不需要用 Wire（小專案的判斷）
+
 ## 執行方式
 
 ```bash
 go run ./tutorials/31-wire
 ```
 
-## Wire 的工作流程
+---
+
+## 為什麼編譯時 DI 比執行時 DI 好？
+
+Go 社群偏好**編譯時 DI**，這和 Java/Spring 的**執行時反射 DI** 是完全不同的哲學。
+
+| 比較 | 編譯時 DI（Wire） | 執行時 DI（反射） |
+|------|-------------------|-------------------|
+| **錯誤發現時機** | 編譯時就知道依賴缺少 | 執行時才爆炸（可能上線後） |
+| **效能** | 零額外開銷（生成的就是普通 Go 程式碼） | 反射有額外開銷 |
+| **可讀性** | 生成的程式碼可直接閱讀 | 黑箱，難以追蹤 |
+| **IDE 支援** | 完整（跳轉、補全都能用） | 差（反射繞過型別系統） |
+| **除錯** | 普通 Go 除錯 | 需要理解框架內部 |
+| **代表** | Wire（Google）、fx（Uber） | dig（Uber）、inject（Facebook） |
 
 ```
-你寫的 wire.go：
-  func InitializeApp() (*App, error) {
-      wire.Build(ProvideConfig, ProvideDB, ProvideRepo, ProvideUsecase, ...)
-      return nil, nil
-  }
-          ↓ wire gen
-Wire 生成的 wire_gen.go：
-  func InitializeApp() (*App, error) {
-      config := ProvideConfig()
-      db, err := ProvideDB(config)
-      ...
-      return ProvideApp(config, db, ...), nil
-  }
+Java Spring 的做法（執行時反射）：
+  @Autowired                          ← 執行時掃描、注入
+  private UserRepository userRepo;    ← 如果忘了寫 @Repository，執行時才報錯
+
+Wire 的做法（編譯時生成）：
+  func ProvideUserRepo(db *Database) *UserRepo { ... }   ← 普通函式
+  wire.Build(ProvideDB, ProvideUserRepo)                  ← 編譯時分析依賴
+  // 如果缺少 ProvideDB → wire gen 直接報錯，不用等到執行
 ```
 
-## 安裝 Wire
+---
 
-```bash
-go install github.com/google/wire/cmd/wire@latest
-wire gen ./your-package/
-```
+## Wire 的四大核心概念
 
-## Provider 範例
+### 1. Provider（提供者）
+
+Provider 就是一個**建立元件的函式**。Wire 分析函式的參數和回傳值來推斷依賴關係。
 
 ```go
-// Provider = 建立元件的函式
-// Wire 從參數類型分析依賴關係
-func ProvideDB(cfg *Config) (*Database, error) { ... }       // 依賴 Config
-func ProvideRepo(db *Database, log *Logger) *Repo { ... }    // 依賴 Database + Logger
-func ProvideUsecase(repo *Repo) *Usecase { ... }             // 依賴 Repo
+// Provider 的簽名規則：
+// - 參數 = 依賴（Wire 會自動找到對應的 Provider）
+// - 回傳值 = 這個 Provider 提供的型別
+// - 可以回傳 error（Wire 會生成 if err != nil 檢查）
+
+func ProvideConfig() *Config {
+    return &Config{Port: 8080}
+}
+
+func ProvideDatabase(cfg *Config) (*Database, error) {
+    // 依賴 *Config → Wire 知道要先呼叫 ProvideConfig
+    return gorm.Open(sqlite.Open(cfg.DBPath))
+}
+
+func ProvideLogger(cfg *Config) (*Logger, error) {
+    // 也依賴 *Config → Wire 知道 Config 可以共用
+    if cfg.LogMode == "production" {
+        return zap.NewProduction()
+    }
+    return zap.NewDevelopment()
+}
+
+func ProvideRepo(db *Database, log *Logger) *PostRepository {
+    // 依賴 *Database 和 *Logger → Wire 自動排序
+    return &PostRepository{db: db, logger: log}
+}
 ```
 
-## 何時用 Wire？
+### 2. Injector（注入器）
 
-| | 手動 DI | Wire |
-|--|--------|------|
-| 適合 | 小專案（< 10 個元件）| 大型專案（10+ 元件）|
-| 可讀性 | 直觀 | 需要學習 |
-| 型別安全 | 是 | 是（編譯時）|
-| 維護性 | 手動調整順序 | 自動分析 |
+Injector 是你告訴 Wire「我要什麼」的地方。Wire 看到 Injector 函式後，自動生成對應的程式碼。
+
+```go
+//go:build wireinject    // 這個 build tag 讓這個檔案只在 wire gen 時被讀取
+
+package main
+
+import "github.com/google/wire"
+
+// Injector 函式：回傳值告訴 Wire「我最終想要什麼」
+func InitializeApp() (*App, error) {
+    wire.Build(
+        ProvideConfig,
+        ProvideDatabase,
+        ProvideLogger,
+        ProvideRepo,
+        ProvideUsecase,
+        ProvideHandler,
+        ProvideApp,
+    )
+    return nil, nil    // 這行會被 Wire 替換，不需要真的實作
+}
+```
+
+### 3. ProviderSet（提供者集合）
+
+當 Provider 很多時，用 `wire.NewSet` 打包成群組，提升可維護性。
+
+```go
+// 基礎設施層
+var InfraSet = wire.NewSet(
+    ProvideConfig,
+    ProvideDatabase,
+    ProvideLogger,
+)
+
+// 領域層
+var DomainSet = wire.NewSet(
+    ProvidePostRepository,
+    ProvidePostUsecase,
+)
+
+// Handler 層
+var HandlerSet = wire.NewSet(
+    ProvidePostHandler,
+)
+
+// Injector 變得非常簡潔
+func InitializeApp() (*App, error) {
+    wire.Build(
+        InfraSet,
+        DomainSet,
+        HandlerSet,
+        ProvideApp,
+    )
+    return nil, nil
+}
+```
+
+### 4. wire.Bind（介面綁定）
+
+當你的程式碼依賴**介面**而不是具體型別時，用 `wire.Bind` 告訴 Wire 要用哪個實作。
+
+```go
+// 介面
+type UserRepository interface {
+    Find(id uint) (*User, error)
+    Create(user *User) error
+}
+
+// 實作
+type postgresUserRepo struct{ db *gorm.DB }
+
+func ProvidePostgresUserRepo(db *gorm.DB) *postgresUserRepo {
+    return &postgresUserRepo{db: db}
+}
+
+// 告訴 Wire：當需要 UserRepository 介面時，用 postgresUserRepo
+var RepoSet = wire.NewSet(
+    ProvidePostgresUserRepo,
+    wire.Bind(new(UserRepository), new(*postgresUserRepo)),
+)
+
+// 這樣 ProvideUsecase 可以依賴介面：
+func ProvideUsecase(repo UserRepository) *Usecase {
+    return &Usecase{repo: repo}
+}
+```
+
+---
+
+## wire_gen.go 長什麼樣？
+
+執行 `wire gen` 後，Wire 分析所有 Provider 的依賴關係，生成一個**普通的 Go 函式**。
+
+### 輸入（你寫的 wire.go）
+
+```go
+//go:build wireinject
+
+func InitializeApp() (*App, error) {
+    wire.Build(
+        ProvideConfig,
+        ProvideDatabase,
+        ProvideLogger,
+        ProvidePostRepository,
+        ProvidePostUsecase,
+        ProvidePostHandler,
+        ProvideApp,
+    )
+    return nil, nil
+}
+```
+
+### 輸出（Wire 生成的 wire_gen.go）
+
+```go
+// Code generated by Wire. DO NOT EDIT.
+
+//go:generate go run -mod=mod github.com/google/wire/cmd/wire
+
+func InitializeApp() (*App, error) {
+    config := ProvideConfig()                           // 1. 無依賴，最先建立
+
+    database, err := ProvideDatabase(config)            // 2. 依賴 Config
+    if err != nil {
+        return nil, err
+    }
+
+    logger, err := ProvideLogger(config)                // 3. 依賴 Config（共用同一個 config）
+    if err != nil {
+        return nil, err
+    }
+
+    postRepository := ProvidePostRepository(database, logger)  // 4. 依賴 Database + Logger
+    postUsecase := ProvidePostUsecase(postRepository, logger)  // 5. 依賴 Repository + Logger
+    postHandler := ProvidePostHandler(postUsecase, logger)     // 6. 依賴 Usecase + Logger
+
+    app := ProvideApp(config, database, logger, postHandler)   // 7. 組裝 App
+    return app, nil
+}
+```
+
+重點：生成的程式碼就是**你本來手動會寫的程式碼**，只是 Wire 幫你自動分析了正確的順序。
+
+---
+
+## 手動 DI vs Wire（Before / After）
+
+### Before：手動 DI（main.go 有 40 行初始化）
+
+```go
+func main() {
+    // 手動排列依賴順序（順序不對就編譯錯誤或 nil pointer）
+    cfg := loadConfig()
+
+    db, err := connectDB(cfg)
+    if err != nil { log.Fatal(err) }
+
+    logger, err := setupLogger(cfg)
+    if err != nil { log.Fatal(err) }
+
+    userRepo := NewUserRepo(db, logger)
+    postRepo := NewPostRepo(db, logger)
+    commentRepo := NewCommentRepo(db, logger)
+
+    emailService := NewEmailService(cfg, logger)
+    cacheService := NewCacheService(cfg, logger)
+
+    userUsecase := NewUserUsecase(userRepo, emailService, logger)
+    postUsecase := NewPostUsecase(postRepo, userRepo, cacheService, logger)
+    commentUsecase := NewCommentUsecase(commentRepo, postRepo, logger)
+
+    userHandler := NewUserHandler(userUsecase, logger)
+    postHandler := NewPostHandler(postUsecase, logger)
+    commentHandler := NewCommentHandler(commentUsecase, logger)
+
+    router := setupRouter(userHandler, postHandler, commentHandler)
+    // ... 新增一個服務就要改這裡的順序
+}
+```
+
+### After：用 Wire（main.go 只剩 3 行）
+
+```go
+func main() {
+    app, cleanup, err := InitializeApp()    // Wire 生成的，一行搞定
+    if err != nil { log.Fatal(err) }
+    defer cleanup()
+
+    app.Router.Run(":8080")
+}
+```
+
+---
+
+## Wire 的依賴分析圖
+
+```
+Wire 自動分析你的 Provider，建立依賴圖：
+
+  Config ─────────────────────────────────────▶ App
+     │                                            ↑
+     ├──▶ Database ──▶ PostRepository ──▶ PostUsecase ──▶ PostHandler
+     │                       ↑                  ↑               ↑
+     └──▶ Logger ───────────┴──────────────────┴───────────────┘
+
+如果有循環依賴（A → B → C → A），wire gen 會直接報錯：
+  "cycle: ProvideA -> ProvideB -> ProvideC -> ProvideA"
+```
+
+---
+
+## 什麼時候不要用 Wire？
+
+| 情境 | 建議 |
+|------|------|
+| **小專案（< 10 個元件）** | 手動 DI 更簡單、更直觀 |
+| **CLI 工具** | 通常依賴少，手動組裝即可 |
+| **快速原型** | 先手動寫，等元件多了再遷移到 Wire |
+| **團隊全部不熟悉 Wire** | 學習成本 vs 收益要評估 |
+
+### 何時該用 Wire？
+
+```
+✅ 超過 10 個 Provider（元件超過 10 個）
+✅ 多環境配置（dev 用 SQLite、prod 用 PostgreSQL → wire.Bind 切換）
+✅ 多個服務共享基礎元件（Logger、DB、Cache）
+✅ 團隊成員經常忘記調整 main() 的初始化順序
+✅ 需要 cleanup 函式（Wire 自動生成 defer 鏈）
+```
+
+---
+
+## 安裝和使用 Wire
+
+```bash
+# 安裝
+go install github.com/google/wire/cmd/wire@latest
+
+# 在包含 wire.go 的目錄執行
+wire gen ./internal/di/
+
+# 或者使用 go generate
+# 在 wire_gen.go 開頭加上：
+//go:generate go run -mod=mod github.com/google/wire/cmd/wire
+# 然後執行：
+go generate ./...
+```
+
+---
+
+## 與搶票系統的連結
+
+搶票系統的 `ticket-system/internal/di/` 目錄就是用 Wire 管理所有依賴：
+
+### wire.go（開發者寫的）
+
+```go
+//go:build wireinject
+
+func InitializeApp(cfg *config.Config, tracer trace.Tracer) (*App, func(), error) {
+    wire.Build(
+        ProvideDB,
+        ProvideRedis,
+        ProvideBroker,
+        ProvideHub,
+        ProvideGRPC,
+        ProvideBreaker,
+        ProvideEventRepo,
+        ProvideOrderWriteRepo,
+        ProvideOrderReadRepo,
+        ProvideTicketUsecase,
+        ProvideTicketHandler,
+        ProvideWSHandler,
+        ProvidePaymentWorker,
+        ProvideStockBroadcaster,
+        wire.Struct(new(App), "*"),    // 自動填入 App 的所有欄位
+    )
+    return nil, nil, nil
+}
+```
+
+### wire_gen.go（Wire 生成的）
+
+```go
+func InitializeApp(cfg *config.Config, tracer trace.Tracer) (*App, func(), error) {
+    db, err := ProvideDB(cfg)            // 先建立 DB
+    if err != nil { return nil, nil, err }
+
+    stock := ProvideStockStore(cfg)       // Redis / In-Memory
+    broker := ProvideBroker()             // Message Queue
+    hub := ProvideHub()                   // WebSocket Hub
+
+    grpcComps, err := ProvideGRPC()      // gRPC 支付服務
+    if err != nil { return nil, nil, err }
+
+    breaker := ProvideBreaker()           // Circuit Breaker
+
+    // Repository 層
+    eventRepo := ProvideEventRepo(db)
+    orderWriteRepo := ProvideOrderWriteRepo(db)
+    orderReadRepo := ProvideOrderReadRepo(db)
+
+    // Usecase + Handler
+    ticketUsecase := ProvideTicketUsecase(stock, eventRepo, orderWriteRepo, orderReadRepo, broker, tracer)
+    ticketHandler := ProvideTicketHandler(ticketUsecase)
+    wsHandler := ProvideWSHandler(hub)
+
+    // Worker
+    paymentWorker := ProvidePaymentWorker(broker, orderWriteRepo, grpcComps, breaker, hub, tracer)
+    stockBroadcaster := ProvideStockBroadcaster(broker, hub)
+
+    cleanup := func() {
+        grpcComps.Cleanup()
+        broker.Close()
+    }
+
+    app := &App{ ... }
+    return app, cleanup, nil
+}
+```
+
+注意 `wire.Struct(new(App), "*")` 的用法：Wire 會自動把 App struct 的每個欄位都填入對應型別的 Provider 結果。
+
+---
+
+## 練習題
+
+### 練習 1：新增 CacheService Provider
+在本課程式碼中新增一個 `CacheService`：
+- 定義 `CacheService` struct（包含一個 `map[string]any`）
+- 寫 `ProvideCacheService` Provider
+- 讓 `PostUsecase` 依賴 `CacheService`
+- 更新 `InitializeApp` 的依賴列表
+
+### 練習 2：用 wire.Bind 抽換 Repository
+- 定義 `PostRepo` 介面（`Create`、`FindAll`）
+- 將目前的 `PostRepository` 改為實作該介面
+- 新建一個 `MockPostRepository`（回傳假資料）
+- 用 `wire.Bind` 在測試時切換到 Mock 實作
+
+### 練習 3：建立 ProviderSet
+將本課的 7 個 Provider 分成三個 ProviderSet：
+- `InfraSet`：Config + Database + Logger
+- `DomainSet`：PostRepository + PostUsecase
+- `HandlerSet`：PostHandler + App
+- 更新 `wire.Build` 使用 ProviderSet
+
+### 練習 4：加入 Cleanup 函式
+Wire 支援 Provider 回傳 cleanup 函式：
+```go
+func ProvideDatabase(cfg *Config) (*Database, func(), error) {
+    db := connectDB(cfg)
+    cleanup := func() { db.Close() }
+    return db, cleanup, nil
+}
+```
+- 修改 `ProvideDatabase` 和 `ProvideLogger` 加上 cleanup
+- 觀察 Wire 生成的程式碼如何串接 cleanup 函式
+
+### 練習 5：模擬 wire gen 報錯
+故意製造以下錯誤，觀察 Wire 的錯誤訊息：
+- 移除一個 Provider（缺少依賴）
+- 兩個 Provider 回傳相同型別（重複綁定）
+- 建立循環依賴（A 依賴 B、B 依賴 A）
+- 思考：這些錯誤如果用執行時 DI，什麼時候才會發現？

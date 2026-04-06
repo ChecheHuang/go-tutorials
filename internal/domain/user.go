@@ -1,5 +1,6 @@
 // Package domain 定義核心業務實體與 Repository 介面
 // 這是 Clean Architecture 的最內層，不依賴任何外部套件
+// 教學對應：第 4 課（結構體）、第 13 課（Struct Tags）、第 18 課（JWT 認證）
 package domain
 
 import "time"

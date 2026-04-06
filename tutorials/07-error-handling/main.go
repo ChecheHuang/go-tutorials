@@ -35,6 +35,7 @@ import ( // 匯入需要的標準函式庫
 	"errors"  // errors 套件：提供錯誤相關的工具函式
 	"fmt"     // fmt 套件：格式化輸出
 	"strconv" // strconv 套件：字串和其他型別的轉換
+	"strings" // strings 套件：字串操作（ToUpper 等）
 )
 
 // ========================================
@@ -361,15 +362,97 @@ func main() { // 程式的入口點
 	fmt.Println("  └──────────────┴─────────────────────────────────┘") // 表格底部
 
 	// ========================================
-	// 8. 最佳實踐總結
+	// 8. Early Return（提早返回）— Go 最重要的寫法風格
 	// ========================================
-	fmt.Println("\n=== 8. 最佳實踐 ===")                     // 印出區塊標題
+	// Go 社群稱為 "Guard Clause"（衛語句）或 "Happy Path" 模式
+	// 核心想法：先處理錯誤情況，提早 return，讓主要邏輯保持在最低縮排層級
+	//
+	// 為什麼重要？
+	//   - 後面第 10-18 課的每個 HTTP Handler 都用這個模式
+	//   - 這是 Go 程式碼和其他語言最明顯的風格差異之一
+	//   - 大幅減少巢狀（nesting），讓程式碼更容易閱讀
+
+	fmt.Println("\n=== 8. Early Return — Go 最重要的寫法風格 ===")
+	fmt.Println("  又稱 Guard Clause（衛語句）或 Happy Path 模式")
+	fmt.Println()
+
+	// 比較兩種寫法：
+
+	fmt.Println("  ❌ 巢狀風格（其他語言常見，Go 不推薦）：")
+	fmt.Println("  ┌──────────────────────────────────────────────┐")
+	fmt.Println("  │ func processOrder(order Order) error {       │")
+	fmt.Println("  │     if order.IsValid() {                     │")
+	fmt.Println("  │         if order.HasStock() {                │")
+	fmt.Println("  │             if order.PaymentOK() {           │")
+	fmt.Println("  │                 return ship(order)           │ ← 主邏輯藏在最深層")
+	fmt.Println("  │             } else {                         │")
+	fmt.Println("  │                 return errPaymentFailed      │")
+	fmt.Println("  │             }                                │")
+	fmt.Println("  │         } else {                             │")
+	fmt.Println("  │             return errNoStock                │")
+	fmt.Println("  │         }                                    │")
+	fmt.Println("  │     } else {                                 │")
+	fmt.Println("  │         return errInvalidOrder               │")
+	fmt.Println("  │     }                                        │")
+	fmt.Println("  │ }                                            │")
+	fmt.Println("  └──────────────────────────────────────────────┘")
+
+	fmt.Println()
+	fmt.Println("  ✅ Early Return（Go 慣用風格）：")
+	fmt.Println("  ┌──────────────────────────────────────────────┐")
+	fmt.Println("  │ func processOrder(order Order) error {       │")
+	fmt.Println("  │     if !order.IsValid() {                    │")
+	fmt.Println("  │         return errInvalidOrder               │ ← 錯誤情況提早離開")
+	fmt.Println("  │     }                                        │")
+	fmt.Println("  │     if !order.HasStock() {                   │")
+	fmt.Println("  │         return errNoStock                    │ ← 錯誤情況提早離開")
+	fmt.Println("  │     }                                        │")
+	fmt.Println("  │     if !order.PaymentOK() {                  │")
+	fmt.Println("  │         return errPaymentFailed              │ ← 錯誤情況提早離開")
+	fmt.Println("  │     }                                        │")
+	fmt.Println("  │     return ship(order)                       │ ← 主邏輯在最外層")
+	fmt.Println("  │ }                                            │")
+	fmt.Println("  └──────────────────────────────────────────────┘")
+
+	fmt.Println()
+	fmt.Println("  差異：")
+	fmt.Println("    巢狀風格：4 層縮排、主邏輯藏在最深處、else 散落各處")
+	fmt.Println("    提早返回：1 層縮排、主邏輯在最外層、讀完錯誤就到主邏輯")
+	fmt.Println()
+	fmt.Println("  在 Web 開發中（第 10-18 課），幾乎每個 Handler 都是這個模式：")
+	fmt.Println("    func getArticle(c *gin.Context) {")
+	fmt.Println("        id, err := strconv.Atoi(c.Param(\"id\"))")
+	fmt.Println("        if err != nil {")
+	fmt.Println("            c.JSON(400, gin.H{\"error\": \"無效 ID\"})")
+	fmt.Println("            return                               // ← 提早返回")
+	fmt.Println("        }")
+	fmt.Println("        article, err := usecase.GetByID(id)")
+	fmt.Println("        if err != nil {")
+	fmt.Println("            c.JSON(404, gin.H{\"error\": \"找不到\"})")
+	fmt.Println("            return                               // ← 提早返回")
+	fmt.Println("        }")
+	fmt.Println("        c.JSON(200, article)                     // ← Happy Path")
+	fmt.Println("    }")
+
+	// 用實際函式示範
+	fmt.Println()
+	fmt.Println("  實際執行（見下方 validateAndProcess 函式）：")
+	fmt.Println("   ", validateAndProcess(""))       // 空字串
+	fmt.Println("   ", validateAndProcess("ab"))     // 太短
+	fmt.Println("   ", validateAndProcess("hello!")) // 有特殊字元
+	fmt.Println("   ", validateAndProcess("hello"))  // 成功
+
+	// ========================================
+	// 9. 最佳實踐總結
+	// ========================================
+	fmt.Println("\n=== 9. 最佳實踐 ===")                     // 印出區塊標題
 	fmt.Println("  1. 永遠檢查 error，不要用 _ 忽略它")             // 規則 1
 	fmt.Println("  2. 用 fmt.Errorf + %w 包裝錯誤，保留上下文和錯誤鏈") // 規則 2
 	fmt.Println("  3. 底層回傳錯誤，上層處理錯誤（錯誤邊界）")              // 規則 3
 	fmt.Println("  4. 只在真正不可恢復的情況下使用 panic")             // 規則 4
 	fmt.Println("  5. 用 errors.Is 比較值，errors.As 比較型別")   // 規則 5
 	fmt.Println("  6. 哨兵錯誤用 ErrXxx 命名，方便呼叫方判斷")          // 規則 6
+	fmt.Println("  7. 用 Early Return 減少巢狀，保持 Happy Path 清晰")  // 規則 7
 
 	// ========================================
 	// 結語
@@ -383,6 +466,24 @@ func main() { // 程式的入口點
 // ========================================
 // 輔助函式
 // ========================================
+
+// validateAndProcess 示範 Early Return 模式
+// 每個 Guard Clause 提早返回，最後的 Happy Path 在最外層
+func validateAndProcess(input string) string {
+	if input == "" { // Guard 1：空字串
+		return "錯誤：輸入不能為空"
+	}
+	if len(input) < 3 { // Guard 2：太短
+		return fmt.Sprintf("錯誤：'%s' 至少要 3 個字元", input)
+	}
+	for _, ch := range input { // Guard 3：只允許英文字母
+		if (ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z') {
+			return fmt.Sprintf("錯誤：'%s' 包含非字母字元", input)
+		}
+	}
+	// Happy Path：所有檢查都通過了！
+	return fmt.Sprintf("成功：處理 '%s' → '%s'", input, strings.ToUpper(input))
+}
 
 // processInput 示範串聯多個可能出錯的步驟
 // 每一步失敗都提早返回，不繼續往下走

@@ -1,5 +1,7 @@
 package handler
 
+// 教學對應：第 12 課（Gin 框架）、第 13 課（JSON Binding）、第 7 課（Early Return）
+
 import (
 	"strconv"
 

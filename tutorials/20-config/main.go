@@ -26,7 +26,7 @@
 //   - 支援預設值
 //   - 熱重載（設定檔變更時自動更新）
 //
-// 執行方式：go run ./tutorials/26-config
+// 執行方式：go run ./tutorials/20-config
 // ==========================================================================
 
 package main // 宣告這是 main 套件
@@ -317,7 +317,7 @@ func demonstrateSecurityBestPractices() { // 示範安全最佳實踐
 
 func main() { // 程式進入點
 	fmt.Println("==========================================")
-	fmt.Println(" 第二十六課：Config 管理")
+	fmt.Println(" 第二十課：Config 管理")
 	fmt.Println("==========================================")
 
 	demonstrateSimpleConfig()          // 1. 輕量版 Config

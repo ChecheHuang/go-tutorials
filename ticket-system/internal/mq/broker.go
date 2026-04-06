@@ -1,4 +1,4 @@
-// Package mq 用 Go channel 實作 In-Memory Message Queue（第 33 課）
+// Package mq 用 Go channel 實作 In-Memory Message Queue（第 32 課）
 // 生產環境應替換為 Redis Streams / RabbitMQ / Kafka
 package mq
 

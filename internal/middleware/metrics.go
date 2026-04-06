@@ -1,5 +1,7 @@
 package middleware
 
+// 教學對應：第 35 課（Prometheus 監控）
+
 import (
 	"strconv"
 	"time"

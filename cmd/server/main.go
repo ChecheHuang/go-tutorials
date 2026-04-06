@@ -21,6 +21,7 @@
 // @tag.description 文章管理（CRUD、分頁、搜尋）
 // @tag.name        comments
 // @tag.description 留言管理（CRUD）
+// 教學對應：第 10 課（依賴注入）、第 29 課（Graceful Shutdown）
 package main
 
 import (

@@ -1,5 +1,7 @@
 package middleware
 
+// 教學對應：第 17 課（中介層 CORS）
+
 import (
 	"github.com/gin-gonic/gin"
 )

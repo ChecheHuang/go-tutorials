@@ -1,5 +1,7 @@
 package domain
 
+// 教學對應：第 4 課（結構體）、第 14 課（GORM 關聯）
+
 import (
 	"time"
 

@@ -1,4 +1,4 @@
-// Package telemetry 初始化 OpenTelemetry 追蹤（第 35 課）
+// Package telemetry 初始化 OpenTelemetry 追蹤（第 37 課）
 package telemetry
 
 import (

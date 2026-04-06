@@ -1,5 +1,7 @@
 package handler
 
+// 教學對應：第 12 課（Gin 路由群組）、第 17 課（中介層）
+
 import (
 	"net/http/pprof"
 

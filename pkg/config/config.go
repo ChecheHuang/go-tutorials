@@ -1,5 +1,6 @@
 // Package config 提供應用程式的設定管理功能
 // 使用 Viper 支援 YAML 設定檔 + 環境變數覆蓋
+// 教學對應：第 20 課（Config 管理）
 package config
 
 import (

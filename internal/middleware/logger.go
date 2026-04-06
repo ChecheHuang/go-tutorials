@@ -1,5 +1,7 @@
 package middleware
 
+// 教學對應：第 17 課（中介層 Logger）、第 21 課（結構化日誌）
+
 import (
 	"log/slog"
 	"time"

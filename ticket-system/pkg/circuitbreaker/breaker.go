@@ -1,4 +1,4 @@
-// Package circuitbreaker 封裝 gobreaker v2（第 34 課）
+// Package circuitbreaker 封裝 gobreaker v2（第 39 課）
 package circuitbreaker
 
 import (

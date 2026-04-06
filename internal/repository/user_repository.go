@@ -1,5 +1,6 @@
 // Package repository 實作 domain 層定義的 Repository 介面
 // 使用 GORM 作為 ORM 框架，SQLite 作為資料庫
+// 教學對應：第 10 課（Clean Architecture Repository 層）、第 14 課（GORM CRUD）
 package repository
 
 import (
