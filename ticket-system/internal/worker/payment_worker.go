@@ -25,6 +25,7 @@ type PaymentWorker struct {
 	hub         *ws.Hub
 	tracer      trace.Tracer
 	workerCount int
+	wg          sync.WaitGroup // 追蹤所有 worker goroutine 的生命週期
 }
 
 // NewPaymentWorker 建立支付工作者
@@ -49,14 +50,16 @@ func NewPaymentWorker(
 }
 
 // Start 啟動 Worker Pool（多個 goroutine 並發消費）
+//
+// 呼叫後立即返回，Worker 在背景執行。
+// 使用 Wait() 等待所有 Worker 完全停止（在取消 ctx 之後）。
 func (w *PaymentWorker) Start(ctx context.Context) {
 	orders := w.broker.Subscribe("order.created")
 
-	var wg sync.WaitGroup
 	for i := 0; i < w.workerCount; i++ {
-		wg.Add(1)
+		w.wg.Add(1)
 		go func(id int) {
-			defer wg.Done()
+			defer w.wg.Done()
 			slog.Info("支付 Worker 啟動", "worker_id", id)
 
 			for {
@@ -78,12 +81,18 @@ func (w *PaymentWorker) Start(ctx context.Context) {
 			}
 		}(i)
 	}
+}
 
-	// 等待所有 worker 結束（在 ctx 取消後）
-	go func() {
-		wg.Wait()
-		slog.Info("所有支付 Worker 已停止")
-	}()
+// Wait 阻塞直到所有 Worker goroutine 完全停止
+//
+// 典型的 graceful shutdown 流程：
+//
+//	cancel()            // 1. 取消 context，通知 worker 停止
+//	worker.Wait()       // 2. 等待所有 worker 處理完當前訂單並退出
+//	broker.Close()      // 3. 關閉 broker（此時確保不會有 worker 在讀 channel）
+func (w *PaymentWorker) Wait() {
+	w.wg.Wait()
+	slog.Info("所有支付 Worker 已停止")
 }
 
 // processOrder 處理單一訂單（透過 Circuit Breaker 呼叫支付服務）

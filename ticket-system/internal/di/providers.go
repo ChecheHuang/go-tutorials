@@ -144,8 +144,8 @@ func ProvideTicketHandler(uc *usecase.TicketUsecase) *handler.TicketHandler {
 }
 
 // ProvideWSHandler 建立 WebSocket Handler
-func ProvideWSHandler(hub *ws.Hub) *handler.WSHandler {
-	return handler.NewWSHandler(hub)
+func ProvideWSHandler(hub *ws.Hub, cfg *config.Config) *handler.WSHandler {
+	return handler.NewWSHandler(hub, cfg.Server.AllowedOrigins)
 }
 
 // ProvidePaymentWorker 建立支付 Worker

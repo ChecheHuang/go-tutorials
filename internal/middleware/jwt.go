@@ -58,9 +58,14 @@ func JWTAuth(cfg *config.Config) gin.HandlerFunc {
 			return
 		}
 
-		// JWT 中的數字預設會被解析為 float64
-		userID := uint(claims["user_id"].(float64))
-		c.Set("user_id", userID) // 將 user_id 存入 context，供後續 handler 使用
+		// JWT 中的數字預設會被解析為 float64，必須做安全的型別斷言
+		userIDFloat, ok := claims["user_id"].(float64)
+		if !ok {
+			response.Unauthorized(c, "Token 中缺少有效的 user_id")
+			c.Abort()
+			return
+		}
+		c.Set("user_id", uint(userIDFloat)) // 將 user_id 存入 context，供後續 handler 使用
 
 		c.Next() // 繼續執行下一個 handler
 	}

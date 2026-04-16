@@ -27,10 +27,11 @@ func SetupRouter(
 	r := gin.New()
 
 	// 全域中介層
-	r.Use(middleware.Metrics())  // Prometheus 指標（放在最前面才能測量所有請求）
-	r.Use(middleware.Logger())   // 結構化日誌
-	r.Use(middleware.Recovery()) // Panic 恢復
-	r.Use(middleware.CORS())     // 跨域設定
+	r.Use(middleware.Metrics())        // Prometheus 指標（放在最前面才能測量所有請求）
+	r.Use(middleware.Logger())         // 結構化日誌
+	r.Use(middleware.Recovery())       // Panic 恢復
+	r.Use(middleware.DefaultBodyLimit()) // 請求 body 限制 1MB（防 OOM）
+	r.Use(middleware.CORS(cfg.Server.AllowedOrigins)) // 跨域設定（白名單由 config 控制）
 
 	// 系統端點
 	r.GET("/healthz", healthHandler.Healthz)

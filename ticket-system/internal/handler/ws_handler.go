@@ -3,6 +3,7 @@ package handler
 import (
 	"log/slog"
 	"net/http"
+	"slices"
 
 	"ticket-system/internal/ws"
 
@@ -10,24 +11,38 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true // 開發用，生產環境要檢查 Origin
-	},
-}
-
 type WSHandler struct {
-	hub *ws.Hub
+	hub      *ws.Hub
+	upgrader websocket.Upgrader
 }
 
-func NewWSHandler(hub *ws.Hub) *WSHandler {
-	return &WSHandler{hub: hub}
+func NewWSHandler(hub *ws.Hub, allowedOrigins []string) *WSHandler {
+	return &WSHandler{
+		hub: hub,
+		upgrader: websocket.Upgrader{
+			CheckOrigin: newOriginChecker(allowedOrigins),
+		},
+	}
+}
+
+// newOriginChecker 根據白名單建立 Origin 檢查函式
+// 白名單為空或包含 "*" 時允許所有來源（僅限開發環境使用）
+func newOriginChecker(allowedOrigins []string) func(r *http.Request) bool {
+	allowAll := len(allowedOrigins) == 0 || slices.Contains(allowedOrigins, "*")
+
+	return func(r *http.Request) bool {
+		if allowAll {
+			return true
+		}
+		origin := r.Header.Get("Origin")
+		return slices.Contains(allowedOrigins, origin)
+	}
 }
 
 // HandleWebSocket 處理 WebSocket 連線
 // GET /ws
 func (h *WSHandler) HandleWebSocket(c *gin.Context) {
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	conn, err := h.upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		slog.Error("WebSocket 升級失敗", "error", err)
 		return

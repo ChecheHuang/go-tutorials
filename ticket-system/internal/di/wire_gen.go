@@ -33,7 +33,7 @@ func InitializeApp(cfg *config.Config, tracer trace.Tracer) (*App, func(), error
 
 	ticketUsecase := ProvideTicketUsecase(stock, eventRepo, orderWriteRepo, orderReadRepo, broker, tracer)
 	ticketHandler := ProvideTicketHandler(ticketUsecase)
-	wsHandler := ProvideWSHandler(hub)
+	wsHandler := ProvideWSHandler(hub, cfg)
 
 	paymentWorker := ProvidePaymentWorker(broker, orderWriteRepo, grpcComps, breaker, hub, tracer)
 	stockBroadcaster := ProvideStockBroadcaster(broker, hub)

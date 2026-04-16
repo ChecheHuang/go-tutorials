@@ -16,8 +16,9 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Port string
-	Mode string
+	Port           string
+	Mode           string
+	AllowedOrigins []string // WebSocket / CORS 白名單，空陣列時允許所有來源（僅限開發環境）
 }
 
 type DatabaseConfig struct {
@@ -47,6 +48,7 @@ func Load() *Config {
 
 	v.SetDefault("server.port", "8080")
 	v.SetDefault("server.mode", "debug")
+	v.SetDefault("server.allowed_origins", []string{})
 	v.SetDefault("database.dsn", "ticket.db")
 	v.SetDefault("redis.addr", "localhost:6379")
 	v.SetDefault("redis.password", "")
@@ -63,7 +65,11 @@ func Load() *Config {
 	}
 
 	return &Config{
-		Server:   ServerConfig{Port: v.GetString("server.port"), Mode: v.GetString("server.mode")},
+		Server: ServerConfig{
+			Port:           v.GetString("server.port"),
+			Mode:           v.GetString("server.mode"),
+			AllowedOrigins: v.GetStringSlice("server.allowed_origins"),
+		},
 		Database: DatabaseConfig{DSN: v.GetString("database.dsn")},
 		Redis:    RedisConfig{Addr: v.GetString("redis.addr"), Password: v.GetString("redis.password"), DB: v.GetInt("redis.db")},
 		Log:      LogConfig{Level: v.GetString("log.level"), Format: v.GetString("log.format")},

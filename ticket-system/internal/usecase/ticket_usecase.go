@@ -3,6 +3,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 
@@ -60,19 +61,16 @@ func (u *TicketUsecase) GrabTicket(ctx context.Context, cmd domain.OrderCommand)
 		return nil, apperror.Wrap(apperror.ErrNotFound, "活動 ID=%d", cmd.EventID)
 	}
 
-	// 2. 原子扣庫存（Redis DECRBY 或 Memory atomic）
+	// 2. 原子扣庫存（Redis Lua script 或 Memory CAS，不會超賣）
 	stockKey := fmt.Sprintf("stock:event:%d", cmd.EventID)
-	remaining, err := u.stock.DecrBy(ctx, stockKey, int64(cmd.Quantity))
+	remaining, err := u.stock.DecrIfSufficient(ctx, stockKey, int64(cmd.Quantity))
+	if errors.Is(err, domain.ErrInsufficientStock) {
+		slog.Info("庫存不足", "event_id", cmd.EventID, "remaining", remaining)
+		return nil, apperror.Wrap(apperror.ErrSoldOut, "活動 %s 已售罄", event.Name)
+	}
 	if err != nil {
 		span.RecordError(err)
 		return nil, apperror.Wrap(apperror.ErrInternal, "庫存扣減失敗")
-	}
-
-	// 庫存不足，回滾
-	if remaining < 0 {
-		u.stock.IncrBy(ctx, stockKey, int64(cmd.Quantity))
-		slog.Info("庫存不足", "event_id", cmd.EventID, "remaining", remaining+int64(cmd.Quantity))
-		return nil, apperror.Wrap(apperror.ErrSoldOut, "活動 %s 已售罄", event.Name)
 	}
 
 	span.AddEvent("庫存扣減成功", trace.WithAttributes(
