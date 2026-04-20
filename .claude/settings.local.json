@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"/c/work/alphacore/go-tutorials/.claude/skills/go-chapter-quiz/references\")",
+      "Bash(cp \"/c/Users/Carl.Huang/.claude/skills/go-chapter-quiz/SKILL.md\" \"/c/work/alphacore/go-tutorials/.claude/skills/go-chapter-quiz/SKILL.md\")",
+      "Bash(cp \"/c/Users/Carl.Huang/.claude/skills/go-chapter-quiz/references/chapters.md\" \"/c/work/alphacore/go-tutorials/.claude/skills/go-chapter-quiz/references/chapters.md\")",
+      "Bash(rm -rf \"/c/Users/Carl.Huang/.claude/skills/go-chapter-quiz\")",
+      "Bash(rm -f \"/c/Users/Carl.Huang/.claude/skills/skill-creator/go-chapter-quiz.skill\")"
+    ]
+  }
+}
