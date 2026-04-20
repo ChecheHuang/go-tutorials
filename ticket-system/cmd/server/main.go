@@ -132,11 +132,21 @@ func main() {
 	<-quit
 
 	slog.Info("正在優雅關閉...")
-	cancel()
 
+	// Graceful shutdown 順序很重要：
+	// 1. 先停止接收新 HTTP 請求
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer shutdownCancel()
 	srv.Shutdown(shutdownCtx)
+
+	// 2. 取消 context，通知 worker 停止消費
+	cancel()
+
+	// 3. 等待 worker 處理完當前正在處理的訂單
+	app.PaymentWorker.Wait()
+
+	// 4. 最後關閉 broker（此時所有 worker 都已停止，不會 send on closed channel）
+	app.Broker.Close()
 
 	slog.Info("搶票系統已關閉")
 }

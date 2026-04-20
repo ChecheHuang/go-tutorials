@@ -21,7 +21,11 @@ func Run(db *gorm.DB) {
 
 	slog.Info("資料庫為空，開始填入初始資料")
 
-	password, _ := bcrypt.GenerateFromPassword([]byte("password123"), bcrypt.DefaultCost)
+	password, err := bcrypt.GenerateFromPassword([]byte("password123"), bcrypt.DefaultCost)
+	if err != nil {
+		slog.Error("密碼加密失敗，跳過初始資料填入", "error", err)
+		return
+	}
 	users := []domain.User{
 		{Username: "alice", Email: "alice@example.com", Password: string(password)},
 		{Username: "bob", Email: "bob@example.com", Password: string(password)},

@@ -18,6 +18,17 @@ import (
 	"log/slog"
 )
 
+// safeCall 安全地執行函式，將 panic 轉換為 error 回傳
+// 確保即使步驟 panic，Saga 也能繼續執行後續的補償動作
+func safeCall(fn func(ctx context.Context) error, ctx context.Context) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("panic: %v", r)
+		}
+	}()
+	return fn(ctx)
+}
+
 // Step 代表 Saga 中的一個步驟
 //
 // 每個步驟包含：
@@ -100,7 +111,7 @@ func (s *Saga) Run(ctx context.Context) (*Result, error) {
 			"total", len(s.steps),
 		)
 
-		if err := step.Execute(ctx); err != nil {
+		if err := safeCall(step.Execute, ctx); err != nil {
 			slog.Error("Saga 步驟失敗，開始補償",
 				"saga", s.name,
 				"failed_step", step.Name,
@@ -146,14 +157,14 @@ func (s *Saga) compensate(ctx context.Context, completedSteps []int) []error {
 			continue
 		}
 
-		if err := step.Compensate(ctx); err != nil {
+		if err := safeCall(step.Compensate, ctx); err != nil {
 			slog.Error("Saga 補償失敗",
 				"saga", s.name,
 				"step", step.Name,
 				"error", err,
 			)
 			compErrors = append(compErrors, fmt.Errorf("補償 [%s] 失敗: %w", step.Name, err))
-			// 不中斷，繼續補償其他步驟
+			// 不中斷，繼續補償其他步驟（即使 panic 也已被 recover，不影響後續補償）
 		} else {
 			slog.Info("Saga 補償完成", "saga", s.name, "step", step.Name)
 		}

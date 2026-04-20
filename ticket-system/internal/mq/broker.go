@@ -20,6 +20,7 @@ type Broker struct {
 	mu          sync.RWMutex
 	subscribers map[string][]chan Message
 	bufferSize  int
+	closed      bool // 關閉後禁止 Publish，防止 shutdown 期間訊息遺失
 }
 
 // NewBroker 建立訊息代理
@@ -42,9 +43,18 @@ func (b *Broker) Subscribe(topic string) <-chan Message {
 }
 
 // Publish 發布訊息到主題（非阻塞，滿了就丟棄並記錄警告）
+//
+// 設計要點：
+//   - RWMutex 的 RLock 保證 Publish 與 Close 互斥，不會 send on closed channel
+//   - closed flag 作為額外防護，避免 Close 完成後仍有 Publish 呼叫靜默丟失訊息
 func (b *Broker) Publish(topic string, payload any) {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
+
+	if b.closed {
+		slog.Warn("Broker 已關閉，訊息被丟棄", "topic", topic)
+		return
+	}
 
 	msg := Message{
 		Topic:     topic,
@@ -61,10 +71,15 @@ func (b *Broker) Publish(topic string, payload any) {
 	}
 }
 
-// Close 關閉所有訂閱 channel
+// Close 關閉所有訂閱 channel（可安全重複呼叫）
 func (b *Broker) Close() {
 	b.mu.Lock()
 	defer b.mu.Unlock()
+
+	if b.closed {
+		return
+	}
+	b.closed = true
 
 	for topic, subs := range b.subscribers {
 		for _, ch := range subs {
@@ -72,4 +87,5 @@ func (b *Broker) Close() {
 		}
 		delete(b.subscribers, topic)
 	}
+	slog.Info("Broker 已關閉")
 }

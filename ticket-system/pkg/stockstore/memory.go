@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 	"sync/atomic"
+
+	"ticket-system/internal/domain"
 )
 
 // MemoryStore 使用 in-memory 的庫存儲存（不需要 Redis）
@@ -35,8 +37,21 @@ func (s *MemoryStore) getOrCreate(key string) *atomic.Int64 {
 	return v
 }
 
-func (s *MemoryStore) DecrBy(_ context.Context, key string, value int64) (int64, error) {
-	return s.getOrCreate(key).Add(-value), nil
+// DecrIfSufficient 原子扣減：使用 CAS（Compare-And-Swap）迴圈確保不會超賣
+// 只有當前庫存 >= 扣減數量時才會成功，否則回傳 ErrInsufficientStock
+func (s *MemoryStore) DecrIfSufficient(_ context.Context, key string, value int64) (int64, error) {
+	counter := s.getOrCreate(key)
+	for {
+		current := counter.Load()
+		if current < value {
+			return current, domain.ErrInsufficientStock
+		}
+		// CAS：只有在值未被其他 goroutine 修改時才寫入
+		// 如果 CAS 失敗，代表有其他 goroutine 同時修改了庫存，重新嘗試
+		if counter.CompareAndSwap(current, current-value) {
+			return current - value, nil
+		}
+	}
 }
 
 func (s *MemoryStore) IncrBy(_ context.Context, key string, value int64) (int64, error) {

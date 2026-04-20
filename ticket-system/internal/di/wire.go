@@ -16,7 +16,7 @@ import (
 func InitializeApp(cfg *config.Config, tracer trace.Tracer) (*App, func(), error) {
 	wire.Build(
 		ProvideDB,
-		ProvideRedis,
+		ProvideStockStore,
 		ProvideBroker,
 		ProvideHub,
 		ProvideGRPC,

@@ -115,8 +115,11 @@ func main() {
 
 	// === 7. Graceful Shutdown ===
 	srv := &http.Server{
-		Addr:    ":" + cfg.Server.Port,
-		Handler: router,
+		Addr:           ":" + cfg.Server.Port,
+		Handler:        router,
+		ReadTimeout:    15 * time.Second,
+		WriteTimeout:   15 * time.Second,
+		MaxHeaderBytes: 1 << 20, // 1MB max header size
 	}
 
 	// 在 goroutine 中啟動伺服器

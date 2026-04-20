@@ -22,8 +22,9 @@ type Config struct {
 
 // ServerConfig 定義伺服器相關設定
 type ServerConfig struct {
-	Port string
-	Mode string
+	Port           string
+	Mode           string
+	AllowedOrigins []string // CORS 白名單，空陣列或包含 "*" 時允許所有來源
 }
 
 // DatabaseConfig 定義資料庫相關設定
@@ -64,6 +65,7 @@ func Load() *Config {
 	// 設定預設值
 	v.SetDefault("server.port", "8080")
 	v.SetDefault("server.mode", "debug")
+	v.SetDefault("server.allowed_origins", []string{}) // 預設空陣列，debug 模式下允許所有來源
 	v.SetDefault("database.dsn", "blog.db")
 	v.SetDefault("jwt.secret", "my-secret-key-change-in-production")
 	v.SetDefault("jwt.expiration", "24h")
@@ -88,16 +90,28 @@ func Load() *Config {
 		expiration = 24 * time.Hour
 	}
 
+	jwtSecret := v.GetString("jwt.secret")
+	mode := v.GetString("server.mode")
+
+	// 非 debug 模式下，JWT secret 必須足夠強
+	if mode != "debug" && len(jwtSecret) < 32 {
+		log.Fatalf("[設定] JWT secret 長度不足：生產環境至少需要 32 字元（目前 %d 字元）。請設定環境變數 JWT_SECRET 或修改 config.yaml", len(jwtSecret))
+	}
+	if jwtSecret == "my-secret-key-change-in-production" && mode != "debug" {
+		log.Fatalf("[設定] 偵測到預設 JWT secret，禁止在生產環境使用。請設定環境變數 JWT_SECRET")
+	}
+
 	return &Config{
 		Server: ServerConfig{
-			Port: v.GetString("server.port"),
-			Mode: v.GetString("server.mode"),
+			Port:           v.GetString("server.port"),
+			Mode:           mode,
+			AllowedOrigins: v.GetStringSlice("server.allowed_origins"),
 		},
 		Database: DatabaseConfig{
 			DSN: v.GetString("database.dsn"),
 		},
 		JWT: JWTConfig{
-			Secret:     v.GetString("jwt.secret"),
+			Secret:     jwtSecret,
 			Expiration: expiration,
 		},
 		Log: LogConfig{
