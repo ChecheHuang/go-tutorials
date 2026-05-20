@@ -1,23 +1,126 @@
 #!/bin/bash
-# Blog API 快速指令
+# go-tutorials 快速指令
+#
+#   ./run                  互動選章節（列表 + 輸入編號）
+#   ./run 14               直接跑第 14 章
+#   ./run list             只列章節
+#   ./run readme 14        開該章 README
+#
+#   ./run serve            啟動 Blog API 伺服器（cmd/server）
+#   ./run build            編譯 Blog API 為 blog-api.exe
+#   ./run test             執行 internal/ 測試
+#   ./run cover            測試覆蓋率
+#   ./run clean            清除 DB 與編譯產物
+#   ./run swagger          重新產生 Swagger 文件
+#   ./run tidy             go mod tidy
 
-case "${1:-run}" in
-  run)     go run ./cmd/server/ ;;
-  build)   go build -o blog-api.exe ./cmd/server/ && echo "[OK] blog-api.exe" ;;
-  test)    go test -v ./internal/... ;;
-  cover)   go test -cover ./internal/... ;;
-  clean)   rm -f blog-api.exe blog.db && echo "[OK] clean" ;;
-  swagger) swag init -g cmd/server/main.go -o docs ;;
-  tidy)    go mod tidy ;;
-  *)
+set -e
+cd "$(dirname "$0")"
+
+# 補常見的 go bin path，Git Bash 預設可能漏掉
+export PATH="$HOME/go/bin:/c/Program Files/Go/bin:$PATH"
+
+find_chapter() {
+    local n="$1"
+    if [ ${#n} -eq 1 ]; then n="0$n"; fi
+    local dir
+    dir=$(ls tutorials/ | grep "^${n}-" | head -1)
+    if [ -z "$dir" ]; then
+        echo "找不到第 $1 章" >&2
+        exit 1
+    fi
+    echo "$dir"
+}
+
+list_chapters() {
     echo ""
-    echo "  ./run          啟動伺服器"
-    echo "  ./run build    編譯為 blog-api.exe"
-    echo "  ./run test     執行測試"
-    echo "  ./run cover    測試覆蓋率"
-    echo "  ./run clean    清除 DB 與編譯產物"
-    echo "  ./run swagger  重新產生 Swagger 文件"
-    echo "  ./run tidy     整理依賴"
+    echo "  ===== Go Tutorials ====="
     echo ""
-    ;;
+    echo "  基礎語法 (01–09)"
+    ls tutorials/ | grep -E '^(0[1-9])-' | sed 's/^/    /'
+    echo ""
+    echo "  Web 開發 (10–18)"
+    ls tutorials/ | grep -E '^(1[0-8])-' | sed 's/^/    /'
+    echo ""
+    echo "  工程品質與進階 (19–29)"
+    ls tutorials/ | grep -E '^(19|2[0-9])-' | sed 's/^/    /'
+    echo ""
+    echo "  基礎設施與高可用 (30–42)"
+    ls tutorials/ | grep -E '^(3[0-9]|4[0-2])-' | sed 's/^/    /'
+    echo ""
+}
+
+run_chapter() {
+    local n="$1"
+    shift
+    local dir
+    dir=$(find_chapter "$n")
+    if [ -f "tutorials/$dir/main.go" ]; then
+        ( cd "tutorials/$dir" && go run main.go "$@" )
+    elif ls "tutorials/$dir"/*.go >/dev/null 2>&1; then
+        ( cd "tutorials/$dir" && go run . "$@" )
+    else
+        echo "tutorials/$dir 沒有可跑的 .go，可能只是文件章節。試 ./run readme $n"
+        exit 1
+    fi
+}
+
+case "${1:-pick}" in
+    pick)
+        list_chapters
+        read -rp "輸入章節編號 (e.g. 14)，或 Enter 退出: " n
+        if [ -z "$n" ]; then exit 0; fi
+        run_chapter "$n"
+        ;;
+
+    list|ls)
+        list_chapters
+        ;;
+
+    readme)
+        if [ -z "$2" ]; then echo "用法：./run readme <章節編號>"; exit 1; fi
+        dir=$(find_chapter "$2")
+        less "tutorials/$dir/README.md"
+        ;;
+
+    # ── Blog API commands ──────────────────────────────────
+    serve)   go run ./cmd/server/ ;;
+    build)   go build -o blog-api.exe ./cmd/server/ && echo "[OK] blog-api.exe" ;;
+    test)    go test -v ./internal/... ;;
+    cover)   go test -cover ./internal/... ;;
+    clean)   rm -f blog-api.exe blog.db && echo "[OK] clean" ;;
+    swagger) swag init -g cmd/server/main.go -o docs ;;
+    tidy)    go mod tidy ;;
+
+    # ── 直接編號 ────────────────────────────────────────────
+    [0-9]|[0-9][0-9])
+        n=$1
+        shift
+        run_chapter "$n" "$@"
+        ;;
+
+    help|--help|-h)
+        cat <<EOF
+
+  ./run                  互動選章節（列表 + 輸入編號）
+  ./run 14               跑第 14 章
+  ./run list             只列章節
+  ./run readme 14        看第 14 章 README
+
+  ./run serve            啟動 Blog API（cmd/server）
+  ./run build            編譯為 blog-api.exe
+  ./run test             跑 internal/ 測試
+  ./run cover            測試覆蓋率
+  ./run clean            清 DB 與 binary
+  ./run swagger          產 Swagger
+  ./run tidy             go mod tidy
+
+EOF
+        ;;
+
+    *)
+        echo "未知指令：$1"
+        echo "跑 ./run help 看用法"
+        exit 1
+        ;;
 esac
